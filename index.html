@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="sk" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ponuka energií — GOLEM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg: #0d1117;
+  --bg2: #161b22;
+  --panel: #1c2128;
+  --panel2: #21262d;
+  --border: #30363d;
+  --border-soft: #21262d;
+  --green: #3fb950;
+  --green-dim: #1a4a26;
+  --green-glow: rgba(63,185,80,0.15);
+  --blue: #58a6ff;
+  --blue-dim: #1a3a5c;
+  --blue-glow: rgba(88,166,255,0.15);
+  --orange: #f0a84f;
+  --orange-dim: #4a2e12;
+  --orange-glow: rgba(240,168,79,0.15);
+  --yellow: #f5d04a;
+  --yellow-dim: #4a3a0a;
+  --yellow-glow: rgba(245,208,74,0.15);
+  --purple: #bc8cff;
+  --purple-dim: #3a2a5c;
+  --purple-glow: rgba(188,140,255,0.16);
+  --text: #e6edf3;
+  --text-dim: #8b949e;
+  --text-faint: #484f58;
+  --red: #f85149;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+html[data-theme="light"] {
+  --bg: #111;
+  --bg2: #f5f7f4;
+  --panel: #eef0eb;
+  --panel2: #e2e6de;
+  --border: #bfc5bb;
+  --border-soft: #cfd4cb;
+  --green: #1e7a3c;
+  --green-dim: #9ed0b0;
+  --green-glow: rgba(30,122,60,0.14);
+  --blue: #1a5fb4;
+  --blue-dim: #aacaf2;
+  --blue-glow: rgba(26,95,180,0.14);
+  --orange: #8a5c00;
+  --orange-dim: #eece7a;
+  --orange-glow: rgba(138,92,0,0.14);
+  --yellow: #b08800;
+  --yellow-dim: #f5e59a;
+  --yellow-glow: rgba(176,136,0,0.14);
+  --purple: #5a30a8;
+  --purple-dim: #cbbef0;
+  --purple-glow: rgba(90,48,168,0.11);
+  --text: #1a1f18;
+  --text-dim: #485046;
+  --text-faint: #788274;
+  --red: #c0202a;
+
+  --el-card-bg: #d6e8f8;
+  --el-card-border: #9abee8;
+  --gas-card-bg: #f8f0cc;
+  --gas-card-border: #e0c860;
+  --neutral-card-bg: #e8eaf6;
+  --neutral-card-border: #9fa8da;
+  --hero-card-bg: #e8eaf6;
+  --hero-card-border: #9fa8da;
+  /* distinct light colour for Poplatky + Zmluvné dáta panels */
+  --accent-card-bg: #e8eaf6;
+  --accent-card-border: #9fa8da;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  min-height: 100vh;
+  padding: 0;
+  transition: background .2s, color .2s;
+}
+
+/* ─── PAGE WRAPPER ─────────────────────────── */
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 16px 12px;
+}
+@media (max-width: 768px) {
+  .page {
+    padding: 6px 12px 20px;
+  }
+}
+
+/* ─── THEME TOGGLE — bottom ─────────────────── */
+.theme-tucked {
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  opacity: 0.45;
+  transition: opacity .15s;
+}
+.theme-tucked:hover { opacity: 0.85; }
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px 6px 12px;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: border-color .15s, background .15s;
+}
+.theme-toggle:hover { border-color: var(--green); color: var(--text); }
+.theme-toggle .icon { font-size: 14px; line-height: 1; }
+
+/* ─── HEADER ───────────────────────────────── */
+.header {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px 10px;
+  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  gap: 12px;
+}
+@media (max-width: 768px) {
+  .header {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px 12px 8px;
+  }
+  .header-left { align-items: center; text-align: center; }
+  .header-right { align-items: center; }
+  .header-title-main { font-size: 32px; }
+}
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+.header-center {
+  text-align: center;
+}
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.header h1 {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  line-height: 1.2;
+  white-space: nowrap;
+  margin-bottom: 2px;
+}
+.header-title-main {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--text-dim);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  word-wrap: break-word;
+}
+.client-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  background: var(--green-glow);
+  border: 1px solid var(--green-dim);
+  border-radius: 20px;
+  padding: 3px 10px 3px 9px;
+}
+.client-badge .k {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-dim);
+}
+.client-badge .name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--green);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.4px;
+}
+.header-date-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+.header .offer-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+}
+/* ─── STAT ROW: CONTRACT & CLIENT DATA + SAVINGS (compact) ── */
+.stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: stretch;
+}
+@media (max-width: 768px) {
+  .stat-row {
+    grid-template-columns: 1fr;
+  }
+}
+.stat-row .input-section {
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.stat-row .fees-section {
+  margin-bottom: 0;
+}
+.contract-range-row {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.contract-range-label {
+  font-size: 14px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+.contract-range-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--green-glow) 0%, transparent 100%);
+  border: 1px solid var(--green-dim);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 50% 0%, var(--green-glow), transparent);
+  pointer-events: none;
+}
+.hero .hero-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.hero .hero-num {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: -1px;
+  line-height: 1;
+  font-family: 'JetBrains Mono', monospace;
+}
+.hero .hero-note {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* ─── ENERGY CARDS ─────────────────────────── */
+.energy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+@media (max-width: 768px) {
+  .energy-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ecard {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+}
+
+
+.ecard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ecard-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.ecard-el .ecard-title { color: var(--blue); }
+.ecard-gas .ecard-title { color: var(--yellow); }
+.ecard-icon { font-size: 15px; }
+
+/* prominent consumption highlight inside each energy card */
+.cons-highlight {
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ecard-el .cons-highlight { background: var(--blue-glow); border: 1px solid rgba(88,166,255,0.35); }
+.ecard-gas .cons-highlight { background: var(--yellow-glow); border: 1px solid rgba(245,208,74,0.35); }
+.cons-highlight-left {
+  text-align: left;
+}
+.cons-highlight-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+}
+.cons-highlight-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.ecard-el .cons-highlight-num { color: var(--blue); }
+.ecard-gas .cons-highlight-num { color: var(--yellow); }
+
+/* FIX/SPOT toggle badge */
+.fix-spot-badge {
+  display: inline-flex;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--orange);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 0 0 1px rgba(240,168,79,0.2);
+}
+.fix-spot-badge .fs-opt {
+  padding: 5px 13px;
+  background: var(--panel2);
+  color: var(--text-faint);
+  transition: background .15s, color .15s;
+  cursor: pointer;
+}
+.fix-spot-badge .fs-opt:hover {
+  background: rgba(240,168,79,0.1);
+  color: var(--orange);
+}
+.fix-spot-badge .fs-opt.active-fix {
+  background: var(--orange-dim);
+  color: var(--orange);
+}
+.fix-spot-badge .fs-opt.active-spot {
+  background: var(--orange-dim);
+  color: var(--orange);
+}
+
+/* data rows */
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border-soft);
+  gap: 8px;
+}
+.data-row:last-of-type { border-bottom: none; }
+.data-label { color: var(--text-dim); font-size: 13px; }
+.data-value { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: var(--text); }
+.data-value.strikethrough { text-decoration: line-through; color: var(--text-faint); }
+.data-row:nth-of-type(1) .data-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* offer highlighted row — MAX ponuka */
+.offer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  margin: 8px 0 0;
+  border-radius: 8px;
+  gap: 8px;
+}
+.ecard-el .offer-row {
+  background: rgba(88,166,255,0.10);
+  border: 2px solid var(--blue);
+}
+.ecard-gas .offer-row {
+  background: rgba(245,208,74,0.10);
+  border: 2px solid var(--yellow);
+}
+.offer-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.ecard-el .offer-label { color: var(--blue); }
+.ecard-gas .offer-label { color: var(--yellow); }
+.offer-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+}
+.ecard-el .offer-value { color: var(--blue); }
+.ecard-gas .offer-value { color: var(--yellow); }
+
+/* saving badge */
+.saving-badge {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.ecard-el .saving-badge { background: var(--blue-glow); border: 1px solid rgba(88,166,255,0.25); }
+.ecard-gas .saving-badge { background: var(--yellow-glow); border: 1px solid rgba(245,208,74,0.25); }
+.saving-text { font-size: 13px; color: var(--text-dim); }
+.ecard-el .saving-num { color: var(--blue); }
+.ecard-gas .saving-num { color: var(--yellow); }
+.saving-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ─── INPUT SECTIONS ───────────────────────── */
+.input-section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+@media (max-width: 768px) {
+  .input-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.input-field label {
+  font-size: 15px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-wrap input {
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 6px 40px 6px 10px;
+  transition: border-color .15s, box-shadow .15s;
+  -moz-appearance: textfield;
+}
+.input-wrap input[type="text"],
+.input-wrap input[type="date"] { padding: 5px 9px; }
+.input-wrap input::-webkit-outer-spin-button,
+.input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.input-wrap input:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-glow);
+}
+.input-unit {
+  position: absolute;
+  right: 8px;
+  font-size: 10px;
+  color: var(--text-faint);
+  pointer-events: none;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* editable (yellow-sourced) inputs get a warm accent to mirror the xlsx highlight */
+.input-field.editable .input-wrap input {
+  border-color: rgba(240,168,79,0.45);
+}
+.input-field.editable .input-wrap input:focus {
+  border-color: #f0a84f;
+  box-shadow: 0 0 0 3px rgba(240,168,79,0.14);
+}
+
+/* ─── FEES SECTION ─────────────────────────── */
+.fees-section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+
+.fee-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-soft);
+  gap: 8px;
+}
+.fee-row:last-of-type { border-bottom: none; }
+.fee-label { color: var(--text-dim); font-size: 15px; }
+.fee-value { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: var(--text); white-space: nowrap; }
+.fee-row.computed { margin-top: 3px; padding-top: 6px; border-top: 1px solid var(--border); border-bottom: none; }
+.fee-row.computed .fee-label { color: var(--text); font-weight: 600; font-size: 14px; }
+.fee-row.computed .fee-value { color: var(--text); font-size: 18px; }
+
+/* fee inputs inline */
+.fee-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.fee-input-wrap input {
+  background: var(--bg2);
+  border: 1px solid rgba(240,168,79,0.45);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 4px 8px;
+  width: 88px;
+  text-align: right;
+  transition: border-color .15s;
+  -moz-appearance: textfield;
+}
+.fee-input-wrap input::-webkit-outer-spin-button,
+.fee-input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.fee-input-wrap input:focus { outline: none; border-color: var(--green); }
+.fee-input-wrap .fee-unit { font-size: 14px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+
+/* ─── YEAR CARDS ───────────────────────────── */
+.year-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 768px) {
+  .year-grid {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    gap: 6px;
+  }
+}
+.ycard {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+}
+@media (max-width: 768px) {
+  .ycard {
+    padding: 10px 14px;
+  }
+  .ycard-num {
+    font-size: 24px !important;
+  }
+}
+.ycard-label {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+.ycard-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.ycard-note {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  font-weight: 600;
+}
+.ycard-total {
+  border: 2px solid var(--green-dim);
+  background: var(--green-glow);
+}
+.ycard-total .ycard-label { color: var(--green); font-weight: 600; }
+.ycard-total .ycard-num { font-size: 32px; color: var(--green); }
+
+/* ─── FOOTER ───────────────────────────────── */
+footer {
+  font-size: 11px;
+  color: var(--text-faint);
+  text-align: center;
+  padding-top: 5px;
+  border-top: 1px solid var(--border-soft);
+}
+
+/* ─── XLSX IMPORT — unobtrusive, bottom of page ───── */
+.import-tucked {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+  opacity: 0.6;
+  transition: opacity .15s;
+}
+.import-tucked:hover { opacity: 1; }
+.import-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  text-decoration: none;
+  transition: color .15s;
+}
+.import-link:hover { color: var(--text-dim); text-decoration: underline; }
+.import-link svg { flex-shrink: 0; opacity: 0.7; }
+.import-status {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 2px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  display: none;
+}
+.import-status.ok  { display: inline-block; background: var(--green-glow);  border: 1px solid rgba(63,185,80,0.3);  color: var(--green); }
+.import-status.err { display: inline-block; background: rgba(248,81,73,0.12);  border: 1px solid rgba(248,81,73,0.3);  color: var(--red);   }
+/* hide native file input */
+#xlsxFileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+/* ─── INLINE EDITABLE INPUTS (inside energy cards) ─── */
+.inline-edit-wrap {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.inline-edit-input {
+  background: var(--bg2);
+  border: 1px solid rgba(240,168,79,0.45);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 3px 6px;
+  width: 68px;
+  text-align: right;
+  transition: border-color .15s, box-shadow .15s;
+  -moz-appearance: textfield;
+}
+.inline-edit-input::-webkit-outer-spin-button,
+.inline-edit-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.inline-edit-input:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-glow);
+}
+.inline-edit-input.inline-edit-offer {
+  font-size: 17px;
+  width: 76px;
+  border-width: 2px;
+  padding: 3px 7px;
+}
+.inline-edit-input.el-color { border-color: rgba(88,166,255,0.55); color: var(--blue); }
+.inline-edit-input.el-color:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+.inline-edit-input.gas-color { border-color: rgba(245,208,74,0.55); color: var(--yellow); }
+.inline-edit-input.gas-color:focus { border-color: var(--yellow); box-shadow: 0 0 0 3px var(--yellow-glow); }
+.inline-edit-unit {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+
+
+/* ─── LIGHT MODE CARD TINTS ────────────────── */
+html[data-theme="light"] .ecard-el {
+  background: var(--el-card-bg);
+  border-color: var(--el-card-border);
+}
+html[data-theme="light"] .ecard-gas {
+  background: var(--gas-card-bg);
+  border-color: var(--gas-card-border);
+}
+html[data-theme="light"] .ecard-el .cons-highlight {
+  background: rgba(26,95,180,0.12);
+  border-color: rgba(26,95,180,0.30);
+}
+html[data-theme="light"] .ecard-gas .cons-highlight {
+  background: rgba(176,136,0,0.10);
+  border-color: rgba(176,136,0,0.28);
+}
+html[data-theme="light"] .ecard-el .offer-row {
+  background: rgba(26,95,180,0.10);
+  border-color: var(--blue);
+}
+html[data-theme="light"] .ecard-gas .offer-row {
+  background: rgba(176,136,0,0.10);
+  border-color: var(--yellow);
+}
+html[data-theme="light"] .ecard-el .saving-badge {
+  background: rgba(26,95,180,0.10);
+  border-color: rgba(26,95,180,0.22);
+}
+html[data-theme="light"] .ecard-gas .saving-badge {
+  background: rgba(176,136,0,0.10);
+  border-color: rgba(176,136,0,0.22);
+}
+html[data-theme="light"] .header {
+  background: var(--neutral-card-bg);
+  border-color: var(--neutral-card-border);
+}
+html[data-theme="light"] .input-section {
+  background: var(--neutral-card-bg);
+  border-color: var(--neutral-card-border);
+}
+/* fees-section override moved to bottom (accent color block) */
+html[data-theme="light"] .ycard {
+  background: var(--neutral-card-bg);
+  border-color: var(--neutral-card-border);
+}
+html[data-theme="light"] .ycard-total {
+  background: var(--hero-card-bg);
+  border-color: var(--hero-card-border);
+}
+html[data-theme="light"] .hero {
+  background: linear-gradient(135deg, rgba(159,168,218,0.22) 0%, var(--hero-card-bg) 100%);
+  border-color: var(--hero-card-border);
+}
+html[data-theme="light"] .input-wrap input,
+html[data-theme="light"] .fee-input-wrap input,
+html[data-theme="light"] .inline-edit-input {
+  background: rgba(255,255,255,0.75);
+  border-color: var(--border);
+}
+html[data-theme="light"] .ecard-el .inline-edit-input.el-color {
+  background: rgba(255,255,255,0.65);
+}
+html[data-theme="light"] .ecard-gas .inline-edit-input.gas-color {
+  background: rgba(255,255,255,0.65);
+  border-color: rgba(176,136,0,0.55);
+  color: var(--yellow);
+}
+/* Poplatky a Zmluvné dáta — distinct accent colour in light mode */
+html[data-theme="light"] .fees-section {
+  background: var(--accent-card-bg);
+  border-color: var(--accent-card-border);
+}
+html[data-theme="light"] .stat-row .input-section {
+  background: var(--accent-card-bg);
+  border-color: var(--accent-card-border);
+}
+html[data-theme="light"] .fees-section .fee-input-wrap input,
+html[data-theme="light"] .stat-row .input-section .input-wrap input {
+  background: rgba(255,255,255,0.80);
+}
+
+/* ─── RESPONSIVE ───────────────────────────── */
+@media (max-width: 640px) {
+  .energy-grid { grid-template-columns: 1fr; }
+  .stat-row { grid-template-columns: 1fr; }
+  .input-grid { grid-template-columns: 1fr; }
+  .header { grid-template-columns: 1fr; gap: 10px; }
+  .header-right { align-items: flex-start; }
+  .header-center { text-align: left; }
+  .cons-highlight-num { font-size: 22px; }
+  .hero .hero-num { font-size: 26px; }
+  .ycard-num { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <span class="client-badge">
+        <span class="k">Odberateľ</span>
+        <span class="name" id="clientDisp">GOLEM</span>
+      </span>
+    </div>
+    <div class="header-center">
+      <div class="header-title-main">Analýza cien energií</div>
+    </div>
+    <div class="header-right">
+      <span class="header-date-label">Dátum ponuky</span>
+      <span class="offer-date" id="offerDateDisp">06.09.2026</span>
+    </div>
+  </div>
+
+  <!-- HERO: celková ročná úspora (hrubá, pred poplatkami) -->
+  <div class="hero">
+    <div class="hero-label">Celková ročná úspora (pred poplatkami)</div>
+    <div class="hero-num"><span id="heroGross"></span></div>
+    <div class="hero-note">Elektrina + Plyn spolu / rok</div>
+  </div>
+
+  <!-- ENERGY CARDS -->
+  <div class="energy-grid">
+
+    <!-- ELEKTRINA -->
+    <div class="ecard ecard-el">
+      <div class="ecard-header">
+        <div class="ecard-title">
+          <span class="ecard-icon">⚡</span> Elektrina
+        </div>
+      </div>
+
+      <div class="cons-highlight">
+        <div class="cons-highlight-left">
+          <div class="cons-highlight-label">Ročná spotreba</div>
+          <div class="cons-highlight-num" id="consElBadge">46,12 MWh</div>
+        </div>
+        <div class="fix-spot-badge" id="fsEl">
+          <span class="fs-opt active-fix" id="fsEl_fix">FIX</span>
+          <span class="fs-opt" id="fsEl_spot">SPOT</span>
+        </div>
+      </div>
+
+      <div class="data-row">
+        <span class="data-label">Súčasná cena (2026)</span>
+        <span class="data-value" id="curElDisp">150,00 €/MWh</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Predpoklad <span id="elYearLabel">2027</span> (bez zmeny)</span>
+        <div class="inline-edit-wrap">
+          <input type="number" class="inline-edit-input" id="inp_el2027" value="160" step="0.1" min="0" oninput="recalc()">
+          <span class="inline-edit-unit">€/MWh</span>
+        </div>
+      </div>
+      <div class="offer-row">
+        <span class="offer-label">Naša ponuka MAX</span>
+        <div class="inline-edit-wrap">
+          <input type="number" class="inline-edit-input inline-edit-offer el-color" id="inp_elMax" value="125" step="0.1" min="0" oninput="recalc()">
+          <span class="inline-edit-unit">€/MWh</span>
+        </div>
+      </div>
+
+      <div class="saving-badge">
+        <span class="saving-text" id="elSavUnit">Úspora 35 €/MWh →</span>
+        <span class="saving-num" id="elSavYear">1 614,06 € / rok</span>
+      </div>
+    </div>
+
+    <!-- PLYN -->
+    <div class="ecard ecard-gas">
+      <div class="ecard-header">
+        <div class="ecard-title">
+          <span class="ecard-icon">🔥</span> Plyn
+        </div>
+      </div>
+
+      <div class="cons-highlight">
+        <div class="cons-highlight-left">
+          <div class="cons-highlight-label">Ročná spotreba</div>
+          <div class="cons-highlight-num" id="consGasBadge">43,80 MWh</div>
+        </div>
+        <div class="fix-spot-badge" id="fsGas">
+          <span class="fs-opt active-fix" id="fsGas_fix">FIX</span>
+          <span class="fs-opt" id="fsGas_spot">SPOT</span>
+        </div>
+      </div>
+
+      <div class="data-row">
+        <span class="data-label">Súčasná cena (2026)</span>
+        <span class="data-value" id="curGasDisp">56,90 €/MWh</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Predpoklad <span id="gasYearLabel">2027</span> (bez zmeny)</span>
+        <div class="inline-edit-wrap">
+          <input type="number" class="inline-edit-input" id="inp_gas2027" value="70" step="0.1" min="0" oninput="recalc()">
+          <span class="inline-edit-unit">€/MWh</span>
+        </div>
+      </div>
+      <div class="offer-row">
+        <span class="offer-label">Naša ponuka MAX</span>
+        <div class="inline-edit-wrap">
+          <input type="number" class="inline-edit-input inline-edit-offer gas-color" id="inp_gasMax" value="49.5" step="0.1" min="0" oninput="recalc()">
+          <span class="inline-edit-unit">€/MWh</span>
+        </div>
+      </div>
+
+      <div class="saving-badge">
+        <span class="saving-text" id="gasSavUnit">Úspora 20,50 €/MWh →</span>
+        <span class="saving-num" id="gasSavYear">897,90 € / rok</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- HIDDEN INPUTS: consumption & current 2026 prices (populated by xlsx import, not shown as editable sections) -->
+  <div style="display:none">
+    <input type="number" id="inp_consEl"  value="46.116">
+    <input type="number" id="inp_consGas" value="43.8">
+    <input type="number" id="inp_curEl"   value="150">
+    <input type="number" id="inp_curGas"  value="56.9">
+  </div>
+
+  <!-- STAT ROW: FEES + CONTRACT DATA side by side -->
+  <div class="stat-row">
+    <div class="fees-section">
+      <div class="section-title">Poplatky za službu</div>
+
+      <div class="fee-row">
+        <span class="fee-label">Jednorazový administratívny poplatok</span>
+        <div class="fee-input-wrap">
+          <input type="number" id="inp_fee1" value="200" step="1" min="0">
+          <span class="fee-unit">€</span>
+        </div>
+      </div>
+
+      <div class="fee-row">
+        <span class="fee-label">Mesačný poplatok</span>
+        <div class="fee-input-wrap">
+          <input type="number" id="inp_feeM" value="45" step="1" min="0">
+          <span class="fee-unit">€</span>
+        </div>
+      </div>
+
+      <div class="fee-row computed">
+        <span class="fee-label">Ročný poplatok (12 mes.)</span>
+        <span class="fee-value" id="feeYearly">540,00 €</span>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="section-title">Zmluvné a klientske údaje</div>
+      <div class="input-grid">
+        <div class="input-field editable">
+          <label>Viazanosť kontraktu (rokov)</label>
+          <div class="input-wrap">
+            <input type="number" id="inp_years" value="3" step="1" min="1">
+            <span class="input-unit">rokov</span>
+          </div>
+        </div>
+        <div class="input-field editable">
+          <label>Začiatok viazanosti</label>
+          <div class="input-wrap">
+            <input type="date" id="inp_start" value="2027-01-01">
+          </div>
+        </div>
+      </div>
+      <div class="contract-range-row">
+        <span class="contract-range-label">Viazanosť</span>
+        <span class="contract-range-value" id="viazanostDisp">1.1.2027 – 31.12.2029</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- YEAR CARDS (generated dynamically based on Viazanosť v rokoch) -->
+  <div class="year-grid" id="yearGrid"></div>
+
+  <footer id="footerNote">
+    Ceny sú orientačné a platné počas doby platnosti ponuky (2 dni od 06.09.2026).
+  </footer>
+
+  <!-- THEME TOGGLE — tucked at bottom -->
+  <div class="theme-tucked">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+      <span class="icon" id="themeIcon">🌙</span>
+      <span id="themeLabel">Tmavý režim</span>
+    </button>
+  </div>
+
+  <!-- XLSX IMPORT — tucked away, unobtrusive -->
+  <div class="import-tucked">
+    <input type="file" id="xlsxFileInput" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+    <button class="import-link" onclick="document.getElementById('xlsxFileInput').click()">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 12v2h12v-2M8 2v8M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Načítať dáta z Excelu
+    </button>
+    <span class="import-status" id="importStatus"></span>
+  </div>
+
+</div>
+
+<script>
+  // ══════════════════════════════════════════════
+  //  THEME TOGGLE
+  // ══════════════════════════════════════════════
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isLight = html.getAttribute('data-theme') === 'light';
+    html.setAttribute('data-theme', isLight ? 'dark' : 'light');
+    v('themeIcon').textContent  = isLight ? '🌙' : '☀️';
+    v('themeLabel').textContent = isLight ? 'Tmavý režim' : 'Svetlý režim';
+  }
+
+  // ══════════════════════════════════════════════
+  //  STATE
+  //  Yellow-highlighted cells in the xlsx are always
+  //  editable in the dashboard (bound to inputs below).
+  //  Everything else (predpoklad 2027, ponuka MAX,
+  //  and all "VÝPOČET"/"ČISTÁ ÚSPORA" rows) is
+  //  recalculated from the xlsx formulas.
+  // ══════════════════════════════════════════════
+  let STATIC_EL2027  = 160;   // B21 (not yellow — fixed, from import)
+  let STATIC_GAS2027 = 70;    // B22
+  let STATIC_ELMAX   = 125;   // B26
+  let STATIC_GASMAX  = 49.5;  // B27
+  let VALIDITY_TEXT  = '2 dni'; // B5, display only
+  let CLIENT_NAME    = 'GOLEM';    // B3, not yellow — read-only, set only from import
+  let OFFER_DATE     = new Date(); // B4, not yellow — read-only, set only from import
+
+  // ── FIX/SPOT badge helper ────────────────────
+  function setFixSpot(prefix, val) {
+    const isSpot = String(val).trim().toUpperCase() === 'SPOT';
+    const fixEl  = document.getElementById(prefix + '_fix');
+    const spotEl = document.getElementById(prefix + '_spot');
+    if (!fixEl || !spotEl) return;
+    fixEl.className  = 'fs-opt' + (isSpot ? '' : ' active-fix');
+    spotEl.className = 'fs-opt' + (isSpot ? ' active-spot' : '');
+  }
+
+  // ── FIX/SPOT click toggle ────────────────────
+  function wireFixSpotToggle(prefix) {
+    const fixEl  = document.getElementById(prefix + '_fix');
+    const spotEl = document.getElementById(prefix + '_spot');
+    if (!fixEl || !spotEl) return;
+    fixEl.addEventListener('click', function() { setFixSpot(prefix, 'FIX'); });
+    spotEl.addEventListener('click', function() { setFixSpot(prefix, 'SPOT'); });
+  }
+  wireFixSpotToggle('fsEl');
+  wireFixSpotToggle('fsGas');
+
+  // ── Format helpers ───────────────────────────
+  const sk2  = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  const mwh2 = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €/MWh';
+  const dsk  = d => d.toLocaleDateString('sk-SK');
+  const num  = id => parseFloat(document.getElementById(id).value) || 0;
+  const v    = id => document.getElementById(id);
+
+  function parseDateInput(id, fallback) {
+    const raw = v(id).value;
+    if (!raw) return fallback;
+    const d = new Date(raw + 'T00:00:00');
+    return isNaN(d) ? fallback : d;
+  }
+
+  function addYearsMinusDay(start, years) {
+    const end = new Date(start);
+    end.setFullYear(end.getFullYear() + years);
+    end.setDate(end.getDate() - 1);
+    return end;
+  }
+
+  function toDateInputValue(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  // ── Recalculate (mirrors the xlsx formulas) ──
+  function recalc() {
+    // yellow / editable inputs
+    const client   = CLIENT_NAME;
+    const offerDate = OFFER_DATE;
+    const years     = Math.max(1, Math.round(num('inp_years')) || 3);
+    const start     = parseDateInput('inp_start', new Date(2027, 0, 1));
+    const consEl    = num('inp_consEl');
+    const consGas   = num('inp_consGas');
+    const curEl     = num('inp_curEl');
+    const curGas    = num('inp_curGas');
+    const fee1      = num('inp_fee1');
+    const feeM      = num('inp_feeM');
+
+    // now editable inline in the energy cards
+    const el2027  = num('inp_el2027');
+    const gas2027 = num('inp_gas2027');
+    const elMax   = num('inp_elMax');
+    const gasMax  = num('inp_gasMax');
+
+    // ── formulas from the xlsx ──
+    const unitEl  = el2027 - elMax;          // B32
+    const unitGas = gas2027 - gasMax;        // B33
+    const savEl   = consEl  * unitEl;        // B35
+    const savGas  = consGas * unitGas;       // B36
+    const gross   = savEl + savGas;          // B38
+    const feeYear = feeM * 12;               // B44
+
+    const yearValues = [];
+    for (let i = 0; i < years; i++) {
+      yearValues.push(i === 0 ? gross - fee1 - feeYear : gross - feeYear); // B48 / B49,B50...
+    }
+    const totalNy = yearValues.reduce((a, b) => a + b, 0); // B52
+
+    const end = addYearsMinusDay(start, years);
+
+    // ── header / client / dates ──
+    v('clientDisp').textContent    = client;
+    v('offerDateDisp').textContent = dsk(offerDate);
+    v('viazanostDisp').textContent = dsk(start) + ' – ' + dsk(end);
+
+    // ── update forecast year labels ──
+    const forecastYear = start.getFullYear();
+    v('elYearLabel').textContent = forecastYear;
+    v('gasYearLabel').textContent = forecastYear;
+
+    // ── savings hero ──
+    v('heroGross').textContent = sk2(gross);
+
+    // ── energy cards ──
+    v('curElDisp').textContent   = mwh2(curEl);
+    v('curGasDisp').textContent  = mwh2(curGas);
+
+    v('elSavUnit').textContent  = 'Úspora ' + unitEl.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
+    v('gasSavUnit').textContent = 'Úspora ' + unitGas.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
+    v('elSavYear').textContent  = sk2(savEl)  + ' / rok';
+    v('gasSavYear').textContent = sk2(savGas) + ' / rok';
+
+    v('consElBadge').textContent  = consEl.toLocaleString('sk-SK', {maximumFractionDigits:3}) + ' MWh';
+    v('consGasBadge').textContent = consGas.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' MWh';
+
+    // ── fees ──
+    v('feeYearly').textContent = sk2(feeYear);
+
+    // ── year cards (dynamic count based on Viazanosť) ──
+    const grid = v('yearGrid');
+    grid.innerHTML = '';
+    const startYear = start.getFullYear();
+    yearValues.forEach((val, i) => {
+      const card = document.createElement('div');
+      card.className = 'ycard';
+      card.innerHTML = `
+        <div class="ycard-label">Rok ${i + 1} · ${startYear + i}</div>
+        <div class="ycard-num">${sk2(val)}</div>
+        <div class="ycard-note">ČISTÁ ÚSPORA (po odrátaní poplatku)</div>
+      `;
+      grid.appendChild(card);
+    });
+    // total card
+    const totalCard = document.createElement('div');
+    totalCard.className = 'ycard ycard-total';
+    totalCard.innerHTML = `
+      <div class="ycard-label">Celková úspora</div>
+      <div class="ycard-num">${sk2(totalNy)}</div>
+      <div class="ycard-note">${years} roky spolu</div>
+    `;
+    grid.appendChild(totalCard);
+
+    // ── footer ──
+    v('footerNote').textContent =
+      `Ceny sú orientačné a platné počas doby platnosti ponuky (${VALIDITY_TEXT} od ${dsk(offerDate)}).`;
+  }
+
+  // ── Wire manual inputs ───────────────────────
+  ['inp_years','inp_start',
+   'inp_consEl','inp_consGas','inp_curEl','inp_curGas',
+   'inp_el2027','inp_gas2027','inp_elMax','inp_gasMax',
+   'inp_fee1','inp_feeM']
+    .forEach(id => v(id).addEventListener('input', recalc));
+
+  // ══════════════════════════════════════════════
+  //  XLSX IMPORT — reads Ponuka_Energia.xlsx
+  //  Mapping: row labels in column A → values col B
+  //  Yellow-filled cells → editable dashboard inputs
+  //  Everything else (predpoklad 2027, ponuka MAX)
+  //  → fixed static values used by the formulas
+  // ══════════════════════════════════════════════
+  function parseXlsx(arrayBuffer) {
+    const wb = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+    let sectionEl  = false; // inside SÚČASNÝ STAV Elektrina
+    let sectionGas = false; // inside SÚČASNÝ STAV Plyn
+
+    for (const row of rows) {
+      const labelRaw = String(row[0] ?? '').trim();
+      const labelLow = labelRaw.toLowerCase();
+      const val      = row[1];
+
+      // ── section headers ────────────────────────────────────────────────
+      if (labelLow.startsWith('súčasný stav elektrina')) { sectionEl = true;  sectionGas = false; continue; }
+      if (labelLow.startsWith('súčasný stav plyn'))      { sectionEl = false; sectionGas = true;  continue; }
+      if (labelLow.startsWith('predpoklad na 2027'))     { sectionEl = false; sectionGas = false; }
+      if (labelLow.startsWith('navrhovaná ponuka'))      { sectionEl = false; sectionGas = false; }
+      if (labelLow.startsWith('ročná spotreba'))         { sectionEl = false; sectionGas = false; }
+      if (labelLow.startsWith('poplatok za službu'))     { sectionEl = false; sectionGas = false; }
+
+      // ── text / date fields ─────────────────────────────────────────────
+      // Odberateľ
+      if (labelLow === 'odberateľ:') {
+        const name = String(val).trim();
+        if (name) CLIENT_NAME = name;
+        continue;
+      }
+      // Dátum ponuky (Excel serial → Date)
+      if (labelLow === 'dátum ponuky:') {
+        if (val instanceof Date) OFFER_DATE = val;
+        else if (typeof val === 'number') {
+          // Excel serial date fallback
+          const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+          if (!isNaN(d)) OFFER_DATE = d;
+        }
+        continue;
+      }
+      if (labelLow === 'platnosť:') {
+        if (val !== '' && val !== null && val !== undefined) VALIDITY_TEXT = String(val).trim();
+        continue;
+      }
+      if (labelLow === 'viazanosť kontraktu v rokoch:') {
+        const yrs = parseFloat(String(val).replace(',', '.'));
+        if (!isNaN(yrs) && yrs > 0) v('inp_years').value = Math.round(yrs);
+        continue;
+      }
+      if (labelLow === 'začiatok:') {
+        if (val instanceof Date) v('inp_start').value = toDateInputValue(val);
+        else if (typeof val === 'number') {
+          const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+          if (!isNaN(d)) v('inp_start').value = toDateInputValue(d);
+        }
+        continue;
+      }
+
+      // FIX / SPOT type — must be checked BEFORE numeric filter (value is text "FIX"/"SPOT")
+      if (labelLow.startsWith('druh (fix/spot)')) {
+        if (sectionEl)  setFixSpot('fsEl',  val);
+        if (sectionGas) setFixSpot('fsGas', val);
+        continue;
+      }
+
+      // ── numeric rows ───────────────────────────────────────────────────
+      if (val === '' || val === null || val === undefined) continue;
+      const numVal = parseFloat(String(val).replace(',', '.'));
+      if (isNaN(numVal)) continue;
+
+      // Current 2026 prices — identified by section context
+      // "SPOLU Cena komodity (€/MWh)" appears once for el and once for gas
+      if (labelLow.startsWith('spolu cena komodity')) {
+        if (sectionEl)  v('inp_curEl').value  = numVal;
+        if (sectionGas) v('inp_curGas').value = numVal;
+        continue;
+      }
+
+      // Annual consumption
+      if (labelLow.startsWith('spolu (elektrina')) { v('inp_consEl').value  = numVal; continue; }
+      if (labelLow.startsWith('spolu (plyn'))      { v('inp_consGas').value = numVal; continue; }
+
+      // Forecast 2027
+      if (labelLow === 'elektrina (€/mwh):') { v('inp_el2027').value = numVal; continue; }
+      if (labelLow === 'plyn (€/mwh):')      { v('inp_gas2027').value = numVal; continue; }
+
+      // Offer MAX
+      if (labelLow === 'elektrina max (€/mwh):') { v('inp_elMax').value = numVal; continue; }
+      if (labelLow === 'plyn max (€/mwh):')      { v('inp_gasMax').value = numVal; continue; }
+
+      // Fees
+      if (labelLow === 'jednorazový administratívny poplatok:') { v('inp_fee1').value = numVal; continue; }
+      if (labelLow === 'mesačný poplatok:')                     { v('inp_feeM').value = numVal; continue; }
+    }
+
+    recalc();
+  }
+
+  // ── File input handler ───────────────────────
+  document.getElementById('xlsxFileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const status = v('importStatus');
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        parseXlsx(evt.target.result);
+        status.textContent = '✓ ' + file.name + ' načítaný';
+        status.className = 'import-status ok';
+      } catch(err) {
+        status.textContent = '✗ Chyba pri čítaní súboru';
+        status.className = 'import-status err';
+        console.error(err);
+      }
+    };
+    reader.onerror = () => {
+      status.textContent = '✗ Súbor sa nedal otvoriť';
+      status.className = 'import-status err';
+    };
+    reader.readAsArrayBuffer(file);
+
+    // Reset input so same file can be re-loaded
+    this.value = '';
+  });
+
+  // ── Init ─────────────────────────────────────
+  recalc();
+</script>
+</body>
+</html>
