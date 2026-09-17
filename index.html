@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ponuka energií — GOLEM</title>
+<title>Analýza cien energií</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -220,6 +220,20 @@ body {
   color: var(--text);
   font-family: 'JetBrains Mono', monospace;
 }
+.header-validity-note {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  text-align: right;
+  max-width: 220px;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+@media (max-width: 768px) {
+  .header-validity-note {
+    text-align: center;
+    max-width: 100%;
+  }
+}
 /* ─── STAT ROW: CONTRACT & CLIENT DATA + SAVINGS (compact) ── */
 .stat-row {
   display: grid;
@@ -411,6 +425,72 @@ body {
 .fix-spot-badge .fs-opt.active-spot {
   background: var(--orange-dim);
   color: var(--orange);
+}
+
+/* ─── CATEGORY ON/OFF SWITCH ────────────────── */
+.cat-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cat-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.cat-switch .track {
+  position: relative;
+  width: 34px;
+  height: 18px;
+  border-radius: 20px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  transition: background .15s, border-color .15s;
+  flex-shrink: 0;
+}
+.cat-switch .track::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  transition: transform .15s, background .15s;
+}
+.cat-switch.on .track { background: var(--green-dim); border-color: var(--green); }
+.cat-switch.on .track::after { transform: translateX(16px); background: var(--green); }
+.cat-switch .cat-switch-label { white-space: nowrap; }
+.cat-switch.on .cat-switch-label { color: var(--text-dim); }
+
+/* card greyed-out (category OFF) state */
+.ecard.cat-off {
+  opacity: 0.45;
+  filter: grayscale(1);
+  background: var(--panel2);
+}
+.ecard.cat-off .fix-spot-badge,
+.ecard.cat-off .inline-edit-input,
+.ecard.cat-off input {
+  pointer-events: none;
+}
+.ecard.cat-off .cat-switch {
+  opacity: 1;
+  filter: none;
+  pointer-events: auto;
+}
+html[data-theme="light"] .ecard.cat-off {
+  background: var(--panel2);
 }
 
 /* data rows */
@@ -887,7 +967,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
     <div class="header-left">
       <span class="client-badge">
         <span class="k">Odberateľ</span>
-        <span class="name" id="clientDisp">GOLEM</span>
+        <span class="name" id="clientDisp">Firma</span>
       </span>
     </div>
     <div class="header-center">
@@ -895,7 +975,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
     </div>
     <div class="header-right">
       <span class="header-date-label">Dátum ponuky</span>
-      <span class="offer-date" id="offerDateDisp">06.09.2026</span>
+      <span class="offer-date" id="offerDateDisp">08.09.2026</span>
+      <span class="header-validity-note" id="headerValidityNote">Ceny sú orientačné a platné 2 dni</span>
     </div>
   </div>
 
@@ -910,7 +991,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
   <div class="energy-grid">
 
     <!-- ELEKTRINA -->
-    <div class="ecard ecard-el">
+    <div class="ecard ecard-el" id="ecardEl">
       <div class="ecard-header">
         <div class="ecard-title">
           <span class="ecard-icon">⚡</span> Elektrina
@@ -922,9 +1003,15 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
           <div class="cons-highlight-label">Ročná spotreba</div>
           <div class="cons-highlight-num" id="consElBadge">46,12 MWh</div>
         </div>
-        <div class="fix-spot-badge" id="fsEl">
-          <span class="fs-opt active-fix" id="fsEl_fix">FIX</span>
-          <span class="fs-opt" id="fsEl_spot">SPOT</span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="fix-spot-badge" id="fsEl">
+            <span class="fs-opt active-fix" id="fsEl_fix">FIX</span>
+            <span class="fs-opt" id="fsEl_spot">SPOT</span>
+          </div>
+          <div class="cat-switch on" id="catSwitch_el" onclick="toggleCategory('el')">
+            <span class="track"></span>
+            <span class="cat-switch-label" id="catSwitchLabel_el">ZAP</span>
+          </div>
         </div>
       </div>
 
@@ -935,14 +1022,14 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
       <div class="data-row">
         <span class="data-label">Predpoklad <span id="elYearLabel">2027</span> (bez zmeny)</span>
         <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input" id="inp_el2027" value="160" step="0.1" min="0" oninput="recalc()">
+          <input type="number" class="inline-edit-input" id="inp_el2027" value="135" step="0.1" min="0" oninput="recalc()">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
       <div class="offer-row">
         <span class="offer-label">Naša ponuka MAX</span>
         <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input inline-edit-offer el-color" id="inp_elMax" value="125" step="0.1" min="0" oninput="recalc()">
+          <input type="number" class="inline-edit-input inline-edit-offer el-color" id="inp_elMax" value="120" step="0.1" min="0" oninput="recalc()">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
@@ -954,7 +1041,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
     </div>
 
     <!-- PLYN -->
-    <div class="ecard ecard-gas">
+    <div class="ecard ecard-gas" id="ecardGas">
       <div class="ecard-header">
         <div class="ecard-title">
           <span class="ecard-icon">🔥</span> Plyn
@@ -966,9 +1053,15 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
           <div class="cons-highlight-label">Ročná spotreba</div>
           <div class="cons-highlight-num" id="consGasBadge">43,80 MWh</div>
         </div>
-        <div class="fix-spot-badge" id="fsGas">
-          <span class="fs-opt active-fix" id="fsGas_fix">FIX</span>
-          <span class="fs-opt" id="fsGas_spot">SPOT</span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="fix-spot-badge" id="fsGas">
+            <span class="fs-opt active-fix" id="fsGas_fix">FIX</span>
+            <span class="fs-opt" id="fsGas_spot">SPOT</span>
+          </div>
+          <div class="cat-switch on" id="catSwitch_gas" onclick="toggleCategory('gas')">
+            <span class="track"></span>
+            <span class="cat-switch-label" id="catSwitchLabel_gas">ZAP</span>
+          </div>
         </div>
       </div>
 
@@ -979,14 +1072,14 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
       <div class="data-row">
         <span class="data-label">Predpoklad <span id="gasYearLabel">2027</span> (bez zmeny)</span>
         <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input" id="inp_gas2027" value="70" step="0.1" min="0" oninput="recalc()">
+          <input type="number" class="inline-edit-input" id="inp_gas2027" value="45" step="0.1" min="0" oninput="recalc()">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
       <div class="offer-row">
         <span class="offer-label">Naša ponuka MAX</span>
         <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input inline-edit-offer gas-color" id="inp_gasMax" value="49.5" step="0.1" min="0" oninput="recalc()">
+          <input type="number" class="inline-edit-input inline-edit-offer gas-color" id="inp_gasMax" value="35" step="0.1" min="0" oninput="recalc()">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
@@ -1001,10 +1094,10 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
 
   <!-- HIDDEN INPUTS: consumption & current 2026 prices (populated by xlsx import, not shown as editable sections) -->
   <div style="display:none">
-    <input type="number" id="inp_consEl"  value="46.116">
-    <input type="number" id="inp_consGas" value="43.8">
-    <input type="number" id="inp_curEl"   value="150">
-    <input type="number" id="inp_curGas"  value="56.9">
+    <input type="number" id="inp_consEl"  value="100">
+    <input type="number" id="inp_consGas" value="100">
+    <input type="number" id="inp_curEl"   value="130">
+    <input type="number" id="inp_curGas"  value="40">
   </div>
 
   <!-- STAT ROW: FEES + CONTRACT DATA side by side -->
@@ -1015,7 +1108,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
       <div class="fee-row">
         <span class="fee-label">Jednorazový administratívny poplatok</span>
         <div class="fee-input-wrap">
-          <input type="number" id="inp_fee1" value="200" step="1" min="0">
+          <input type="number" id="inp_fee1" value="400" step="1" min="0">
           <span class="fee-unit">€</span>
         </div>
       </div>
@@ -1023,7 +1116,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
       <div class="fee-row">
         <span class="fee-label">Mesačný poplatok</span>
         <div class="fee-input-wrap">
-          <input type="number" id="inp_feeM" value="45" step="1" min="0">
+          <input type="number" id="inp_feeM" value="55" step="1" min="0">
           <span class="fee-unit">€</span>
         </div>
       </div>
@@ -1040,14 +1133,14 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
         <div class="input-field editable">
           <label>Viazanosť kontraktu (rokov)</label>
           <div class="input-wrap">
-            <input type="number" id="inp_years" value="3" step="1" min="1">
+            <input type="number" id="inp_years" value="2" step="1" min="1">
             <span class="input-unit">rokov</span>
           </div>
         </div>
         <div class="input-field editable">
           <label>Začiatok viazanosti</label>
           <div class="input-wrap">
-            <input type="date" id="inp_start" value="2027-01-01">
+            <input type="date" id="inp_start" value="2028-01-01">
           </div>
         </div>
       </div>
@@ -1060,10 +1153,6 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
 
   <!-- YEAR CARDS (generated dynamically based on Viazanosť v rokoch) -->
   <div class="year-grid" id="yearGrid"></div>
-
-  <footer id="footerNote">
-    Ceny sú orientačné a platné počas doby platnosti ponuky (2 dni od 06.09.2026).
-  </footer>
 
   <!-- THEME TOGGLE — tucked at bottom -->
   <div class="theme-tucked">
@@ -1107,13 +1196,22 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
   //  and all "VÝPOČET"/"ČISTÁ ÚSPORA" rows) is
   //  recalculated from the xlsx formulas.
   // ══════════════════════════════════════════════
-  let STATIC_EL2027  = 160;   // B21 (not yellow — fixed, from import)
-  let STATIC_GAS2027 = 70;    // B22
-  let STATIC_ELMAX   = 125;   // B26
-  let STATIC_GASMAX  = 49.5;  // B27
+  let STATIC_EL2027  = 135;   // B21 (not yellow — fixed, from import)
+  let STATIC_GAS2027 = 45;    // B22
+  let STATIC_ELMAX   = 120;   // B26
+  let STATIC_GASMAX  = 35;    // B27
   let VALIDITY_TEXT  = '2 dni'; // B5, display only
-  let CLIENT_NAME    = 'GOLEM';    // B3, not yellow — read-only, set only from import
-  let OFFER_DATE     = new Date(); // B4, not yellow — read-only, set only from import
+  let CLIENT_NAME    = 'Firma';    // B3, not yellow — read-only, set only from import
+  let OFFER_DATE     = parseDateInput2('2026-09-08'); // B4, not yellow — read-only, set only from import
+
+  // ── ENERGY CATEGORY ON/OFF STATE ──
+  // When a category is OFF, it is excluded from all totals/savings and its card is greyed out.
+  let ENERGY_ON = { el: true, gas: true };
+
+  function parseDateInput2(raw) {
+    const d = new Date(raw + 'T00:00:00');
+    return isNaN(d) ? new Date() : d;
+  }
 
   // ── FIX/SPOT badge helper ────────────────────
   function setFixSpot(prefix, val) {
@@ -1135,6 +1233,24 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
   }
   wireFixSpotToggle('fsEl');
   wireFixSpotToggle('fsGas');
+
+  // ── Category ON/OFF toggle ───────────────────
+  function toggleCategory(cat) {
+    ENERGY_ON[cat] = !ENERGY_ON[cat];
+    applyCategoryState(cat);
+    recalc();
+  }
+
+  function applyCategoryState(cat) {
+    const on = ENERGY_ON[cat];
+    const cardId = cat === 'el' ? 'ecardEl' : 'ecardGas';
+    const card = document.getElementById(cardId);
+    const sw = document.getElementById('catSwitch_' + cat);
+    const label = document.getElementById('catSwitchLabel_' + cat);
+    if (card) card.classList.toggle('cat-off', !on);
+    if (sw) sw.classList.toggle('on', on);
+    if (label) label.textContent = on ? 'ZAP' : 'VYP';
+  }
 
   // ── Format helpers ───────────────────────────
   const sk2  = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
@@ -1187,8 +1303,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
     // ── formulas from the xlsx ──
     const unitEl  = el2027 - elMax;          // B32
     const unitGas = gas2027 - gasMax;        // B33
-    const savEl   = consEl  * unitEl;        // B35
-    const savGas  = consGas * unitGas;       // B36
+    const savEl   = ENERGY_ON.el  ? consEl  * unitEl  : 0; // B35
+    const savGas  = ENERGY_ON.gas ? consGas * unitGas : 0; // B36
     const gross   = savEl + savGas;          // B38
     const feeYear = feeM * 12;               // B44
 
@@ -1252,9 +1368,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
     `;
     grid.appendChild(totalCard);
 
-    // ── footer ──
-    v('footerNote').textContent =
-      `Ceny sú orientačné a platné počas doby platnosti ponuky (${VALIDITY_TEXT} od ${dsk(offerDate)}).`;
+    // ── validity note (moved to header, under date) ──
+    v('headerValidityNote').textContent = `Ceny sú orientačné a platné ${VALIDITY_TEXT}`;
   }
 
   // ── Wire manual inputs ───────────────────────
@@ -1396,6 +1511,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
   });
 
   // ── Init ─────────────────────────────────────
+  applyCategoryState('el');
+  applyCategoryState('gas');
   recalc();
 </script>
 </body>
