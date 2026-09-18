@@ -104,33 +104,42 @@ body {
   }
 }
 
+/* ─── BOTTOM BAR ────────────────────────────── */
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
 /* ─── THEME TOGGLE — bottom ─────────────────── */
 .theme-tucked {
   display: flex;
-  justify-content: center;
-  margin-top: 6px;
-  margin-bottom: 2px;
-  opacity: 0.45;
+  justify-content: flex-end;
+  margin-left: auto;
+  opacity: 0.75;
   transition: opacity .15s;
 }
-.theme-tucked:hover { opacity: 0.85; }
+.theme-tucked:hover { opacity: 1; }
 .theme-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 6px 14px 6px 12px;
+  padding: 7px 16px 7px 14px;
   cursor: pointer;
-  color: var(--text-dim);
+  color: var(--text);
   font-family: 'Inter', sans-serif;
-  font-size: 12.5px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   transition: border-color .15s, background .15s;
 }
 .theme-toggle:hover { border-color: var(--green); color: var(--text); }
-.theme-toggle .icon { font-size: 14px; line-height: 1; }
+.theme-toggle .icon { font-size: 16px; line-height: 1; }
 
 /* ─── HEADER ───────────────────────────────── */
 .header {
@@ -140,7 +149,7 @@ body {
   padding: 12px 16px 10px;
   margin-bottom: 8px;
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: minmax(auto, 1.4fr) 2fr 1fr;
   align-items: center;
   gap: 12px;
 }
@@ -159,6 +168,7 @@ body {
   flex-direction: column;
   gap: 4px;
   align-items: flex-start;
+  min-width: 0;
 }
 .header-center {
   text-align: center;
@@ -194,24 +204,32 @@ body {
 .client-badge {
   display: inline-flex;
   align-items: baseline;
-  gap: 5px;
+  gap: 7px;
   background: var(--green-glow);
   border: 1px solid var(--green-dim);
   border-radius: 20px;
-  padding: 3px 10px 3px 9px;
+  padding: 5px 14px 5px 12px;
+  max-width: 100%;
+  overflow: hidden;
 }
 .client-badge .k {
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.09em;
   color: var(--text-dim);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .client-badge .name {
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
   color: var(--green);
   font-family: 'JetBrains Mono', monospace;
   letter-spacing: -0.4px;
+  padding-left: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .header-date-label {
   font-size: 10px;
@@ -359,13 +377,13 @@ body {
 .ecard-title {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 15px;
+  gap: 7px;
+  font-size: 19px;
   font-weight: 700;
 }
 .ecard-el .ecard-title { color: var(--blue); }
 .ecard-gas .ecard-title { color: var(--yellow); }
-.ecard-icon { font-size: 15px; }
+.ecard-icon { font-size: 19px; }
 
 /* prominent consumption highlight inside each energy card */
 .cons-highlight {
@@ -392,7 +410,7 @@ body {
 }
 .cons-highlight-num {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.5px;
   line-height: 1;
@@ -538,8 +556,8 @@ html[data-theme="light"] .cat-off {
   gap: 8px;
 }
 .data-row:last-of-type { border-bottom: none; }
-.data-label { color: var(--text-dim); font-size: 13px; }
-.data-value { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: var(--text); }
+.data-label { color: var(--text-dim); font-size: 15px; }
+.data-value { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; color: var(--text); }
 .data-value.strikethrough { text-decoration: line-through; color: var(--text-faint); }
 .data-row:nth-of-type(1) .data-value {
   font-size: 18px;
@@ -564,8 +582,24 @@ html[data-theme="light"] .cat-off {
   background: rgba(245,208,74,0.10);
   border: 2px solid var(--yellow);
 }
+html[data-theme="dark"] .ecard-el .offer-row {
+  background: rgba(88,166,255,0.14);
+  box-shadow: 0 0 14px 2px rgba(88,166,255,0.45), inset 0 0 10px rgba(88,166,255,0.12);
+}
+html[data-theme="dark"] .ecard-gas .offer-row {
+  background: rgba(245,208,74,0.14);
+  box-shadow: 0 0 14px 2px rgba(245,208,74,0.45), inset 0 0 10px rgba(245,208,74,0.12);
+}
+html[data-theme="dark"] .inline-edit-input.inline-edit-offer.el-color {
+  color: #d6ecff;
+  text-shadow: 0 0 6px rgba(88,166,255,0.9), 0 0 14px rgba(88,166,255,0.6);
+}
+html[data-theme="dark"] .inline-edit-input.inline-edit-offer.gas-color {
+  color: #fff3c9;
+  text-shadow: 0 0 6px rgba(245,208,74,0.9), 0 0 14px rgba(245,208,74,0.6);
+}
 .offer-label {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
@@ -591,12 +625,12 @@ html[data-theme="light"] .cat-off {
 }
 .ecard-el .saving-badge { background: var(--blue-glow); border: 1px solid rgba(88,166,255,0.25); }
 .ecard-gas .saving-badge { background: var(--yellow-glow); border: 1px solid rgba(245,208,74,0.25); }
-.saving-text { font-size: 13px; color: var(--text-dim); }
+.saving-text { font-size: 14.5px; color: var(--text-dim); }
 .ecard-el .saving-num { color: var(--blue); }
 .ecard-gas .saving-num { color: var(--yellow); }
 .saving-num {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -646,7 +680,8 @@ html[data-theme="light"] .cat-off {
   display: flex;
   align-items: center;
 }
-.input-wrap input {
+.input-wrap input,
+.input-wrap select {
   width: 100%;
   background: var(--bg2);
   border: 1px solid var(--border);
@@ -660,11 +695,23 @@ html[data-theme="light"] .cat-off {
   transition: border-color .15s, box-shadow .15s;
   -moz-appearance: textfield;
 }
+.input-wrap select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  text-align-last: right;
+  padding-right: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238b949e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
 .input-wrap input[type="text"],
 .input-wrap input[type="date"] { padding: 5px 9px; text-align: left; }
 .input-wrap input::-webkit-outer-spin-button,
 .input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
-.input-wrap input:focus {
+.input-wrap input:focus,
+.input-wrap select:focus {
   outline: none;
   border-color: var(--green);
   box-shadow: 0 0 0 3px var(--green-glow);
@@ -680,10 +727,12 @@ html[data-theme="light"] .cat-off {
 }
 
 /* editable (yellow-sourced) inputs get a warm accent to mirror the xlsx highlight */
-.input-field.editable .input-wrap input {
+.input-field.editable .input-wrap input,
+.input-field.editable .input-wrap select {
   border-color: rgba(240,168,79,0.45);
 }
-.input-field.editable .input-wrap input:focus {
+.input-field.editable .input-wrap input:focus,
+.input-field.editable .input-wrap select:focus {
   border-color: #f0a84f;
   box-shadow: 0 0 0 3px rgba(240,168,79,0.14);
 }
@@ -809,10 +858,9 @@ footer {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 10px;
-  margin-top: 8px;
-  opacity: 0.6;
+  opacity: 0.85;
   transition: opacity .15s;
 }
 .import-tucked:hover { opacity: 1; }
@@ -822,19 +870,19 @@ footer {
   gap: 6px;
   background: none;
   border: none;
-  color: var(--text-faint);
+  color: var(--text-dim);
   font-family: 'Inter', sans-serif;
-  font-size: 11.5px;
-  font-weight: 500;
+  font-size: 13.5px;
+  font-weight: 600;
   cursor: pointer;
   padding: 4px 8px;
   text-decoration: none;
   transition: color .15s;
 }
-.import-link:hover { color: var(--text-dim); text-decoration: underline; }
-.import-link svg { flex-shrink: 0; opacity: 0.7; }
+.import-link:hover { color: var(--text); text-decoration: underline; }
+.import-link svg { flex-shrink: 0; opacity: 0.85; width: 14px; height: 14px; }
 .import-status {
-  font-size: 11px;
+  font-size: 12.5px;
   font-family: 'JetBrains Mono', monospace;
   padding: 2px 10px;
   border-radius: 20px;
@@ -867,10 +915,10 @@ footer {
   border-radius: 6px;
   color: var(--text);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   padding: 3px 6px;
-  width: 68px;
+  width: 72px;
   text-align: right;
   transition: border-color .15s, box-shadow .15s;
   -moz-appearance: textfield;
@@ -883,8 +931,8 @@ footer {
   box-shadow: 0 0 0 3px var(--green-glow);
 }
 .inline-edit-input.inline-edit-offer {
-  font-size: 17px;
-  width: 76px;
+  font-size: 19px;
+  width: 80px;
   border-width: 2px;
   padding: 3px 7px;
 }
@@ -955,6 +1003,7 @@ html[data-theme="light"] .hero {
   border-color: var(--hero-card-border);
 }
 html[data-theme="light"] .input-wrap input,
+html[data-theme="light"] .input-wrap select,
 html[data-theme="light"] .fee-input-wrap input,
 html[data-theme="light"] .inline-edit-input {
   background: rgba(255,255,255,0.75);
@@ -978,7 +1027,8 @@ html[data-theme="light"] .stat-row .input-section {
   border-color: var(--accent-card-border);
 }
 html[data-theme="light"] .fees-section .fee-input-wrap input,
-html[data-theme="light"] .stat-row .input-section .input-wrap input {
+html[data-theme="light"] .stat-row .input-section .input-wrap input,
+html[data-theme="light"] .stat-row .input-section .input-wrap select {
   background: rgba(255,255,255,0.80);
 }
 
@@ -1008,20 +1058,13 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
       </span>
     </div>
     <div class="header-center">
-      <div class="header-title-main">Orientačné ceny energií</div>
+      <div class="header-title-main">Ponuka cien energií</div>
     </div>
     <div class="header-right">
       <span class="header-date-label">Dátum ponuky</span>
-      <span class="offer-date" id="offerDateDisp">08.09.2026</span>
+      <span class="offer-date" id="offerDateDisp">17.09.2026</span>
       <span class="header-validity-note" id="headerValidityNote">Ceny sú orientačné a platné 2 dni</span>
     </div>
-  </div>
-
-  <!-- HERO: celková ročná úspora (hrubá, pred poplatkami) -->
-  <div class="hero">
-    <div class="hero-label">Celková ročná úspora (pred poplatkami)</div>
-    <div class="hero-num"><span id="heroGross"></span></div>
-    <div class="hero-note">Elektrina + Plyn spolu / rok</div>
   </div>
 
   <!-- ENERGY CARDS -->
@@ -1033,43 +1076,43 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
         <div class="ecard-title">
           <span class="ecard-icon">⚡</span> Elektrina
         </div>
+        <div class="cat-switch on" id="catSwitch_el" onclick="toggleCategory('el')">
+          <span class="track"></span>
+          <span class="cat-switch-label" id="catSwitchLabel_el">ZAP</span>
+        </div>
       </div>
 
       <div class="cons-highlight">
         <div class="cons-highlight-left">
           <div class="cons-highlight-label">Ročná spotreba</div>
           <div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;">
-            <div class="cons-highlight-num" id="consElBadge">46,12 MWh</div>
+            <div class="cons-highlight-num" id="consElBadge">100,00 MWh</div>
             <div class="reg-badge" id="regBadgeEl"></div>
           </div>
         </div>
-        <div style="display:flex; align-items:center; gap:8px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
           <div class="fix-spot-badge" id="fsEl">
             <span class="fs-opt active-fix" id="fsEl_fix">FIX</span>
             <span class="fs-opt" id="fsEl_spot">SPOT</span>
-          </div>
-          <div class="cat-switch on" id="catSwitch_el" onclick="toggleCategory('el')">
-            <span class="track"></span>
-            <span class="cat-switch-label" id="catSwitchLabel_el">ZAP</span>
           </div>
         </div>
       </div>
 
       <div class="data-row">
         <span class="data-label">Súčasná cena (2026)</span>
-        <span class="data-value" id="curElDisp">150,00 €/MWh</span>
+        <span class="data-value" id="curElDisp">140,00 €/MWh</span>
       </div>
       <div class="data-row">
         <span class="data-label">Predpoklad <span id="elYearLabel">2027</span> (bez zmeny)</span>
         <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input" id="inp_el2027" value="135" step="0.1" min="0" oninput="recalc()">
+          <input type="number" class="inline-edit-input" id="inp_el2027" value="165" step="0.1" min="0" oninput="recalc()">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
       <div class="offer-row">
-        <span class="offer-label">Naša ponuka MAX</span>
+        <span class="offer-label">Ponúkaná cena (max)</span>
         <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input inline-edit-offer el-color" id="inp_elMax" value="120" step="0.1" min="0" oninput="recalc()">
+          <input type="number" class="inline-edit-input inline-edit-offer el-color" id="inp_elMax" value="135" step="0.1" min="0" oninput="recalc()">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
@@ -1086,43 +1129,43 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
         <div class="ecard-title">
           <span class="ecard-icon">🔥</span> Plyn
         </div>
+        <div class="cat-switch on" id="catSwitch_gas" onclick="toggleCategory('gas')">
+          <span class="track"></span>
+          <span class="cat-switch-label" id="catSwitchLabel_gas">ZAP</span>
+        </div>
       </div>
 
       <div class="cons-highlight">
         <div class="cons-highlight-left">
           <div class="cons-highlight-label">Ročná spotreba</div>
           <div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;">
-            <div class="cons-highlight-num" id="consGasBadge">43,80 MWh</div>
+            <div class="cons-highlight-num" id="consGasBadge">100,00 MWh</div>
             <div class="reg-badge" id="regBadgeGas"></div>
           </div>
         </div>
-        <div style="display:flex; align-items:center; gap:8px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
           <div class="fix-spot-badge" id="fsGas">
             <span class="fs-opt active-fix" id="fsGas_fix">FIX</span>
             <span class="fs-opt" id="fsGas_spot">SPOT</span>
-          </div>
-          <div class="cat-switch on" id="catSwitch_gas" onclick="toggleCategory('gas')">
-            <span class="track"></span>
-            <span class="cat-switch-label" id="catSwitchLabel_gas">ZAP</span>
           </div>
         </div>
       </div>
 
       <div class="data-row">
         <span class="data-label">Súčasná cena (2026)</span>
-        <span class="data-value" id="curGasDisp">56,90 €/MWh</span>
+        <span class="data-value" id="curGasDisp">55,00 €/MWh</span>
       </div>
       <div class="data-row">
         <span class="data-label">Predpoklad <span id="gasYearLabel">2027</span> (bez zmeny)</span>
         <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input" id="inp_gas2027" value="45" step="0.1" min="0" oninput="recalc()">
+          <input type="number" class="inline-edit-input" id="inp_gas2027" value="60" step="0.1" min="0" oninput="recalc()">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
       <div class="offer-row">
-        <span class="offer-label">Naša ponuka MAX</span>
+        <span class="offer-label">Ponúkaná cena (max)</span>
         <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input inline-edit-offer gas-color" id="inp_gasMax" value="35" step="0.1" min="0" oninput="recalc()">
+          <input type="number" class="inline-edit-input inline-edit-offer gas-color" id="inp_gasMax" value="45" step="0.1" min="0" oninput="recalc()">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
@@ -1139,8 +1182,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
   <div style="display:none">
     <input type="number" id="inp_consEl"  value="100">
     <input type="number" id="inp_consGas" value="100">
-    <input type="number" id="inp_curEl"   value="130">
-    <input type="number" id="inp_curGas"  value="40">
+    <input type="number" id="inp_curEl"   value="140">
+    <input type="number" id="inp_curGas"  value="55">
   </div>
 
   <!-- STAT ROW: CONTRACT DATA (Elektrina) — FEES (stred) — CONTRACT DATA (Plyn) -->
@@ -1153,7 +1196,12 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
           <label>Viazanosť kontraktu</label>
           <div class="input-wrap">
             <span class="input-unit">Počet rokov</span>
-            <input type="number" id="inp_years_el" value="3" step="1" min="1">
+            <select id="inp_years_el">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+            </select>
           </div>
         </div>
         <div class="input-field editable">
@@ -1175,7 +1223,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
       <div class="fee-row">
         <span class="fee-label">Jednorazový administratívny poplatok</span>
         <div class="fee-input-wrap">
-          <input type="number" id="inp_fee1" value="400" step="1" min="0">
+          <input type="number" id="inp_fee1" value="0" step="1" min="0">
           <span class="fee-unit">€</span>
         </div>
       </div>
@@ -1183,7 +1231,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
       <div class="fee-row">
         <span class="fee-label">Mesačný poplatok</span>
         <div class="fee-input-wrap">
-          <input type="number" id="inp_feeM" value="55" step="1" min="0">
+          <input type="number" id="inp_feeM" value="0" step="1" min="0">
           <span class="fee-unit">€</span>
         </div>
       </div>
@@ -1201,7 +1249,12 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
           <label>Viazanosť kontraktu</label>
           <div class="input-wrap">
             <span class="input-unit">Počet rokov</span>
-            <input type="number" id="inp_years_gas" value="3" step="1" min="1">
+            <select id="inp_years_gas">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+            </select>
           </div>
         </div>
         <div class="input-field editable">
@@ -1222,24 +1275,25 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
   <!-- YEAR CARDS (generated dynamically based on Viazanosť v rokoch) -->
   <div class="year-grid" id="yearGrid"></div>
 
-  <!-- THEME TOGGLE — tucked at bottom -->
-  <div class="theme-tucked">
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
-      <span class="icon" id="themeIcon">🌙</span>
-      <span id="themeLabel">Tmavý režim</span>
-    </button>
-  </div>
+  <!-- BOTTOM BAR — import (left) / theme toggle (right) -->
+  <div class="bottom-bar">
+    <div class="import-tucked">
+      <input type="file" id="xlsxFileInput" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+      <button class="import-link" onclick="document.getElementById('xlsxFileInput').click()">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 12v2h12v-2M8 2v8M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Načítať dáta z Excelu
+      </button>
+      <span class="import-status" id="importStatus"></span>
+    </div>
 
-  <!-- XLSX IMPORT — tucked away, unobtrusive -->
-  <div class="import-tucked">
-    <input type="file" id="xlsxFileInput" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
-    <button class="import-link" onclick="document.getElementById('xlsxFileInput').click()">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2 12v2h12v-2M8 2v8M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Načítať dáta z Excelu
-    </button>
-    <span class="import-status" id="importStatus"></span>
+    <div class="theme-tucked">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+        <span class="icon" id="themeIcon">🌙</span>
+        <span id="themeLabel">Tmavý režim</span>
+      </button>
+    </div>
   </div>
 
 </div>
@@ -1270,7 +1324,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
   let STATIC_GASMAX  = 35;    // B27
   let VALIDITY_TEXT  = '2 dni'; // B5, display only
   let CLIENT_NAME    = 'Firma';    // B3, not yellow — read-only, set only from import
-  let OFFER_DATE     = parseDateInput2('2026-09-08'); // B4, not yellow — read-only, set only from import
+  let OFFER_DATE     = parseDateInput2('2026-09-17'); // B4, not yellow — read-only, set only from import
 
   // ── ENERGY CATEGORY ON/OFF STATE ──
   // When a category is OFF, it is excluded from all totals/savings and its card is greyed out.
@@ -1342,12 +1396,30 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
     return isNaN(d) ? fallback : d;
   }
 
-  function addYearsMinusDay(start, years) {
-    const end = new Date(start);
-    end.setFullYear(end.getFullYear() + years);
-    end.setDate(end.getDate() - 1);
-    return end;
+  function calcContractEnd(start, years) {
+    // Always ends on 31.12 of (start year + years - 1) — a contract that
+    // starts 1.3.2027 with 1 rok covers just the rest of 2027, ending 31.12.2027.
+    const endYear = start.getFullYear() + years - 1;
+    return new Date(endYear, 11, 31);
   }
+
+  // ── keep client name on one line: shrink font to fit available width ──
+  function fitClientName() {
+    const el = document.getElementById('clientDisp');
+    const badge = el.closest('.client-badge');
+    if (!el || !badge) return;
+    const maxFont = 24;
+    const minFont = 12;
+    el.style.fontSize = maxFont + 'px';
+    let size = maxFont;
+    const container = badge.parentElement; // .header-left
+    const available = () => container.getBoundingClientRect().width;
+    while (badge.scrollWidth > available() && size > minFont) {
+      size -= 1;
+      el.style.fontSize = size + 'px';
+    }
+  }
+  window.addEventListener('resize', fitClientName);
 
   function toDateInputValue(d) {
     const y = d.getFullYear();
@@ -1367,8 +1439,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
     const yearsGas = Math.max(1, Math.round(num('inp_years_gas')) || 2);
     const startEl  = parseDateInput('inp_start_el',  new Date(2027, 0, 1));
     const startGas = parseDateInput('inp_start_gas', new Date(2027, 0, 1));
-    const endEl    = addYearsMinusDay(startEl,  yearsEl);
-    const endGas   = addYearsMinusDay(startGas, yearsGas);
+    const endEl    = calcContractEnd(startEl,  yearsEl);
+    const endGas   = calcContractEnd(startGas, yearsGas);
 
     const consEl    = num('inp_consEl');
     const consGas   = num('inp_consGas');
@@ -1419,6 +1491,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
 
     // ── header / client / dates ──
     v('clientDisp').textContent    = client;
+    fitClientName();
     v('offerDateDisp').textContent = dsk(offerDate);
     v('viazanostDisp_el').textContent  = dsk(startEl)  + ' – ' + dsk(endEl);
     v('viazanostDisp_gas').textContent = dsk(startGas) + ' – ' + dsk(endGas);
@@ -1426,9 +1499,6 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
     // ── update forecast year labels ──
     v('elYearLabel').textContent  = startEl.getFullYear();
     v('gasYearLabel').textContent = startGas.getFullYear();
-
-    // ── savings hero ──
-    v('heroGross').textContent = sk2(gross);
 
     // ── energy cards ──
     v('curElDisp').textContent   = mwh2(curEl);
@@ -1491,6 +1561,9 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
    'inp_el2027','inp_gas2027','inp_elMax','inp_gasMax',
    'inp_fee1','inp_feeM']
     .forEach(id => v(id).addEventListener('input', recalc));
+  // selects: also listen for 'change' (some browsers/iOS Safari versions
+  // don't reliably fire 'input' on <select>)
+  ['inp_years_el','inp_years_gas'].forEach(id => v(id).addEventListener('change', recalc));
 
   // ══════════════════════════════════════════════
   //  XLSX IMPORT — reads Ponuka_Energia.xlsx
@@ -1502,65 +1575,119 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
   function parseXlsx(arrayBuffer) {
     const wb = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
     const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-    let sectionEl  = false; // inside SÚČASNÝ STAV Elektrina
-    let sectionGas = false; // inside SÚČASNÝ STAV Plyn
+    // ── Sparse, bounded row extraction (columns A & B only) ─────────────
+    // IMPORTANT: do NOT use XLSX.utils.sheet_to_json(ws, {header:1}) here.
+    // Some source workbooks declare a bogus sheet dimension (e.g. entire
+    // rows styled out to column XFD), which makes sheet_to_json try to
+    // materialize a dense array with 16000+ columns per row — this can
+    // exhaust the browser's memory and freeze/crash the tab on import.
+    // Instead we read only the actual populated cells in columns A and B
+    // directly from the worksheet object (which is sparse — only real
+    // cells exist as keys), bounded to a sane max row count as a safety net.
+    const MAX_ROWS = 2000;
+    let maxRow = 0;
+    for (const key in ws) {
+      if (key.charCodeAt(0) === 33) continue; // skip '!ref', '!merges', etc.
+      const m = /^([A-Z]+)(\d+)$/.exec(key);
+      if (!m) continue;
+      if (m[1] !== 'A' && m[1] !== 'B') continue;
+      const r = parseInt(m[2], 10);
+      if (r > maxRow && r <= MAX_ROWS) maxRow = r;
+    }
+    const rows = [];
+    for (let r = 1; r <= maxRow; r++) {
+      const a = ws['A' + r];
+      const b = ws['B' + r];
+      rows.push([
+        a ? (a.w !== undefined ? a.v : a.v) : '',
+        b ? b.v : ''
+      ]);
+    }
+
+    // The source workbook's rows get shifted and relabelled from version to
+    // version (extra/missing blank rows, renamed headers, section text
+    // moved around, …). Instead of relying on exact row positions or exact
+    // header strings, we walk every row, keep track of which broad SECTION
+    // we are currently inside (based on flexible/partial header matches),
+    // and — for the generic "Elektrina" / "Plyn" value rows that only make
+    // sense in context (Predpoklad 2027, Ponuka MAX) — use that section to
+    // know which field a bare "Elektrina"/"Plyn" row belongs to. Rows that
+    // already name the commodity themselves (e.g. "Súčasná cena elektrina")
+    // are resolved directly from their own text and don't need the section
+    // at all, so they still work even if they get moved to a different part
+    // of the sheet.
+    let section = null;        // 'current' | 'forecast' | 'offer' | 'fees' | null
+    let subCommodity = null;   // 'el' | 'gas' | null — for legacy nested sub-sections
+
+    const hasEl  = t => t.includes('elektrin');
+    const hasGas = t => t.includes('plyn');
+    const commodityOf = t => hasEl(t) ? 'el' : (hasGas(t) ? 'gas' : null);
 
     for (const row of rows) {
       const labelRaw = String(row[0] ?? '').trim();
       const labelLow = labelRaw.toLowerCase();
       const val      = row[1];
 
-      // ── section headers ────────────────────────────────────────────────
-      if (labelLow.startsWith('súčasný stav elektrina')) { sectionEl = true;  sectionGas = false; continue; }
-      if (labelLow.startsWith('súčasný stav plyn'))      { sectionEl = false; sectionGas = true;  continue; }
-      if (labelLow.startsWith('predpoklad na 2027'))     { sectionEl = false; sectionGas = false; }
-      if (labelLow.startsWith('navrhovaná ponuka'))      { sectionEl = false; sectionGas = false; }
-      if (labelLow.startsWith('ročná spotreba'))         { sectionEl = false; sectionGas = false; }
-      if (labelLow.startsWith('poplatok za službu'))     { sectionEl = false; sectionGas = false; }
+      if (!labelLow) continue;
+
+      // ── section headers (flexible matching) ──────────────────────────
+      // Legacy nested sub-sections take priority over the generic one.
+      if (labelLow.startsWith('súčasný stav elektrina')) { section = 'current'; subCommodity = 'el';  continue; }
+      if (labelLow.startsWith('súčasný stav plyn'))      { section = 'current'; subCommodity = 'gas'; continue; }
+      if (labelLow.startsWith('súčasný stav'))           { section = 'current'; subCommodity = null;  continue; }
+      if (labelLow.includes('predpoklad'))               { section = 'forecast'; subCommodity = null; continue; }
+      if (labelLow.includes('navrhovaná ponuka') || labelLow.includes('naša ponuka') || labelLow.includes('ponúkaná cena')) {
+        section = 'offer'; subCommodity = null; continue;
+      }
+      if (labelLow.startsWith('poplatok za'))             { section = 'fees'; subCommodity = null; continue; }
+      // Anything starting with "Výpočet úspory", "Čistá úspora" or "Celková…"
+      // is a computed/derived block from the sheet — the dashboard
+      // recalculates these itself, so we just stop attributing rows to a
+      // data-entry section (prevents them being misread as offer/forecast).
+      if (labelLow.startsWith('výpočet úspory') || labelLow.startsWith('čistá úspora') || labelLow.startsWith('celková')) {
+        section = null; subCommodity = null; continue;
+      }
 
       // ── text / date fields ─────────────────────────────────────────────
       // Odberateľ
-      if (labelLow === 'odberateľ:') {
+      if (labelLow.startsWith('odberateľ')) {
         const name = String(val).trim();
         if (name) CLIENT_NAME = name;
         continue;
       }
       // Dátum ponuky (Excel serial → Date)
-      if (labelLow === 'dátum ponuky:') {
+      if (labelLow.startsWith('dátum ponuky')) {
         if (val instanceof Date) OFFER_DATE = val;
         else if (typeof val === 'number') {
-          // Excel serial date fallback
           const d = new Date(Math.round((val - 25569) * 86400 * 1000));
           if (!isNaN(d)) OFFER_DATE = d;
         }
         continue;
       }
-      if (labelLow === 'platnosť:') {
+      if (labelLow.startsWith('platnosť')) {
         if (val !== '' && val !== null && val !== undefined) VALIDITY_TEXT = String(val).trim();
         continue;
       }
-      // "Viazanosť kontraktu v rokoch:" / "Začiatok:" appear up to 3× in the
-      // xlsx: once as a general default (outside any section) and once each
-      // inside "SÚČASNÝ STAV Elektrina" / "SÚČASNÝ STAV Plyn". Values found
-      // inside a commodity section apply ONLY to that commodity's panel;
-      // the general row (read before either section, since it sits above
-      // them in the sheet) seeds both as a fallback that the section-specific
-      // rows then override.
-      if (labelLow === 'viazanosť kontraktu v rokoch:') {
-        const yrs = parseFloat(String(val).replace(',', '.'));
-        if (!isNaN(yrs) && yrs > 0) {
-          if (sectionEl)       v('inp_years_el').value  = Math.round(yrs);
-          else if (sectionGas) v('inp_years_gas').value = Math.round(yrs);
+      // "Viazanosť kontraktu v rokoch:" / "Začiatok:" — a bare/general row
+      // (no commodity named, outside a nested sub-section) seeds BOTH
+      // Elektrina and Plyn; a row that names a commodity, or sits inside a
+      // legacy nested sub-section, applies only to that commodity.
+      if (labelLow.startsWith('viazanosť kontraktu')) {
+        const yrsRaw = parseFloat(String(val).replace(',', '.'));
+        if (!isNaN(yrsRaw) && yrsRaw > 0) {
+          const yrs = Math.min(4, Math.max(1, Math.round(yrsRaw))); // clamp to the 1–4 dropdown range
+          const c = commodityOf(labelLow) || subCommodity;
+          if (c === 'el')       v('inp_years_el').value  = yrs;
+          else if (c === 'gas') v('inp_years_gas').value = yrs;
           else {
-            v('inp_years_el').value  = Math.round(yrs);
-            v('inp_years_gas').value = Math.round(yrs);
+            v('inp_years_el').value  = yrs;
+            v('inp_years_gas').value = yrs;
           }
         }
         continue;
       }
-      if (labelLow === 'začiatok:') {
+      if (labelLow.startsWith('začiatok')) {
         let dv = null;
         if (val instanceof Date) dv = toDateInputValue(val);
         else if (typeof val === 'number') {
@@ -1568,8 +1695,9 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
           if (!isNaN(d)) dv = toDateInputValue(d);
         }
         if (dv) {
-          if (sectionEl)       v('inp_start_el').value  = dv;
-          else if (sectionGas) v('inp_start_gas').value = dv;
+          const c = commodityOf(labelLow) || subCommodity;
+          if (c === 'el')       v('inp_start_el').value  = dv;
+          else if (c === 'gas') v('inp_start_gas').value = dv;
           else {
             v('inp_start_el').value  = dv;
             v('inp_start_gas').value = dv;
@@ -1578,10 +1706,12 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
         continue;
       }
 
-      // FIX / SPOT type — must be checked BEFORE numeric filter (value is text "FIX"/"SPOT")
-      if (labelLow.startsWith('druh (fix/spot)')) {
-        if (sectionEl)  setFixSpot('fsEl',  val);
-        if (sectionGas) setFixSpot('fsGas', val);
+      // FIX / SPOT type — must be checked BEFORE the numeric filter below
+      // (its value is the text "FIX"/"SPOT", not a number).
+      if (labelLow.includes('druh') && (labelLow.includes('fix') || labelLow.includes('spot'))) {
+        const c = commodityOf(labelLow) || subCommodity;
+        if (c === 'el')  setFixSpot('fsEl',  val);
+        if (c === 'gas') setFixSpot('fsGas', val);
         continue;
       }
 
@@ -1590,29 +1720,43 @@ html[data-theme="light"] .stat-row .input-section .input-wrap input {
       const numVal = parseFloat(String(val).replace(',', '.'));
       if (isNaN(numVal)) continue;
 
-      // Current 2026 prices — identified by section context
-      // "SPOLU Cena komodity (€/MWh)" appears once for el and once for gas
-      if (labelLow.startsWith('spolu cena komodity')) {
-        if (sectionEl)  v('inp_curEl').value  = numVal;
-        if (sectionGas) v('inp_curGas').value = numVal;
+      // Annual consumption — "Ročná spotreba (elektrina…)" / "Spolu (Elektrina…)"
+      if (labelLow.includes('spotreb') || labelLow.startsWith('spolu (elektrina') || labelLow.startsWith('spolu (plyn')) {
+        const c = commodityOf(labelLow) || subCommodity;
+        if (c === 'el')  { v('inp_consEl').value  = numVal; continue; }
+        if (c === 'gas') { v('inp_consGas').value = numVal; continue; }
         continue;
       }
 
-      // Annual consumption
-      if (labelLow.startsWith('spolu (elektrina')) { v('inp_consEl').value  = numVal; continue; }
-      if (labelLow.startsWith('spolu (plyn'))      { v('inp_consGas').value = numVal; continue; }
+      // Current prices — "Súčasná cena elektrina" / "SPOLU Cena komodity (€/MWh)" (legacy, needs section context)
+      if (section === 'current' && (labelLow.includes('cena') || labelLow.startsWith('spolu cena komodity'))) {
+        const c = commodityOf(labelLow) || subCommodity;
+        if (c === 'el')  { v('inp_curEl').value  = numVal; continue; }
+        if (c === 'gas') { v('inp_curGas').value = numVal; continue; }
+        continue;
+      }
 
-      // Forecast 2027
-      if (labelLow === 'elektrina (€/mwh):') { v('inp_el2027').value = numVal; continue; }
-      if (labelLow === 'plyn (€/mwh):')      { v('inp_gas2027').value = numVal; continue; }
+      // Forecast 2027 (bez zmeny) — bare "Elektrina"/"Plyn" rows inside the forecast section
+      if (section === 'forecast') {
+        const c = commodityOf(labelLow) || subCommodity;
+        if (c === 'el')  { v('inp_el2027').value  = numVal; continue; }
+        if (c === 'gas') { v('inp_gas2027').value = numVal; continue; }
+        continue;
+      }
 
-      // Offer MAX
-      if (labelLow === 'elektrina max (€/mwh):') { v('inp_elMax').value = numVal; continue; }
-      if (labelLow === 'plyn max (€/mwh):')      { v('inp_gasMax').value = numVal; continue; }
+      // Offer / Ponuka MAX — bare "Elektrina"/"Plyn" rows inside the offer section
+      if (section === 'offer') {
+        const c = commodityOf(labelLow) || subCommodity;
+        if (c === 'el')  { v('inp_elMax').value  = numVal; continue; }
+        if (c === 'gas') { v('inp_gasMax').value = numVal; continue; }
+        continue;
+      }
 
-      // Fees
-      if (labelLow === 'jednorazový administratívny poplatok:') { v('inp_fee1').value = numVal; continue; }
-      if (labelLow === 'mesačný poplatok:')                     { v('inp_feeM').value = numVal; continue; }
+      // Fees — gated to the fees section so e.g. "Rok 1 (2027) - s jednorazovým:"
+      // (which also contains the word "jednorazovým") is never mistaken for
+      // the one-off fee input further down the sheet.
+      if (section === 'fees' && labelLow.includes('jednorazov')) { v('inp_fee1').value = numVal; continue; }
+      if (section === 'fees' && labelLow.includes('mesačný'))    { v('inp_feeM').value = numVal; continue; }
     }
 
     recalc();
