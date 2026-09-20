@@ -528,9 +528,9 @@ html[data-theme="light"] .cat-off { background: var(--panel2); }
 }
 .data-row:last-of-type { border-bottom: none; }
 .data-label { color: var(--text-dim); font-size: 14px; font-weight: 500; }
-.data-value { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: var(--text); }
+.data-value { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; color: var(--text); }
 .data-value.strikethrough { text-decoration: line-through; color: var(--text-faint); }
-.data-row:nth-of-type(1) .data-value { font-size: 16px; font-weight: 700; }
+.data-row:nth-of-type(1) .data-value { font-size: 18px; font-weight: 700; }
 
 /* offer highlighted row */
 .offer-row {
@@ -580,7 +580,7 @@ html[data-theme="dark"] .inline-edit-input.inline-edit-offer.gas-color {
 /* saving badge */
 .saving-badge {
   margin-top: 8px;
-  padding: 7px 14px;
+  padding: 7px 12px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -812,6 +812,80 @@ html[data-theme="dark"] .inline-edit-input.inline-edit-offer.gas-color {
 .ycard-total .ycard-label { color: var(--green); font-weight: 700; }
 .ycard-total .ycard-num { font-size: 30px; color: var(--green); }
 
+
+.data-value-col {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  text-align: right;
+}
+.data-value-col .data-value { padding: 4px 10px 4px 8px; border: 1px solid transparent; }
+.data-value-col .data-unit {
+  display: inline-block;
+  min-width: 52px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+.data-label-sub {
+  display: inline-block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #b3bcc7;
+  white-space: nowrap;
+}
+html[data-theme="light"] .data-label-sub,
+html[data-theme="light"] .data-label-sub b { color: #7a8476; }
+.data-label-sub b {
+  color: #b3bcc7;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+/* súčasná cena – farba podľa okna */
+.ecard-el  #curElDisp  { color: var(--blue); }
+.ecard-gas #curGasDisp { color: var(--yellow); }
+
+/* ─── DODÁVATEĽ (v okne Elektrina / Plyn) ─── */
+.supplier-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+.supplier-left {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.supplier-row .data-label-sub { flex: 0 0 auto; margin-left: auto; text-align: right; }
+.supplier-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.supplier-value {
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.ecard-el  .supplier-value { color: var(--blue); }
+.ecard-gas .supplier-value { color: var(--yellow); }
+.supplier-value.empty { color: var(--text-faint); font-weight: 500; }
+
 /* ─── FOOTER ───────────────────────────────── */
 footer {
   font-size: 11px;
@@ -863,7 +937,8 @@ footer {
 }
 .import-status.ok  { display: inline-block; background: var(--green-glow);  border: 1px solid rgba(63,185,80,0.3);  color: var(--green); }
 .import-status.err { display: inline-block; background: rgba(248,81,73,0.12);  border: 1px solid rgba(248,81,73,0.3);  color: var(--red);   }
-#xlsxFileInput {
+#xlsxFileInput,
+#jsonFileInput {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -886,10 +961,10 @@ footer {
   border-radius: 8px;
   color: var(--text);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   padding: 4px 8px;
-  width: 76px;
+  width: 96px;
   text-align: right;
   transition: border-color .15s, box-shadow .15s;
   -moz-appearance: textfield;
@@ -903,7 +978,7 @@ footer {
 }
 .inline-edit-input.inline-edit-offer {
   font-size: 18px;
-  width: 84px;
+  width: 96px;
   border-width: 2px;
   padding: 4px 8px;
 }
@@ -912,6 +987,9 @@ footer {
 .inline-edit-input.gas-color { border-color: rgba(245,208,74,0.50); color: var(--yellow); }
 .inline-edit-input.gas-color:focus { border-color: var(--yellow); box-shadow: 0 0 0 3px var(--yellow-glow); }
 .inline-edit-unit {
+  display: inline-block;
+  min-width: 52px;
+  text-align: left;
   font-size: 12px;
   color: var(--text-dim);
   font-family: 'JetBrains Mono', monospace;
@@ -932,9 +1010,12 @@ footer {
 /* PDF export button centered in the bottom bar */
 .pdf-export-center {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
 }
 
 .pdf-export-btn {
@@ -967,8 +1048,7 @@ footer {
   align-items: center;
   opacity: 0.8;
   transition: opacity .15s;
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 0 0 auto;
 }
 .theme-tucked:hover { opacity: 1; }
 .theme-toggle {
@@ -999,7 +1079,7 @@ footer {
   }
   .import-tucked { width: 100%; justify-content: center; }
   .theme-tucked { width: 100%; justify-content: center; }
-  .pdf-export-center { width: 100%; }
+  .pdf-export-center { width: 100%; justify-content: center; margin-left: 0; }
 }
 
 /* ─── PRINT ─────────────────────────── */
@@ -1142,6 +1222,14 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
         </div>
       </div>
 
+      <div class="supplier-row">
+        <div class="supplier-left">
+          <span class="supplier-label">Dodávateľ</span>
+          <span class="supplier-value empty" id="supplier_el">—</span>
+        </div>
+        <span class="data-label-sub" id="bind_el">Viazanosť do: <b>neurčitá</b></span>
+      </div>
+
       <div class="cons-highlight">
         <div class="cons-highlight-left">
           <div class="cons-highlight-label">Ročná spotreba</div>
@@ -1161,19 +1249,21 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
 
       <div class="data-row">
         <span class="data-label">Súčasná cena (2026)</span>
-        <span class="data-value" id="curElDisp">140,00 €/MWh</span>
+        <div class="data-value-col">
+          <span class="data-value" id="curElDisp">140,00</span><span class="data-unit">€/MWh</span>
+        </div>
       </div>
       <div class="data-row">
         <span class="data-label">Predpoklad <span id="elYearLabel">2027</span> (bez zmeny)</span>
         <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input" id="inp_el2027" value="165" step="0.1" min="0" oninput="recalc()">
+          <input type="number" class="inline-edit-input" id="inp_el2027" value="165" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
       <div class="offer-row">
         <span class="offer-label" id="elMaxLabel">Ponúkaná cena (max)</span>
-        <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input inline-edit-offer el-color" id="inp_elMax" value="135" step="0.1" min="0" oninput="recalc()">
+        <div class="inline-edit-wrap" style="margin-left:auto;">
+          <input type="number" class="inline-edit-input inline-edit-offer el-color" id="inp_elMax" value="135" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
@@ -1183,16 +1273,16 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       </div>
 
       <div class="data-row kombi-only" id="elKombiRow2028" style="display:none;">
-        <span class="data-label">Predpoklad 2028</span>
+        <span class="data-label">Predpoklad <span id="elYear2Label">2028</span></span>
         <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input" id="inp_el2028" value="165" step="0.1" min="0" oninput="recalc()">
+          <input type="number" class="inline-edit-input" id="inp_el2028" value="165" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
       <div class="offer-row kombi-only" id="elKombiRowFix2028" style="display:none;">
-        <span class="offer-label">Ponúkaná cena FIX od 2028</span>
-        <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input inline-edit-offer el-color" id="inp_elFix2028" value="135" step="0.1" min="0" oninput="recalc()">
+        <span class="offer-label" id="elFixLabel">Ponúkaná cena FIX od 2028</span>
+        <div class="inline-edit-wrap" style="margin-left:auto;">
+          <input type="number" class="inline-edit-input inline-edit-offer el-color" id="inp_elFix2028" value="135" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
@@ -1219,6 +1309,14 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
         </div>
       </div>
 
+      <div class="supplier-row">
+        <div class="supplier-left">
+          <span class="supplier-label">Dodávateľ</span>
+          <span class="supplier-value empty" id="supplier_gas">—</span>
+        </div>
+        <span class="data-label-sub" id="bind_gas">Viazanosť do: <b>neurčitá</b></span>
+      </div>
+
       <div class="cons-highlight">
         <div class="cons-highlight-left">
           <div class="cons-highlight-label">Ročná spotreba</div>
@@ -1237,19 +1335,21 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
 
       <div class="data-row">
         <span class="data-label">Súčasná cena (2026)</span>
-        <span class="data-value" id="curGasDisp">55,00 €/MWh</span>
+        <div class="data-value-col">
+          <span class="data-value" id="curGasDisp">55,00</span><span class="data-unit">€/MWh</span>
+        </div>
       </div>
       <div class="data-row">
         <span class="data-label">Predpoklad <span id="gasYearLabel">2027</span> (bez zmeny)</span>
         <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input" id="inp_gas2027" value="60" step="0.1" min="0" oninput="recalc()">
+          <input type="number" class="inline-edit-input" id="inp_gas2027" value="60" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
       <div class="offer-row">
         <span class="offer-label">Ponúkaná cena (max)</span>
-        <div class="inline-edit-wrap">
-          <input type="number" class="inline-edit-input inline-edit-offer gas-color" id="inp_gasMax" value="45" step="0.1" min="0" oninput="recalc()">
+        <div class="inline-edit-wrap" style="margin-left:auto;">
+          <input type="number" class="inline-edit-input inline-edit-offer gas-color" id="inp_gasMax" value="45" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
@@ -1373,6 +1473,26 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     </div>
 
     <div class="pdf-export-center">
+      <input type="file" id="jsonFileInput" accept=".json,application/json">
+      <button class="pdf-export-btn" id="loadPricesBtn" onclick="loadPrices()" title="Načíta aktuálne ceny z Google tabuľky a vloží ich do polí Ponúkaná cena">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Načítať ceny
+      </button>
+      <button class="pdf-export-btn" id="loadOfferBtn" onclick="document.getElementById('jsonFileInput').click()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 4a1 1 0 0 1 1-1h3l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        </svg>
+        Načítať ponuku
+      </button>
+      <button class="pdf-export-btn" id="saveOfferBtn" onclick="saveOffer()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 2h8l2 2v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M5.5 2v3h4.5V2M5.5 14v-4h5v4" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        </svg>
+        Uložiť ponuku
+      </button>
       <button class="pdf-export-btn" id="pdfExportBtn" onclick="exportToPdf()">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M4 2h5l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
@@ -1416,7 +1536,44 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   let STATIC_GASMAX  = 35;
   let VALIDITY_TEXT  = '2 dni';
   let CLIENT_NAME    = 'Firma';
-  let OFFER_DATE     = parseDateInput2('2026-09-17');
+  let OFFER_DATE     = todayDate();
+  let LAST_RESULT    = null;   // posledný prepočet (pre uloženie do JSON)
+  let SUPPLIER       = { el: '', gas: '' };   // dodávateľ (stĺpec C v Exceli)
+  let BOUND_UNTIL    = { el: '', gas: '' };   // viazanosť do (stĺpec I v Exceli)
+
+  // ponechá len platné dátumy (d.m.rrrr), iné hodnoty sa zahodia
+  function cleanBound(x) {
+    return String(x || '').split(',').map(t => t.trim())
+      .filter(t => /^\d{1,2}\.\d{1,2}\.\d{4}$/.test(t)).join(', ');
+  }
+
+  function showBoundUntil() {
+    ['el', 'gas'].forEach(k => {
+      const box = document.getElementById('bind_' + k);
+      if (!box) return;
+      box.querySelector('b').textContent = BOUND_UNTIL[k] || 'neurčitá';
+    });
+  }
+
+  function showSuppliers() {
+    [['el', SUPPLIER.el], ['gas', SUPPLIER.gas]].forEach(([k, val]) => {
+      const e = document.getElementById('supplier_' + k);
+      if (!e) return;
+      e.textContent = val || '—';
+      e.classList.toggle('empty', !val);
+    });
+  }
+
+  function todayDate() {
+    const t = new Date();
+    return new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  }
+
+  // Akákoľvek zmena údaja používateľom -> dátum ponuky = dnes
+  function onUserChange() {
+    OFFER_DATE = todayDate();
+    recalc();
+  }
 
   let ENERGY_ON = { el: true, gas: true };
 
@@ -1461,14 +1618,20 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     const spotEl  = document.getElementById(prefix + '_spot');
     const kombiEl = document.getElementById(prefix + '_kombi');
     if (!fixEl || !spotEl) return;
-    fixEl.addEventListener('click', function() { setFixSpot(prefix, 'FIX'); });
-    spotEl.addEventListener('click', function() { setFixSpot(prefix, 'SPOT'); });
-    if (kombiEl) kombiEl.addEventListener('click', function() { setFixSpot(prefix, 'KOMBI'); });
+    const pick = mode => function() {
+      const cat = prefix === 'fsEl' ? 'el' : 'gas';
+      if (FS_MODE[cat] !== mode) OFFER_DATE = todayDate();   // zmena režimu = zmena údaja
+      setFixSpot(prefix, mode);
+    };
+    fixEl.addEventListener('click', pick('FIX'));
+    spotEl.addEventListener('click', pick('SPOT'));
+    if (kombiEl) kombiEl.addEventListener('click', pick('KOMBI'));
   }
   wireFixSpotToggle('fsEl');
   wireFixSpotToggle('fsGas');
 
   function toggleCategory(cat) {
+    OFFER_DATE = todayDate();
     ENERGY_ON[cat] = !ENERGY_ON[cat];
     applyCategoryState(cat);
     recalc();
@@ -1493,6 +1656,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
 
   const sk2  = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
   const mwh2 = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €/MWh';
+  const num2 = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const dsk  = d => d.toLocaleDateString('sk-SK');
   const num  = id => parseFloat(document.getElementById(id).value) || 0;
   const v    = id => document.getElementById(id);
@@ -1533,7 +1697,23 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     return `${y}-${m}-${day}`;
   }
 
+  // Koniec viazanosti nesmie presiahnuť rok 2030 (dostupné ceny v tabuľke).
+  // Pri zmene začiatku zníži počet rokov a zablokuje možnosti, ktoré by koniec posunuli za limit.
+  const MAX_END_YEAR = 2030;
+  function clampContractYears() {
+    ['el', 'gas'].forEach(k => {
+      const sel = document.getElementById('inp_years_' + k);
+      const startInp = document.getElementById('inp_start_' + k);
+      if (!sel || !startInp || !startInp.value) return;
+      const startYear = parseDateInput('inp_start_' + k, new Date(2027, 0, 1)).getFullYear();
+      const maxYears = Math.max(1, MAX_END_YEAR - startYear + 1);
+      Array.from(sel.options).forEach(o => { o.disabled = parseInt(o.value, 10) > maxYears; });
+      if (parseInt(sel.value, 10) > maxYears) sel.value = String(Math.min(maxYears, 4));
+    });
+  }
+
   function recalc() {
+    clampContractYears();
     const client   = CLIENT_NAME;
     const offerDate = OFFER_DATE;
 
@@ -1610,10 +1790,14 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     v('viazanostDisp_gas').textContent = dsk(startGas) + ' – ' + dsk(endGas);
 
     v('elYearLabel').textContent  = startEl.getFullYear();
+    const elFixLbl = document.getElementById('elFixLabel');
+    if (elFixLbl) elFixLbl.textContent = 'Ponúkaná cena FIX od ' + (startEl.getFullYear() + 1);
+    const el2028Lbl = document.getElementById('elYear2Label');
+    if (el2028Lbl) el2028Lbl.textContent = startEl.getFullYear() + 1;
     v('gasYearLabel').textContent = startGas.getFullYear();
 
-    v('curElDisp').textContent   = mwh2(curEl);
-    v('curGasDisp').textContent  = mwh2(curGas);
+    v('curElDisp').textContent   = num2(curEl);
+    v('curGasDisp').textContent  = num2(curGas);
 
     v('elSavUnit').textContent  = 'Úspora ' + unitEl.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
     v('gasSavUnit').textContent = 'Úspora ' + unitGas.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
@@ -1658,6 +1842,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     `;
     grid.appendChild(totalCard);
 
+    LAST_RESULT = { el: savEl, gas: savGas, years: yearValues.slice(), total: totalNy };
+
     v('headerValidityNote').textContent = `Ceny sú orientačné a platné ${VALIDITY_TEXT}`;
   }
 
@@ -1666,153 +1852,251 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
    'inp_el2027','inp_gas2027','inp_elMax','inp_gasMax',
    'inp_el2028','inp_elFix2028',
    'inp_fee1','inp_feeM']
-    .forEach(id => v(id).addEventListener('input', recalc));
-  ['inp_years_el','inp_years_gas'].forEach(id => v(id).addEventListener('change', recalc));
+    .forEach(id => v(id).addEventListener('input', onUserChange));
+  ['inp_years_el','inp_years_gas','inp_start_el','inp_start_gas'].forEach(id => v(id).addEventListener('change', onUserChange));
+
+  // ---------------------------------------------------------------------------
+  // IMPORT Z EXCELU – vstupné údaje sa čítajú VÝHRADNE z hlavičky (prvých 7 riadkov)
+  // prvého hárka. Každý údaj je dvojica „popis → hodnota (najbližšia neprázdna bunka
+  // vpravo)“, takže nezáleží na presnom stĺpci, len na názve popisu:
+  //   Odberateľ:                          -> meno klienta
+  //   Dátum ponuky:                       -> dátum ponuky (=TODAY() -> dnešný dátum)
+  //   Viazanosť kontraktu v rokoch:       -> počet rokov (elektrina aj plyn)
+  //   Začiatok:                           -> začiatok viazanosti (elektrina aj plyn)
+  //   Celková spotreba elektrina / plyn:  -> ročná spotreba (MWh)
+  //   Vážený priemer ceny elektrina / plyn-> súčasná cena (€/MWh)
+  //   Elektrina / Plyn – predpoklad 2027  -> predpokladaná cena bez zmeny (€/MWh)
+  //   Elektrina / Plyn – Ponuka MAX       -> ponúkaná cena (max) (€/MWh)
+  // Štyri cenové údaje v G3:H6 sa čítajú z PEVNÝCH adries (popis v G, hodnota v H):
+  //   H3 = Elektrina predpoklad 2027, H4 = Elektrina Ponuka MAX,
+  //   H5 = Plyn predpoklad 2027,      H6 = Plyn Ponuka MAX
+  // Popis v G sa len overí (zhoda podľa kľúčových slov); ak nesedí, použije sa
+  // dynamické párovanie popis -> hodnota ako záloha.
+  // ---------------------------------------------------------------------------
+  const HEADER_ROWS = 7;
+  const HEADER_COLS = 26;
 
   function parseXlsx(arrayBuffer) {
-    const wb = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
+    const wb = XLSX.read(arrayBuffer, { type: 'array', cellDates: true, cellFormula: true, sheetStubs: true });
     const ws = wb.Sheets[wb.SheetNames[0]];
 
-    const MAX_ROWS = 2000;
-    let maxRow = 0;
-    for (const key in ws) {
-      if (key.charCodeAt(0) === 33) continue;
-      const m = /^([A-Z]+)(\d+)$/.exec(key);
-      if (!m) continue;
-      if (m[1] !== 'A' && m[1] !== 'B') continue;
-      const r = parseInt(m[2], 10);
-      if (r > maxRow && r <= MAX_ROWS) maxRow = r;
+    const norm = s => String(s == null ? '' : s)
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const hasValue = c => !!c && ((c.v !== undefined && c.v !== null && c.v !== '') || !!c.f);
+
+    const toNum = x => {
+      if (typeof x === 'number') return isFinite(x) ? x : null;
+      const n = parseFloat(String(x == null ? '' : x).replace(/\s/g, '').replace(',', '.'));
+      return isNaN(n) ? null : n;
+    };
+
+    const toDate = c => {
+      if (c.f && /^\s*TODAY\s*\(\s*\)\s*$/i.test(c.f)) {
+        const t = new Date();
+        return new Date(t.getFullYear(), t.getMonth(), t.getDate());
+      }
+      const x = c.v;
+      if (Object.prototype.toString.call(x) === '[object Date]' && !isNaN(x)) {
+        const r = new Date(x.getTime() + 12 * 3600 * 1000);
+        return new Date(r.getFullYear(), r.getMonth(), r.getDate());
+      }
+      if (typeof x === 'number') {
+        const u = new Date(Math.round((x - 25569) * 86400 * 1000));
+        return isNaN(u) ? null : new Date(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate());
+      }
+      if (typeof x === 'string') {
+        let m = /^\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\s*$/.exec(x);
+        if (m) return new Date(+m[3], +m[2] - 1, +m[1]);
+        m = /^\s*(\d{4})-(\d{2})-(\d{2})/.exec(x);
+        if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+      }
+      return null;
+    };
+
+    // popis (bez diakritiky, malými písmenami) -> kľúč údaja
+    const headerKey = n => {
+      const el  = n.includes('elektrin');
+      const gas = n.includes('plyn');
+      if (n.startsWith('odberatel'))           return 'client';
+      if (n.startsWith('datum ponuky'))        return 'offerDate';
+      if (n.startsWith('viazanost kontraktu')) return 'years';
+      if (n.startsWith('zaciatok'))            return 'start';
+      if (n.includes('spotreba'))              return el ? 'consEl'  : (gas ? 'consGas'  : null);
+      if (n.includes('priemer ceny'))          return el ? 'curEl'   : (gas ? 'curGas'   : null);
+      if (n.includes('predpoklad'))            return el ? 'el2027'  : (gas ? 'gas2027'  : null);
+      if (n.includes('ponuka'))                return el ? 'elMax'   : (gas ? 'gasMax'   : null);
+      return null;
+    };
+
+    // 1) prejdi hlavičku a zober dvojice popis -> hodnota
+    const found = {};
+    for (let r = 0; r < HEADER_ROWS; r++) {
+      const cells = [];
+      for (let c = 0; c < HEADER_COLS; c++) {
+        const cell = ws[XLSX.utils.encode_cell({ r, c })];
+        if (hasValue(cell)) cells.push(cell);
+      }
+      for (let i = 0; i < cells.length - 1; i++) {
+        const lab = cells[i];
+        if (typeof lab.v !== 'string') continue;
+        const key = headerKey(norm(lab.v));
+        if (!key) continue;
+        const valCell = cells[i + 1];
+        if (typeof valCell.v === 'string' && headerKey(norm(valCell.v))) continue; // ďalší popis, nie hodnota
+        if (found[key] === undefined) found[key] = valCell;
+        i++; // hodnotová bunka je spotrebovaná
+      }
     }
-    const rows = [];
-    for (let r = 1; r <= maxRow; r++) {
-      const a = ws['A' + r];
-      const b = ws['B' + r];
-      rows.push([
-        a ? (a.w !== undefined ? a.v : a.v) : '',
-        b ? b.v : ''
-      ]);
+
+    // 1a) PEVNÉ ADRESY G3:H6 – predpoklad 2027 a Ponuka MAX (popis v G, hodnota v H)
+    //     Popis sa overuje len podľa kľúčových slov (odolné voči preklepom typu „Plyn - – …“).
+    const FIXED_PRICE_CELLS = [
+      { key: 'el2027',  label: 'G3', value: 'H3', must: ['elektrin', 'predpoklad'] },
+      { key: 'elMax',   label: 'G4', value: 'H4', must: ['elektrin', 'ponuka'] },
+      { key: 'gas2027', label: 'G5', value: 'H5', must: ['plyn', 'predpoklad'] },
+      { key: 'gasMax',  label: 'G6', value: 'H6', must: ['plyn', 'ponuka'] }
+    ];
+    FIXED_PRICE_CELLS.forEach(f => {
+      const lab = ws[f.label];
+      const val = ws[f.value];
+      if (!hasValue(val) || toNum(val.v) === null) return;   // hodnota chýba -> ostane dynamické párovanie
+      const labN = lab && typeof lab.v === 'string' ? norm(lab.v) : '';
+      const labelOk = f.must.every(w => labN.includes(w));
+      // ak popis sedí, alebo je G prázdne (šablóna bez popisu), berie sa pevná bunka H
+      if (labelOk || !labN) found[f.key] = val;
+    });
+
+    // 1b) dodávateľ – stĺpec C pod hlavičkou „Dodávateľ“ (elektrina, potom plyn)
+    const readSuppliers = () => {
+      const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
+      // Excel môže hlásiť dimenziu až po riadok 1 048 576 (formátované prázdne bunky) –
+      // preto sa skutočný posledný riadok určí z reálne obsadených buniek.
+      let lastRow = 0;
+      Object.keys(ws).forEach(k => {
+        if (k.charAt(0) === '!') return;
+        const cell = ws[k];
+        if (!hasValue(cell)) return;
+        const rr = XLSX.utils.decode_cell(k).r;
+        if (rr > lastRow) lastRow = rr;
+      });
+      range.e.r = Math.min(range.e.r, lastRow);
+      const colC = 2, colI = 8;
+      let section = null;
+      const sup   = { el: [], gas: [] };
+      const boundDates = { el: [], gas: [] };
+      const add = (arr, t) => { if (t && !arr.includes(t)) arr.push(t); };
+      const p2  = n => String(n).padStart(2, '0');
+      const fmtD = d => d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear();
+      for (let r = 0; r <= range.e.r; r++) {
+        const a = ws[XLSX.utils.encode_cell({ r, c: 0 })];
+        const aN = a && typeof a.v === 'string' ? norm(a.v) : '';
+        if (aN.includes('elektrin') && !aN.startsWith('vazeny') && !aN.includes('priemer') && !aN.includes('spotreba')) { section = 'el';  continue; }
+        if (aN.includes('plyn')     && !aN.startsWith('vazeny') && !aN.includes('priemer') && !aN.includes('spotreba')) { section = 'gas'; continue; }
+        if (!section) continue;
+        if (aN.startsWith('spolu')) { section = null; continue; }
+
+        // stĺpec C – dodávateľ
+        const c = ws[XLSX.utils.encode_cell({ r, c: colC })];
+        if (c && typeof c.v === 'string') {
+          const t = c.v.trim();
+          if (t && norm(t) !== 'dodavatel') add(sup[section], t);
+        }
+
+        // stĺpec I – dátum do kedy viazanosť (len dátum; text/prázdne = neurčitá)
+        const i = ws[XLSX.utils.encode_cell({ r, c: colI })];
+        if (hasValue(i)) {
+          const d = toDate(i);
+          if (d && !boundDates[section].some(x => x.getTime() === d.getTime())) boundDates[section].push(d);
+        }
+      }
+      const fmtList = arr => arr.slice().sort((x, y) => x - y).map(fmtD).join(', ');
+      return {
+        sup:   { el: sup.el.join(', '),   gas: sup.gas.join(', ') },
+        bound: { el: fmtList(boundDates.el), gas: fmtList(boundDates.gas) }
+      };
+    };
+    const rs = readSuppliers();
+    SUPPLIER    = rs.sup;
+    BOUND_UNTIL = rs.bound;
+    showSuppliers();
+    showBoundUntil();
+
+    // 2) priraď hodnoty do polí analýzy
+    const missing = [];
+
+    const setNum = (key, id, label) => {
+      const n = found[key] ? toNum(found[key].v) : null;
+      if (n === null) { missing.push(label); return; }
+      v(id).value = n;
+    };
+    // voliteľná verzia – nereportuje chýbajúcu hodnotu, len prepíše ak je k dispozícii
+    const setNumOpt = (key, id) => {
+      const n = found[key] ? toNum(found[key].v) : null;
+      if (n !== null) v(id).value = n;
+    };
+
+    const nameCell = found.client;
+    const name = nameCell && typeof nameCell.v === 'string' ? nameCell.v.trim() : '';
+    if (name) CLIENT_NAME = name; else missing.push('Odberateľ');
+
+    const od = found.offerDate ? toDate(found.offerDate) : null;
+    if (od) OFFER_DATE = od; else missing.push('Dátum ponuky');
+
+    const yrsRaw = found.years ? toNum(found.years.v) : null;
+    if (yrsRaw !== null && yrsRaw > 0) {
+      const yrs = Math.min(4, Math.max(1, Math.round(yrsRaw)));
+      v('inp_years_el').value  = yrs;
+      v('inp_years_gas').value = yrs;
+    } else missing.push('Viazanosť kontraktu v rokoch');
+
+    const sd = found.start ? toDate(found.start) : null;
+    if (sd) {
+      const dv = toDateInputValue(sd);
+      v('inp_start_el').value  = dv;
+      v('inp_start_gas').value = dv;
+    } else missing.push('Začiatok');
+
+    setNum('consEl',  'inp_consEl',  'Celková spotreba elektrina');
+    setNum('consGas', 'inp_consGas', 'Celková spotreba plyn');
+    setNum('elMax',   'inp_elMax',   'Elektrina – Ponuka MAX');
+    setNum('gasMax',  'inp_gasMax',  'Plyn – Ponuka MAX');
+
+    // Súčasná cena – ak je k dispozícii, skopíruje sa aj do Predpokladu 2027
+    // a prepínač sa prepne na SPOT (súčasná cena = spot cena)
+    const curElN = found.curEl ? toNum(found.curEl.v) : null;
+    if (curElN !== null) {
+      v('inp_curEl').value  = curElN;
+      // Ak Excel neobsahuje vlastný predpoklad 2027, použije sa súčasná cena
+      if (!found.el2027) {
+        v('inp_el2027').value = curElN;
+      }
+      setFixSpot('fsEl', 'SPOT');
+    } else {
+      missing.push('Vážený priemer ceny elektrina');
     }
 
-    let section = null;
-    let subCommodity = null;
-
-    const hasEl  = t => t.includes('elektrin');
-    const hasGas = t => t.includes('plyn');
-    const commodityOf = t => hasEl(t) ? 'el' : (hasGas(t) ? 'gas' : null);
-
-    for (const row of rows) {
-      const labelRaw = String(row[0] ?? '').trim();
-      const labelLow = labelRaw.toLowerCase();
-      const val      = row[1];
-
-      if (!labelLow) continue;
-
-      if (labelLow.startsWith('súčasný stav elektrina')) { section = 'current'; subCommodity = 'el';  continue; }
-      if (labelLow.startsWith('súčasný stav plyn'))      { section = 'current'; subCommodity = 'gas'; continue; }
-      if (labelLow.startsWith('súčasný stav'))           { section = 'current'; subCommodity = null;  continue; }
-      if (labelLow.includes('predpoklad'))               { section = 'forecast'; subCommodity = null; continue; }
-      if (labelLow.includes('navrhovaná ponuka') || labelLow.includes('naša ponuka') || labelLow.includes('ponúkaná cena')) {
-        section = 'offer'; subCommodity = null; continue;
+    const curGasN = found.curGas ? toNum(found.curGas.v) : null;
+    if (curGasN !== null) {
+      v('inp_curGas').value  = curGasN;
+      // Ak Excel neobsahuje vlastný predpoklad 2027, použije sa súčasná cena
+      if (!found.gas2027) {
+        v('inp_gas2027').value = curGasN;
       }
-      if (labelLow.startsWith('poplatok za'))             { section = 'fees'; subCommodity = null; continue; }
-      if (labelLow.startsWith('výpočet úspory') || labelLow.startsWith('čistá úspora') || labelLow.startsWith('celková')) {
-        section = null; subCommodity = null; continue;
-      }
-
-      if (labelLow.startsWith('odberateľ')) {
-        const name = String(val).trim();
-        if (name) CLIENT_NAME = name;
-        continue;
-      }
-      if (labelLow.startsWith('dátum ponuky')) {
-        if (val instanceof Date) OFFER_DATE = val;
-        else if (typeof val === 'number') {
-          const d = new Date(Math.round((val - 25569) * 86400 * 1000));
-          if (!isNaN(d)) OFFER_DATE = d;
-        }
-        continue;
-      }
-      if (labelLow.startsWith('platnosť')) {
-        if (val !== '' && val !== null && val !== undefined) VALIDITY_TEXT = String(val).trim();
-        continue;
-      }
-      if (labelLow.startsWith('viazanosť kontraktu')) {
-        const yrsRaw = parseFloat(String(val).replace(',', '.'));
-        if (!isNaN(yrsRaw) && yrsRaw > 0) {
-          const yrs = Math.min(4, Math.max(1, Math.round(yrsRaw)));
-          const c = commodityOf(labelLow) || subCommodity;
-          if (c === 'el')       v('inp_years_el').value  = yrs;
-          else if (c === 'gas') v('inp_years_gas').value = yrs;
-          else {
-            v('inp_years_el').value  = yrs;
-            v('inp_years_gas').value = yrs;
-          }
-        }
-        continue;
-      }
-      if (labelLow.startsWith('začiatok')) {
-        let dv = null;
-        if (val instanceof Date) dv = toDateInputValue(val);
-        else if (typeof val === 'number') {
-          const d = new Date(Math.round((val - 25569) * 86400 * 1000));
-          if (!isNaN(d)) dv = toDateInputValue(d);
-        }
-        if (dv) {
-          const c = commodityOf(labelLow) || subCommodity;
-          if (c === 'el')       v('inp_start_el').value  = dv;
-          else if (c === 'gas') v('inp_start_gas').value = dv;
-          else {
-            v('inp_start_el').value  = dv;
-            v('inp_start_gas').value = dv;
-          }
-        }
-        continue;
-      }
-
-      if (labelLow.includes('druh') && (labelLow.includes('fix') || labelLow.includes('spot'))) {
-        const c = commodityOf(labelLow) || subCommodity;
-        if (c === 'el')  setFixSpot('fsEl',  val);
-        if (c === 'gas') setFixSpot('fsGas', val);
-        continue;
-      }
-
-      if (val === '' || val === null || val === undefined) continue;
-      const numVal = parseFloat(String(val).replace(',', '.'));
-      if (isNaN(numVal)) continue;
-
-      if (labelLow.includes('spotreb') || labelLow.startsWith('spolu (elektrina') || labelLow.startsWith('spolu (plyn')) {
-        const c = commodityOf(labelLow) || subCommodity;
-        if (c === 'el')  { v('inp_consEl').value  = numVal; continue; }
-        if (c === 'gas') { v('inp_consGas').value = numVal; continue; }
-        continue;
-      }
-
-      if (section === 'current' && (labelLow.includes('cena') || labelLow.startsWith('spolu cena komodity'))) {
-        const c = commodityOf(labelLow) || subCommodity;
-        if (c === 'el')  { v('inp_curEl').value  = numVal; continue; }
-        if (c === 'gas') { v('inp_curGas').value = numVal; continue; }
-        continue;
-      }
-
-      if (section === 'forecast') {
-        const c = commodityOf(labelLow) || subCommodity;
-        if (c === 'el')  { v('inp_el2027').value  = numVal; continue; }
-        if (c === 'gas') { v('inp_gas2027').value = numVal; continue; }
-        continue;
-      }
-
-      if (section === 'offer') {
-        const c = commodityOf(labelLow) || subCommodity;
-        if (c === 'el')  { v('inp_elMax').value  = numVal; continue; }
-        if (c === 'gas') { v('inp_gasMax').value = numVal; continue; }
-        continue;
-      }
-
-      if (section === 'fees' && labelLow.includes('jednorazov')) { v('inp_fee1').value = numVal; continue; }
-      if (section === 'fees' && labelLow.includes('mesačný'))    { v('inp_feeM').value = numVal; continue; }
+      setFixSpot('fsGas', 'SPOT');
+    } else {
+      missing.push('Vážený priemer ceny plyn');
     }
+
+    // Predpoklad 2027 – ak je v Exceli explicitne, prepíše hodnotu skopírovanú zo súčasnej ceny
+    setNumOpt('el2027',  'inp_el2027');
+    setNumOpt('gas2027', 'inp_gas2027');
 
     recalc();
+    return missing;
   }
 
   document.getElementById('xlsxFileInput').addEventListener('change', function(e) {
@@ -1823,9 +2107,14 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     const reader = new FileReader();
     reader.onload = function(evt) {
       try {
-        parseXlsx(evt.target.result);
-        status.textContent = '✓ ' + file.name + ' načítaný';
-        status.className = 'import-status ok';
+        const missing = parseXlsx(evt.target.result);
+        if (missing.length) {
+          status.textContent = '✗ ' + file.name + ' – v hlavičke chýba: ' + missing.join(', ');
+          status.className = 'import-status err';
+        } else {
+          status.textContent = '✓ ' + file.name + ' načítaný';
+          status.className = 'import-status ok';
+        }
       } catch(err) {
         status.textContent = '✗ Chyba pri čítaní súboru';
         status.className = 'import-status err';
@@ -1837,6 +2126,334 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       status.className = 'import-status err';
     };
     reader.readAsArrayBuffer(file);
+    this.value = '';
+  });
+
+
+  // ---------------------------------------------------------------------------
+  // NAČÍTAŤ CENY z Google tabuľky
+  // Zdroj: hárok „Budúce ceny energií“, elektrina A6:J7, plyn A12:J13
+  //   stĺpce: B=2027 C=2028 D=2029 E=2030 | F=Ø27-28 G=Ø27-29 H=Ø27-30 I=Ø28-29 J=Ø28-30
+  //   (H je v hlavičke hárka chybne popísaný ako „28-30“, ale číselne je to Ø 2027–2030)
+  // Cena sa vyberie podľa začiatku viazanosti a počtu rokov a vloží do „Ponúkaná cena“.
+  // Pole zostáva editovateľné. Z dodávateľov v riadkoch sa berie najnižšia cena.
+  // Tabuľka musí byť zdieľaná „Ktokoľvek s odkazom – zobraziť“.
+  // ---------------------------------------------------------------------------
+  const PRICE_SHEET_ID  = '1yjOl0-yYSOI2lTCxflBfZWiohGkQmJkMVJLIlxGBUdU';
+  const PRICE_SHEET_GID = '1494981420';
+  const PRICE_RANGES    = { el: 'A6:J7', gas: 'A12:J13' };
+
+  // stĺpec (index v rozsahu A..J) pre jednotlivé roky a pre priemery
+  const PRICE_YEAR_COL = { 2027: 1, 2028: 2, 2029: 3, 2030: 4 };
+  const PRICE_AVG_COL  = { '2027-2028': 5, '2027-2029': 6, '2027-2030': 7, '2028-2029': 8, '2028-2030': 9 };
+
+  function priceColumnFor(startYear, years) {
+    const endYear = startYear + years - 1;
+    if (years === 1) {
+      return PRICE_YEAR_COL[startYear] !== undefined
+        ? { col: PRICE_YEAR_COL[startYear], label: 'rok ' + startYear } : null;
+    }
+    const key = startYear + '-' + endYear;
+    return PRICE_AVG_COL[key] !== undefined
+      ? { col: PRICE_AVG_COL[key], label: 'Ø ' + startYear + '–' + endYear } : null;
+  }
+
+  function parseSkNum(x) {
+    if (x === null || x === undefined) return null;
+    if (typeof x === 'number') return isFinite(x) ? x : null;
+    const t = String(x).replace(/\s/g, '').replace(',', '.');
+    if (t === '') return null;
+    const n = parseFloat(t);
+    return isNaN(n) ? null : n;
+  }
+
+  // Načíta rozsah cez gviz pomocou <script> tagu (JSONP) – nepodlieha CORS, takže funguje
+  // aj keď je súbor otvorený lokálne (file://). Vráti 2D pole hodnôt.
+  function fetchSheetRange(range) {
+    return new Promise((resolve, reject) => {
+      const url = 'https://docs.google.com/spreadsheets/d/' + PRICE_SHEET_ID +
+        '/gviz/tq?gid=' + PRICE_SHEET_GID + '&range=' + encodeURIComponent(range) +
+        '&headers=0&tqx=responseHandler:__gvizCb';
+      const script = document.createElement('script');
+      let done = false;
+      const cleanup = () => {
+        clearTimeout(timer);
+        script.remove();
+        try { delete window.__gvizCb; } catch (e) { window.__gvizCb = undefined; }
+      };
+      const timer = setTimeout(() => {
+        if (done) return; done = true; cleanup();
+        reject(new Error('časový limit – tabuľka neodpovedala'));
+      }, 15000);
+      window.__gvizCb = json => {
+        if (done) return; done = true; cleanup();
+        if (!json || json.status === 'error') {
+          const msg = json && json.errors && json.errors[0] && (json.errors[0].detailed_message || json.errors[0].message);
+          return reject(new Error(msg || 'chyba tabuľky'));
+        }
+        resolve((json.table.rows || []).map(r => (r.c || []).map(c => c ? (c.v !== undefined ? c.v : null) : null)));
+      };
+      script.onerror = () => {
+        if (done) return; done = true; cleanup();
+        reject(new Error('sieť/prístup – tabuľka sa nenačítala (skontroluj zdieľanie alebo prihlásenie do Google)'));
+      };
+      script.src = url;
+      document.head.appendChild(script);
+    });
+  }
+
+  // z riadkov (dodávatelia) vyberie najnižšiu platnú cenu v danom stĺpci
+  function pickLowest(rows, col) {
+    let best = null;
+    rows.forEach(r => {
+      const n = parseSkNum(r[col]);
+      if (n !== null && n > 0 && (best === null || n < best.price)) {
+        best = { price: n, supplier: typeof r[0] === 'string' ? r[0].trim() : '' };
+      }
+    });
+    return best;
+  }
+
+  async function loadPrices() {
+    const btn = v('loadPricesBtn');
+    btn.disabled = true;
+    setStatus('Načítavam ceny…', true);
+    try {
+      const elRows  = await fetchSheetRange(PRICE_RANGES.el);
+      const gasRows = await fetchSheetRange(PRICE_RANGES.gas);
+
+      const applied = [];
+      const problems = [];
+
+      const apply = (cat, label, rows, yearsId, startId, inputId) => {
+        if (!ENERGY_ON[cat]) return;
+        const years = Math.max(1, Math.round(num(yearsId)) || 1);
+        const start = parseDateInput(startId, new Date(2027, 0, 1));
+        const startYear = start.getFullYear();
+
+        const pc = priceColumnFor(startYear, years);
+        if (!pc) { problems.push(label + ': pre ' + startYear + ' / ' + years + ' r. nie je v tabuľke stĺpec'); return; }
+        const best = pickLowest(rows, pc.col);
+        if (!best) { problems.push(label + ': v tabuľke chýba cena (' + pc.label + ')'); return; }
+        v(inputId).value = round2(best.price);
+        applied.push(label + ' ' + round2(best.price).toLocaleString('sk-SK', {minimumFractionDigits:2}) + ' (' + pc.label + (best.supplier ? ', ' + best.supplier : '') + ')');
+      };
+
+      // Elektrina: pri FIX/SPOT sa cena vkladá do „Ponúkaná cena“ (inp_elMax).
+      // Pri KOMBI sa tá istá cena zo sheetu vloží do riadku „Ponúkaná cena FIX od …“ (inp_elFix2028);
+      // SPOT pole (inp_elMax) sa pri načítaní cien nikdy nemení – ostáva ručne editovateľné.
+      const elKombi = ENERGY_ON.el && FS_MODE.el === 'KOMBI';
+      apply('el', 'Elektrina', elRows, 'inp_years_el', 'inp_start_el', elKombi ? 'inp_elFix2028' : 'inp_elMax');
+      apply('gas', 'Plyn',      gasRows, 'inp_years_gas', 'inp_start_gas', 'inp_gasMax');
+
+      if (applied.length) OFFER_DATE = todayDate();
+      recalc();
+
+      console.log('Načítané ceny:', applied);
+      const msg = (applied.length ? '✓ Načítané' : '') +
+                  (problems.length ? (applied.length ? ' | ' : '✗ ') + problems.join('; ') : '');
+      setStatus(msg, applied.length > 0 && !problems.length);
+      v('importStatus').title = applied.join('\n');
+    } catch (err) {
+      console.error(err);
+      setStatus('✗ Ceny sa nepodarilo načítať – ' + err.message, false);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // ULOŽIŤ / NAČÍTAŤ PONUKU (JSON)
+  // Ukladajú sa vstupy (úspory sa po načítaní prepočítajú). Blok „vysledok“ je len
+  // informačný – pri načítaní sa ignoruje.
+  // ---------------------------------------------------------------------------
+  const OFFER_FORMAT = 'ponuka-cien-energii';
+
+  function setStatus(text, ok) {
+    const s = v('importStatus');
+    s.textContent = text;
+    s.className = 'import-status ' + (ok ? 'ok' : 'err');
+  }
+
+  const round2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
+
+  function localIsoNow() {
+    const d = new Date();
+    const p = n => String(n).padStart(2, '0');
+    return `${toDateInputValue(d)}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  }
+
+  function slugify(str) {
+    return String(str || '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^A-Za-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function collectState() {
+    recalc();   // aktualizuje LAST_RESULT (dátum ponuky sa tým nemení)
+    const r = LAST_RESULT || { el: 0, gas: 0, years: [], total: 0 };
+    return {
+      format: OFFER_FORMAT,
+      verzia: 1,
+      ulozene: localIsoNow(),
+      odberatel: CLIENT_NAME,
+      datum_ponuky: toDateInputValue(OFFER_DATE),
+      platnost: VALIDITY_TEXT,
+      elektrina: {
+        zapnute: ENERGY_ON.el,
+        dodavatel: SUPPLIER.el,
+        sucasna_viazanost_do: BOUND_UNTIL.el,
+        rezim: FS_MODE.el,
+        spotreba_mwh: num('inp_consEl'),
+        sucasna_cena: num('inp_curEl'),
+        predpoklad_2027: num('inp_el2027'),
+        ponuka_max: num('inp_elMax'),
+        predpoklad_2028: num('inp_el2028'),
+        ponuka_fix_2028: num('inp_elFix2028'),
+        viazanost_roky: num('inp_years_el'),
+        zaciatok: v('inp_start_el').value
+      },
+      plyn: {
+        zapnute: ENERGY_ON.gas,
+        dodavatel: SUPPLIER.gas,
+        sucasna_viazanost_do: BOUND_UNTIL.gas,
+        rezim: FS_MODE.gas,
+        spotreba_mwh: num('inp_consGas'),
+        sucasna_cena: num('inp_curGas'),
+        predpoklad_2027: num('inp_gas2027'),
+        ponuka_max: num('inp_gasMax'),
+        viazanost_roky: num('inp_years_gas'),
+        zaciatok: v('inp_start_gas').value
+      },
+      poplatky: {
+        jednorazovy: num('inp_fee1'),
+        mesacny: num('inp_feeM')
+      },
+      vysledok: {
+        rocna_uspora_elektrina: round2(r.el),
+        rocna_uspora_plyn: round2(r.gas),
+        cista_uspora_po_rokoch: r.years.map(round2),
+        celkova_uspora: round2(r.total)
+      }
+    };
+  }
+
+  function saveOffer() {
+    try {
+      const state = collectState();
+      const skDate = OFFER_DATE.getDate() + '-' + (OFFER_DATE.getMonth() + 1) + '-' + OFFER_DATE.getFullYear();   // SK formát d-m-rrrr
+      const fileName = 'ponuka_' + (slugify(state.odberatel) || 'klient') + '_' + skDate + '.json';
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setStatus('✓ Uložené: ' + fileName, true);
+    } catch (err) {
+      setStatus('✗ Ponuku sa nepodarilo uložiť', false);
+      console.error(err);
+    }
+  }
+
+  // Nastaví stav z uloženého JSON. Nemení dátum ponuky (berie sa uložený).
+  // Vráti zoznam polí, ktoré v súbore chýbali alebo boli neplatné.
+  function applyState(s) {
+    const missing = [];
+    const isObj  = o => !!o && typeof o === 'object';
+    const numOf  = x => (typeof x === 'number' && isFinite(x)) ? x : null;
+    const isDate = x => typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x);
+
+    const el   = isObj(s.elektrina) ? s.elektrina : {};
+    const gas  = isObj(s.plyn)      ? s.plyn      : {};
+    const fees = isObj(s.poplatky)  ? s.poplatky  : {};
+
+    const setN = (obj, key, id, label, optional) => {
+      const n = numOf(obj[key]);
+      if (n === null) { if (!optional) missing.push(label); return; }
+      v(id).value = n;
+    };
+    const setYears = (obj, id, label) => {
+      const n = numOf(obj.viazanost_roky);
+      if (n === null || n < 1) { missing.push(label); return; }
+      v(id).value = String(Math.min(4, Math.max(1, Math.round(n))));
+    };
+    const setStart = (obj, id, label) => {
+      if (isDate(obj.zaciatok)) v(id).value = obj.zaciatok; else missing.push(label);
+    };
+
+    if (typeof s.odberatel === 'string' && s.odberatel.trim()) CLIENT_NAME = s.odberatel.trim();
+    else missing.push('odberateľ');
+    if (isDate(s.datum_ponuky)) OFFER_DATE = parseDateInput2(s.datum_ponuky);
+    else missing.push('dátum ponuky');
+    if (typeof s.platnost === 'string' && s.platnost.trim()) VALIDITY_TEXT = s.platnost.trim();
+
+    SUPPLIER.el  = typeof el.dodavatel  === 'string' ? el.dodavatel.trim()  : '';
+    SUPPLIER.gas = typeof gas.dodavatel === 'string' ? gas.dodavatel.trim() : '';
+    BOUND_UNTIL.el  = cleanBound(el.sucasna_viazanost_do);
+    BOUND_UNTIL.gas = cleanBound(gas.sucasna_viazanost_do);
+    showSuppliers();
+    showBoundUntil();
+
+    ENERGY_ON.el  = el.zapnute  !== false;
+    ENERGY_ON.gas = gas.zapnute !== false;
+
+    setN(el, 'spotreba_mwh',    'inp_consEl',     'elektrina: spotreba');
+    setN(el, 'sucasna_cena',    'inp_curEl',      'elektrina: súčasná cena');
+    setN(el, 'predpoklad_2027', 'inp_el2027',     'elektrina: predpoklad');
+    setN(el, 'ponuka_max',      'inp_elMax',      'elektrina: ponuka');
+    setN(el, 'predpoklad_2028', 'inp_el2028',     '', true);
+    setN(el, 'ponuka_fix_2028', 'inp_elFix2028',  '', true);
+    setYears(el, 'inp_years_el', 'elektrina: viazanosť');
+    setStart(el, 'inp_start_el', 'elektrina: začiatok');
+
+    setN(gas, 'spotreba_mwh',    'inp_consGas', 'plyn: spotreba');
+    setN(gas, 'sucasna_cena',    'inp_curGas',  'plyn: súčasná cena');
+    setN(gas, 'predpoklad_2027', 'inp_gas2027', 'plyn: predpoklad');
+    setN(gas, 'ponuka_max',      'inp_gasMax',  'plyn: ponuka');
+    setYears(gas, 'inp_years_gas', 'plyn: viazanosť');
+    setStart(gas, 'inp_start_gas', 'plyn: začiatok');
+
+    setN(fees, 'jednorazovy', 'inp_fee1', 'poplatok: jednorazový');
+    setN(fees, 'mesacny',     'inp_feeM', 'poplatok: mesačný');
+
+    applyCategoryState('el');
+    applyCategoryState('gas');
+    const modeEl  = String(el.rezim  || 'FIX').toUpperCase();
+    const modeGas = String(gas.rezim || 'FIX').toUpperCase();
+    setFixSpot('fsEl',  ['FIX', 'SPOT', 'KOMBI'].includes(modeEl)  ? modeEl  : 'FIX');
+    setFixSpot('fsGas', ['FIX', 'SPOT'].includes(modeGas)          ? modeGas : 'FIX');
+
+    recalc();
+    return missing;
+  }
+
+  document.getElementById('jsonFileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        const data = JSON.parse(evt.target.result);
+        if (!data || data.format !== OFFER_FORMAT) {
+          setStatus('✗ ' + file.name + ' – nie je uložená ponuka', false);
+          return;
+        }
+        const missing = applyState(data);
+        if (missing.length) setStatus('✗ ' + file.name + ' – chýba: ' + missing.join(', '), false);
+        else setStatus('✓ ' + file.name + ' načítaný', true);
+      } catch (err) {
+        setStatus('✗ Súbor sa nedá prečítať (neplatný JSON)', false);
+        console.error(err);
+      }
+    };
+    reader.onerror = () => setStatus('✗ Súbor sa nedal otvoriť', false);
+    reader.readAsText(file, 'utf-8');
     this.value = '';
   });
 
