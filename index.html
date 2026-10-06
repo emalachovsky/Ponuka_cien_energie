@@ -218,10 +218,7 @@ body {
   width: 100%;
 }
 .client-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 14px;
+  display: block;
 }
 .client-row .cn {
   font-size: 19px;
@@ -231,15 +228,6 @@ body {
   letter-spacing: -0.3px;
   line-height: 1.15;
 }
-.client-row .cs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-dim);
-}
-.client-row .cs b { color: var(--text); font-weight: 700; }
 .header-date-label {
   font-size: 10px;
   text-transform: uppercase;
@@ -1596,9 +1584,10 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   let LAST_RESULT    = null;   // posledný prepočet (pre uloženie do JSON)
   let SUPPLIER       = { el: '', gas: '' };   // dodávateľ (stĺpec C v Exceli)
   let BOUND_UNTIL    = { el: '', gas: '' };   // viazanosť do (stĺpec I v Exceli)
-  let CLIENTS        = [];   // pri načítaní 2+ analýz naraz: [{ name, el, gas }] (odberateľ + jeho dodávatelia)
+  let CLIENTS        = [];   // pri načítaní 2+ analýz naraz: [{ name }] – zoznam odberateľov do hlavičky
 
-  // Hlavička: jeden odberateľ = veľký názov; viac odberateľov = zoznam s dodávateľmi každého
+  // Hlavička: jeden odberateľ = veľký názov; viac odberateľov (2+ analýzy naraz) = zoznam názvov pod sebou.
+  // Dodávatelia sa zobrazujú len v kartách Elektrina a Plyn (rôzni dodávatelia za sebou).
   function renderClients() {
     const multi = CLIENTS.length > 1;
     const nameEl = document.getElementById('clientDisp');
@@ -1607,27 +1596,13 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     if (!nameEl || !box) return;
     nameEl.style.display = multi ? 'none' : '';
     box.style.display    = multi ? '' : 'none';
-    if (label) label.textContent = multi ? 'Odberatelia a dodávatelia' : 'Odberateľ';
+    if (label) label.textContent = multi ? 'Odberatelia' : 'Odberateľ';
     box.textContent = '';
     if (!multi) { fitClientName(); return; }
     CLIENTS.forEach(c => {
       const row = document.createElement('div');
-      row.className = 'client-row';
-      const n = document.createElement('span');
-      n.className = 'cn';
-      n.textContent = c.name || '—';
-      const sup = document.createElement('span');
-      sup.className = 'cs';
-      [['⚡', c.el], ['🔥', c.gas]].forEach(([icon, val]) => {
-        const it = document.createElement('span');
-        it.append(icon + ' ');
-        const b = document.createElement('b');
-        b.textContent = val || '—';
-        it.appendChild(b);
-        sup.appendChild(it);
-      });
-      row.appendChild(n);
-      row.appendChild(sup);
+      row.className = 'client-row cn';
+      row.textContent = c.name || '—';
       box.appendChild(row);
     });
   }
@@ -2474,7 +2449,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
 
     // zápis do polí analýzy
     if (names.length) CLIENT_NAME = names.join(' + ');
-    CLIENTS = multi ? list.map(d => ({ name: d.name, el: d.sup.el, gas: d.sup.gas })) : [];
+    CLIENTS = multi ? list.map(d => ({ name: d.name })) : [];
     if (od) OFFER_DATE = od;
     if (years !== null) { v('inp_years_el').value = years; v('inp_years_gas').value = years; }
     if (start) { const dv = toDateInputValue(start); v('inp_start_el').value = dv; v('inp_start_gas').value = dv; }
@@ -2770,7 +2745,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       verzia: 1,
       ulozene: localIsoNow(),
       odberatel: CLIENT_NAME,
-      odberatelia: CLIENTS.map(c => ({ nazov: c.name, dodavatel_elektrina: c.el, dodavatel_plyn: c.gas })),
+      odberatelia: CLIENTS.map(c => ({ nazov: c.name })),
       datum_ponuky: toDateInputValue(OFFER_DATE),
       platnost: VALIDITY_TEXT,
       elektrina: {
@@ -2864,10 +2839,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     if (typeof s.odberatel === 'string' && s.odberatel.trim()) CLIENT_NAME = s.odberatel.trim();
     else missing.push('odberateľ');
     CLIENTS = Array.isArray(s.odberatelia) && s.odberatelia.length > 1
-      ? s.odberatelia.filter(isObj).map(c => ({
-          name: typeof c.nazov === 'string' ? c.nazov.trim() : '',
-          el:   typeof c.dodavatel_elektrina === 'string' ? c.dodavatel_elektrina.trim() : '',
-          gas:  typeof c.dodavatel_plyn === 'string' ? c.dodavatel_plyn.trim() : '' }))
+      ? s.odberatelia.filter(isObj).map(c => ({ name: typeof c.nazov === 'string' ? c.nazov.trim() : '' }))
       : [];
     if (isDate(s.datum_ponuky)) OFFER_DATE = parseDateInput2(s.datum_ponuky);
     else missing.push('dátum ponuky');
