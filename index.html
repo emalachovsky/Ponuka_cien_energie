@@ -211,6 +211,35 @@ body {
   text-align: left;
   line-height: 1.1;
 }
+.client-multi {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+}
+.client-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+}
+.client-row .cn {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--green);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.3px;
+  line-height: 1.15;
+}
+.client-row .cs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.client-row .cs b { color: var(--text); font-weight: 700; }
 .header-date-label {
   font-size: 10px;
   text-transform: uppercase;
@@ -1194,8 +1223,9 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   <div class="header">
     <div class="header-left">
       <span class="client-badge">
-        <span class="k">Odberateľ</span>
+        <span class="k" id="clientLabel">Odberateľ</span>
         <span class="name" id="clientDisp">Firma</span>
+        <div class="client-multi" id="clientMulti" style="display:none;"></div>
       </span>
     </div>
     <div class="header-center">
@@ -1330,6 +1360,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
           <div class="fix-spot-badge" id="fsGas">
             <span class="fs-opt active-fix" id="fsGas_fix">FIX</span>
             <span class="fs-opt" id="fsGas_spot">SPOT</span>
+            <span class="fs-opt" id="fsGas_kombi">KOMBI</span>
           </div>
         </div>
       </div>
@@ -1348,14 +1379,38 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
         </div>
       </div>
       <div class="offer-row">
-        <span class="offer-label">Ponúkaná cena (max)</span>
+        <span class="offer-label" id="gasMaxLabel">Ponúkaná cena (max)</span>
         <div class="inline-edit-wrap" style="margin-left:auto;">
           <input type="number" class="inline-edit-input inline-edit-offer gas-color" id="inp_gasMax" value="45" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
         </div>
       </div>
 
-      <div class="saving-badge">
+      <div class="saving-badge kombi-only" id="gasKombiRowUspora" style="display:none;">
+        <span class="saving-text" id="gasUsporaUnit">Úspora 20 €/MWh →</span>
+        <span class="saving-num" id="gasUsporaDisp">897,90 € / rok</span>
+      </div>
+
+      <div class="data-row kombi-only" id="gasKombiRow2028" style="display:none;">
+        <span class="data-label">Predpoklad <span id="gasYear2Label">2028</span></span>
+        <div class="inline-edit-wrap">
+          <input type="number" class="inline-edit-input" id="inp_gas2028" value="60" step="0.1" min="0">
+          <span class="inline-edit-unit">€/MWh</span>
+        </div>
+      </div>
+      <div class="offer-row kombi-only" id="gasKombiRowFix2028" style="display:none;">
+        <span class="offer-label" id="gasFixLabel">Ponúkaná cena FIX od 2028</span>
+        <div class="inline-edit-wrap" style="margin-left:auto;">
+          <input type="number" class="inline-edit-input inline-edit-offer gas-color" id="inp_gasFix2028" value="45" step="0.1" min="0">
+          <span class="inline-edit-unit">€/MWh</span>
+        </div>
+      </div>
+      <div class="saving-badge kombi-only" id="gasKombiRowUsporaFix" style="display:none;">
+        <span class="saving-text" id="gasUsporaFixUnit">Úspora 20 €/MWh →</span>
+        <span class="saving-num" id="gasUsporaFixDisp">897,90 € / rok</span>
+      </div>
+
+      <div class="saving-badge" id="gasBottomSavingBadge">
         <span class="saving-text" id="gasSavUnit">Úspora 20,50 €/MWh →</span>
         <span class="saving-num" id="gasSavYear">897,90 € / rok</span>
       </div>
@@ -1463,8 +1518,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   <!-- BOTTOM BAR: import | PDF export (center) | theme toggle -->
   <div class="bottom-bar">
     <div class="import-tucked">
-      <input type="file" id="xlsxFileInput" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
-      <button class="import-link" onclick="document.getElementById('xlsxFileInput').click()">
+      <input type="file" id="xlsxFileInput" multiple accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+      <button class="import-link" title="Možno vybrať viac súborov naraz (Ctrl / Shift) – spotreby sa sčítajú, ceny sa spriemerujú váhou spotreby" onclick="document.getElementById('xlsxFileInput').click()">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M2 12v2h12v-2M8 2v8M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -1541,6 +1596,41 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   let LAST_RESULT    = null;   // posledný prepočet (pre uloženie do JSON)
   let SUPPLIER       = { el: '', gas: '' };   // dodávateľ (stĺpec C v Exceli)
   let BOUND_UNTIL    = { el: '', gas: '' };   // viazanosť do (stĺpec I v Exceli)
+  let CLIENTS        = [];   // pri načítaní 2+ analýz naraz: [{ name, el, gas }] (odberateľ + jeho dodávatelia)
+
+  // Hlavička: jeden odberateľ = veľký názov; viac odberateľov = zoznam s dodávateľmi každého
+  function renderClients() {
+    const multi = CLIENTS.length > 1;
+    const nameEl = document.getElementById('clientDisp');
+    const box    = document.getElementById('clientMulti');
+    const label  = document.getElementById('clientLabel');
+    if (!nameEl || !box) return;
+    nameEl.style.display = multi ? 'none' : '';
+    box.style.display    = multi ? '' : 'none';
+    if (label) label.textContent = multi ? 'Odberatelia a dodávatelia' : 'Odberateľ';
+    box.textContent = '';
+    if (!multi) { fitClientName(); return; }
+    CLIENTS.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'client-row';
+      const n = document.createElement('span');
+      n.className = 'cn';
+      n.textContent = c.name || '—';
+      const sup = document.createElement('span');
+      sup.className = 'cs';
+      [['⚡', c.el], ['🔥', c.gas]].forEach(([icon, val]) => {
+        const it = document.createElement('span');
+        it.append(icon + ' ');
+        const b = document.createElement('b');
+        b.textContent = val || '—';
+        it.appendChild(b);
+        sup.appendChild(it);
+      });
+      row.appendChild(n);
+      row.appendChild(sup);
+      box.appendChild(row);
+    });
+  }
 
   // ponechá len platné dátumy (d.m.rrrr), iné hodnoty sa zahodia
   function cleanBound(x) {
@@ -1596,18 +1686,15 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     spotEl.className  = 'fs-opt' + (mode === 'SPOT'  ? ' active-spot' : '');
     if (kombiEl) kombiEl.className = 'fs-opt' + (mode === 'KOMBI' ? ' active-fix' : '');
 
-    if (cat === 'el') {
+    {
+      // KOMBI riadky (elektrina aj plyn): SPOT na rok 2027 + FIX od 2028
       const show = mode === 'KOMBI' ? '' : 'none';
-      const rowUspora     = document.getElementById('elKombiRowUspora');
-      const row2028       = document.getElementById('elKombiRow2028');
-      const rowFix2028    = document.getElementById('elKombiRowFix2028');
-      const rowUsporaFix  = document.getElementById('elKombiRowUsporaFix');
-      const bottomBadge   = document.getElementById('elBottomSavingBadge');
-      const maxLabel      = document.getElementById('elMaxLabel');
-      if (rowUspora)    rowUspora.style.display = show;
-      if (row2028)      row2028.style.display = show;
-      if (rowFix2028)   rowFix2028.style.display = show;
-      if (rowUsporaFix) rowUsporaFix.style.display = show;
+      const g = id => document.getElementById(cat + id);
+      ['KombiRowUspora', 'KombiRow2028', 'KombiRowFix2028', 'KombiRowUsporaFix'].forEach(id => {
+        const r = g(id); if (r) r.style.display = show;
+      });
+      const bottomBadge = g('BottomSavingBadge');
+      const maxLabel    = g('MaxLabel');
       if (bottomBadge) bottomBadge.style.display = mode === 'KOMBI' ? 'none' : '';
       if (maxLabel) maxLabel.textContent = mode === 'KOMBI' ? 'Ponúkaná cena SPOT na rok ' + KOMBI_SPOT_YEAR : 'Ponúkaná cena (max)';
     }
@@ -1706,11 +1793,13 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   const KOMBI_SPOT_YEAR = 2027;
   const KOMBI_MIN_START = '2028-01-01';
   function applyKombiStartLimit() {
-    const inp = document.getElementById('inp_start_el');
-    if (!inp) return;
-    const kombi = FS_MODE.el === 'KOMBI';
-    inp.min = kombi ? KOMBI_MIN_START : '';
-    if (kombi && inp.value && inp.value < KOMBI_MIN_START) inp.value = KOMBI_MIN_START;
+    ['el', 'gas'].forEach(cat => {
+      const inp = document.getElementById('inp_start_' + cat);
+      if (!inp) return;
+      const kombi = FS_MODE[cat] === 'KOMBI';
+      inp.min = kombi ? KOMBI_MIN_START : '';
+      if (kombi && inp.value && inp.value < KOMBI_MIN_START) inp.value = KOMBI_MIN_START;
+    });
   }
 
   function clampContractYears() {
@@ -1734,7 +1823,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     const yearsEl  = Math.max(1, Math.round(num('inp_years_el'))  || 2);
     const yearsGas = Math.max(1, Math.round(num('inp_years_gas')) || 2);
     const startEl  = parseDateInput('inp_start_el',  new Date(FS_MODE.el === 'KOMBI' ? 2028 : 2027, 0, 1));
-    const startGas = parseDateInput('inp_start_gas', new Date(2027, 0, 1));
+    const startGas = parseDateInput('inp_start_gas', new Date(FS_MODE.gas === 'KOMBI' ? 2028 : 2027, 0, 1));
     const endEl    = calcContractEnd(startEl,  yearsEl);
     const endGas   = calcContractEnd(startGas, yearsGas);
 
@@ -1751,18 +1840,30 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     const gasMax    = num('inp_gasMax');
     const el2028    = num('inp_el2028');
     const elFix2028 = num('inp_elFix2028');
+    const gas2028    = num('inp_gas2028');
+    const gasFix2028 = num('inp_gasFix2028');
 
     const unitEl     = el2027 - elMax;
     const unitElFix  = el2028 - elFix2028;
     const unitGas    = gas2027 - gasMax;
+    const unitGasFix = gas2028 - gasFix2028;
     const savElYear      = consEl  * unitEl;
     const savElYearFix   = consEl  * unitElFix;
     const savGasYear  = consGas * unitGas;
+    const savGasYearFix = consGas * unitGasFix;
     const savEl   = ENERGY_ON.el  ? savElYear  : 0;
     const savGas  = ENERGY_ON.gas ? savGasYear : 0;
     const gross   = savEl + savGas;
     const feeYear = feeM * 12;
-    const isElKombi = FS_MODE.el === 'KOMBI';
+    const isElKombi  = FS_MODE.el  === 'KOMBI';
+    const isGasKombi = FS_MODE.gas === 'KOMBI';
+
+    if (isGasKombi) {
+      v('gasUsporaUnit').textContent    = 'Úspora ' + unitGas.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
+      v('gasUsporaDisp').textContent    = sk2(savGasYear) + ' / rok';
+      v('gasUsporaFixUnit').textContent = 'Úspora ' + unitGasFix.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
+      v('gasUsporaFixDisp').textContent = sk2(savGasYearFix) + ' / rok';
+    }
 
     if (isElKombi) {
       v('elUsporaUnit').textContent    = 'Úspora ' + unitEl.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
@@ -1781,12 +1882,20 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       const overallStart = new Date(Math.min(...activePeriods.map(p => p.start.getTime())));
       const overallEnd   = new Date(Math.max(...activePeriods.map(p => p.end.getTime())));
       // KOMBI: prvý rok je vždy SPOT 2027 (aj keď FIX viazanosť začína až 2028+)
-      const startYearNum = (ENERGY_ON.el && isElKombi)
+      const startYearNum = ((ENERGY_ON.el && isElKombi) || (ENERGY_ON.gas && isGasKombi))
         ? Math.min(overallStart.getFullYear(), KOMBI_SPOT_YEAR)
         : overallStart.getFullYear();
       const endYearNum   = overallEnd.getFullYear();
       for (let calYear = startYearNum, i = 0; calYear <= endYearNum; calYear++, i++) {
-        const gasInYear = ENERGY_ON.gas && calYear >= startGas.getFullYear() && calYear <= endGas.getFullYear();
+        let gasYearSav = 0;
+        if (ENERGY_ON.gas) {
+          if (isGasKombi) {
+            if (calYear === KOMBI_SPOT_YEAR) gasYearSav = savGasYear;                                              // SPOT 2027
+            else if (calYear >= startGas.getFullYear() && calYear <= endGas.getFullYear()) gasYearSav = savGasYearFix; // FIX
+          } else if (calYear >= startGas.getFullYear() && calYear <= endGas.getFullYear()) {
+            gasYearSav = savGasYear;
+          }
+        }
         let elYearSav = 0;
         if (ENERGY_ON.el) {
           if (isElKombi) {
@@ -1796,7 +1905,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
             elYearSav = savElYear;
           }
         }
-        const yearGross = elYearSav + (gasInYear ? savGasYear : 0);
+        const yearGross = elYearSav + gasYearSav;
         const val = i === 0 ? yearGross - fee1 - feeYear : yearGross - feeYear;
         yearValues.push(val);
         totalNy += val;
@@ -1804,7 +1913,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     }
 
     v('clientDisp').textContent    = client;
-    fitClientName();
+    renderClients();
     v('offerDateDisp').textContent = dsk(offerDate);
     v('viazanostDisp_el').textContent  = dsk(startEl)  + ' – ' + dsk(endEl);
     v('viazanostDisp_gas').textContent = dsk(startGas) + ' – ' + dsk(endGas);
@@ -1816,7 +1925,13 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     if (el2028Lbl) el2028Lbl.textContent = startEl.getFullYear();
     const elMaxLbl = document.getElementById('elMaxLabel');
     if (elMaxLbl && isElKombi) elMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + KOMBI_SPOT_YEAR;
-    v('gasYearLabel').textContent = startGas.getFullYear();
+    v('gasYearLabel').textContent = isGasKombi ? KOMBI_SPOT_YEAR : startGas.getFullYear();
+    const gasFixLbl = document.getElementById('gasFixLabel');
+    if (gasFixLbl) gasFixLbl.textContent = 'Ponúkaná cena FIX od ' + startGas.getFullYear();
+    const gas2028Lbl = document.getElementById('gasYear2Label');
+    if (gas2028Lbl) gas2028Lbl.textContent = startGas.getFullYear();
+    const gasMaxLbl = document.getElementById('gasMaxLabel');
+    if (gasMaxLbl && isGasKombi) gasMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + KOMBI_SPOT_YEAR;
 
     v('curElDisp').textContent   = num2(curEl);
     v('curGasDisp').textContent  = num2(curGas);
@@ -1845,7 +1960,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     let overallStartYear = activePeriods.length
       ? new Date(Math.min(...activePeriods.map(p => p.start.getTime()))).getFullYear()
       : startEl.getFullYear();
-    if (ENERGY_ON.el && isElKombi) overallStartYear = Math.min(overallStartYear, KOMBI_SPOT_YEAR);
+    if ((ENERGY_ON.el && isElKombi) || (ENERGY_ON.gas && isGasKombi)) overallStartYear = Math.min(overallStartYear, KOMBI_SPOT_YEAR);
     yearValues.forEach((val, i) => {
       const card = document.createElement('div');
       card.className = 'ycard';
@@ -1873,7 +1988,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   ['inp_years_el','inp_start_el','inp_years_gas','inp_start_gas',
    'inp_consEl','inp_consGas','inp_curEl','inp_curGas',
    'inp_el2027','inp_gas2027','inp_elMax','inp_gasMax',
-   'inp_el2028','inp_elFix2028',
+   'inp_el2028','inp_elFix2028','inp_gas2028','inp_gasFix2028',
    'inp_fee1','inp_feeM']
     .forEach(id => v(id).addEventListener('input', onUserChange));
   ['inp_years_el','inp_years_gas','inp_start_el','inp_start_gas'].forEach(id => v(id).addEventListener('change', onUserChange));
@@ -1899,7 +2014,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   const HEADER_ROWS = 11;   // hlavička = riadky 1–10 (firma 1–5, údaje 7–10), riadok 11 je prázdny
   const HEADER_COLS = 26;
 
-  function parseXlsx(arrayBuffer) {
+  function extractXlsx(arrayBuffer) {
     const wb = XLSX.read(arrayBuffer, { type: 'array', cellDates: true, cellFormula: true, sheetStubs: true });
     const ws = wb.Sheets[wb.SheetNames[0]];
 
@@ -2250,138 +2365,201 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
         sup:   { el: sup.el.join(', '),   gas: sup.gas.join(', ') },
         bound: { el: fmtList(boundDates.el), gas: fmtList(boundDates.gas) },
         kind:  { el: pickKind('el'), gas: pickKind('gas') },
+        kindsRaw: kinds,
         rows:  { el: sumRows('el'),  gas: sumRows('gas') }
       };
     };
     const rs = readSuppliers();
-    SUPPLIER    = rs.sup;
-    BOUND_UNTIL = rs.bound;
+    const num = key => (found[key] ? numOfCell(found[key]) : null);
+
+    const nameCell = found.client;
+    const yrsRaw = num('years');
+    const out = {
+      name:      nameCell && typeof nameCell.v === 'string' ? nameCell.v.trim() : '',
+      offerDate: found.offerDate ? toDate(found.offerDate) : null,
+      years:     (yrsRaw !== null && yrsRaw > 0) ? Math.min(4, Math.max(1, Math.round(yrsRaw))) : null,
+      start:     found.start ? toDate(found.start) : null,
+      sup:       rs.sup,
+      bound:     rs.bound,
+      kindsRaw:  rs.kindsRaw
+    };
+    // Zdroj pravdy = tabuľka OM (stĺpec J, súčet riadkov; L = vážený priemer ceny).
+    // Hlavička (spotreba / priemer ceny) sa použije len ako záloha.
+    // cons === null = klient nemá danú komodity (prázdna spotreba).
+    [['el', 'consEl', 'curEl', 'el2027', 'elMax'], ['gas', 'consGas', 'curGas', 'gas2027', 'gasMax']]
+      .forEach(([cat, kCons, kCur, k27, kMax]) => {
+        let cons = rs.rows[cat].cons;
+        if (cons === null) cons = num(kCons);
+        let cur = rs.rows[cat].price;
+        if (cur === null) cur = num(kCur);
+        const f27 = num(k27);                       // ak Excel nemá predpoklad, použije sa súčasná cena
+        out[cat] = { cons: cons, cur: cur, f27: f27 !== null ? f27 : cur, max: num(kMax) };
+      });
+    return out;
+  }
+
+  // ── Spojenie viacerých firiem (súborov) do jednej analýzy ─────────────────────
+  // spotreby sa sčítajú; ceny (súčasná, predpoklad 2027, Ponuka MAX) sa spriemerujú
+  // váhou ročnej spotreby danej komodity. Jeden súbor = správanie ako doteraz.
+  function applyImports(list, fileNames) {
+    const multi   = list.length > 1;
+    const missing = [];
+    const warnings = [];
+    const tag = i => multi ? fileNames[i] + ': ' : '';
+    const r4  = x => (x === null || !multi) ? x : Math.round(x * 1e4) / 1e4;
+
+    list.forEach((d, i) => {
+      if (!d.name)      missing.push(tag(i) + 'Odberateľ');
+      if (!d.offerDate) missing.push(tag(i) + 'Dátum ponuky');
+      if (d.years === null) missing.push(tag(i) + 'Viazanosť kontraktu v rokoch');
+      if (!d.start)     missing.push(tag(i) + 'Začiatok');
+      [['el', 'Elektrina', 'elektrina'], ['gas', 'Plyn', 'plyn']].forEach(([cat, L1, L2]) => {
+        const x = d[cat];
+        if (x.cons === null) return;                // komodita sa nepoužíva
+        if (x.max === null) missing.push(tag(i) + L1 + ' – Ponuka MAX');
+        if (x.cur === null) missing.push(tag(i) + 'Vážený priemer ceny ' + L2);
+      });
+    });
+
+    // spoločné údaje – z prvého súboru, pri rozdieloch upozornenie
+    const firstOf = key => { for (const d of list) if (d[key] !== null && d[key] !== '') return d[key]; return null; };
+    const years = firstOf('years');
+    const start = firstOf('start');
+    const od    = firstOf('offerDate');
+    if (multi) {
+      if (list.some(d => d.years !== null && d.years !== years)) warnings.push('rozdielna viazanosť v rokoch (použitá ' + years + ')');
+      if (start && list.some(d => d.start && d.start.getTime() !== start.getTime())) warnings.push('rozdielny začiatok viazanosti (použitý z prvého súboru)');
+    }
+
+    // názov: všetky odberateľov spojí
+    const names = [];
+    list.forEach(d => { if (d.name && !names.includes(d.name)) names.push(d.name); });
+
+    // súčty a vážené priemery
+    const total = cat => {
+      const xs = list.map(d => d[cat].cons).filter(c => c !== null);
+      return xs.length ? xs.reduce((a, b) => a + b, 0) : null;
+    };
+    const wavg = (cat, key) => {
+      const rows = list.map(d => d[cat]).filter(x => x[key] !== null);
+      if (!rows.length) return null;
+      const tot = rows.reduce((a, x) => a + (x.cons || 0), 0);
+      if (tot > 0) return rows.reduce((a, x) => a + (x.cons || 0) * x[key], 0) / tot;
+      return rows.reduce((a, x) => a + x[key], 0) / rows.length;
+    };
+
+    // dodávatelia a viazanosť – zjednotenie
+    const uniq = (cat, getter, sep) => {
+      const o = [];
+      list.forEach(d => String(getter(d)[cat] || '').split(sep).map(t => t.trim()).filter(Boolean)
+        .forEach(t => { if (!o.includes(t)) o.push(t); }));
+      return o;
+    };
+    const toD = t => { const m = t.split('.'); return new Date(+m[2], +m[1] - 1, +m[0]).getTime(); };
+    SUPPLIER = { el: uniq('el', d => d.sup, ',').join(', '), gas: uniq('gas', d => d.sup, ',').join(', ') };
+    BOUND_UNTIL = {
+      el:  uniq('el',  d => d.bound, ',').sort((x, y) => toD(x) - toD(y)).join(', '),
+      gas: uniq('gas', d => d.bound, ',').sort((x, y) => toD(x) - toD(y)).join(', ')
+    };
     showSuppliers();
     showBoundUntil();
 
-    // 2) priraď hodnoty do polí analýzy
-    const missing = [];
-
-    const setNum = (key, id, label) => {
-      const n = found[key] ? numOfCell(found[key]) : null;
-      if (n === null) { missing.push(label); return; }
-      v(id).value = n;
-    };
-    // voliteľná verzia – nereportuje chýbajúcu hodnotu, len prepíše ak je k dispozícii
-    const setNumOpt = (key, id) => {
-      const n = found[key] ? numOfCell(found[key]) : null;
-      if (n !== null) v(id).value = n;
+    // druh FIX / SPOT / KOMBI – rozhoduje najväčšia spotreba naprieč všetkými súbormi
+    const pickKind = cat => {
+      const w = {};
+      list.forEach(d => (d.kindsRaw[cat] || []).forEach(k => { w[k.kind] = (w[k.kind] || 0) + (k.cons > 0 ? k.cons : 1); }));
+      const keys = Object.keys(w);
+      return keys.length ? keys.sort((a, b) => w[b] - w[a])[0] : null;
     };
 
-    const nameCell = found.client;
-    const name = nameCell && typeof nameCell.v === 'string' ? nameCell.v.trim() : '';
-    if (name) CLIENT_NAME = name; else missing.push('Odberateľ');
+    // zápis do polí analýzy
+    if (names.length) CLIENT_NAME = names.join(' + ');
+    CLIENTS = multi ? list.map(d => ({ name: d.name, el: d.sup.el, gas: d.sup.gas })) : [];
+    if (od) OFFER_DATE = od;
+    if (years !== null) { v('inp_years_el').value = years; v('inp_years_gas').value = years; }
+    if (start) { const dv = toDateInputValue(start); v('inp_start_el').value = dv; v('inp_start_gas').value = dv; }
 
-    const od = found.offerDate ? toDate(found.offerDate) : null;
-    if (od) OFFER_DATE = od; else missing.push('Dátum ponuky');
-
-    const yrsRaw = found.years ? toNum(found.years.v) : null;
-    if (yrsRaw !== null && yrsRaw > 0) {
-      const yrs = Math.min(4, Math.max(1, Math.round(yrsRaw)));
-      v('inp_years_el').value  = yrs;
-      v('inp_years_gas').value = yrs;
-    } else missing.push('Viazanosť kontraktu v rokoch');
-
-    const sd = found.start ? toDate(found.start) : null;
-    if (sd) {
-      const dv = toDateInputValue(sd);
-      v('inp_start_el').value  = dv;
-      v('inp_start_gas').value = dv;
-    } else missing.push('Začiatok');
-
-    // Chýbajúca (prázdna) celková spotreba = klient nemá dodávateľa danej komodity:
-    // zapíše sa 0 a prepínač komodity sa vypne. Inak sa komodita zapne.
     const consMissing = { el: false, gas: false };
-    [['el', 'consEl', 'inp_consEl'], ['gas', 'consGas', 'inp_consGas']].forEach(([cat, key, id]) => {
-      // Zdroj pravdy = tabuľka OM (stĺpec J, súčet riadkov). Hlavička (C3/C4) sa môže v Exceli
-      // odkazovať krížom (popis „spotreba“ na bunku s cenou), preto sa používa len ako záloha.
-      let n = rs.rows[cat].cons;
-      if (n === null) n = found[key] ? numOfCell(found[key]) : null;
-      if (n === null) {
-        v(id).value = 0;
-        consMissing[cat] = true;
-        ENERGY_ON[cat] = false;
-      } else {
-        v(id).value = n;
-        ENERGY_ON[cat] = true;
-      }
-      applyCategoryState(cat);
-    });
+    [['el', 'inp_consEl', 'inp_curEl', 'inp_el2027', 'inp_elMax', 'fsEl'],
+     ['gas', 'inp_consGas', 'inp_curGas', 'inp_gas2027', 'inp_gasMax', 'fsGas']]
+      .forEach(([cat, idCons, idCur, id27, idMax, fs]) => {
+        const cons = total(cat);
+        if (cons === null) {
+          v(idCons).value = 0;
+          consMissing[cat] = true;
+          ENERGY_ON[cat] = false;
+        } else {
+          v(idCons).value = r4(cons);
+          ENERGY_ON[cat] = true;
+        }
+        applyCategoryState(cat);
 
-    if (!consMissing.el)  setNum('elMax',  'inp_elMax',  'Elektrina – Ponuka MAX');
-    if (!consMissing.gas) setNum('gasMax', 'inp_gasMax', 'Plyn – Ponuka MAX');
+        const max = wavg(cat, 'max');
+        if (!consMissing[cat] && max !== null) v(idMax).value = r4(max);
 
-    // Súčasná cena – ak je k dispozícii, skopíruje sa aj do Predpokladu 2027
-    // a prepínač sa prepne na SPOT (súčasná cena = spot cena)
-    // Zdroj pravdy = vážený priemer z tabuľky OM (stĺpec L × spotreba J); hlavička len ako záloha.
-    let curElN = rs.rows.el.price;
-    if (curElN === null) curElN = found.curEl ? numOfCell(found.curEl) : null;
-    if (curElN !== null) {
-      v('inp_curEl').value  = curElN;
-      // Ak Excel neobsahuje vlastný predpoklad 2027, použije sa súčasná cena
-      if (!found.el2027) {
-        v('inp_el2027').value = curElN;
-      }
-      // Druh (FIX / SPOT / KOMBI) sa berie zo stĺpca K v Exceli – nie pevne SPOT
-      if (rs.kind.el) setFixSpot('fsEl', rs.kind.el);
-    } else if (!consMissing.el) {
-      missing.push('Vážený priemer ceny elektrina');
-    }
-
-    let curGasN = rs.rows.gas.price;
-    if (curGasN === null) curGasN = found.curGas ? numOfCell(found.curGas) : null;
-    if (curGasN !== null) {
-      v('inp_curGas').value  = curGasN;
-      // Ak Excel neobsahuje vlastný predpoklad 2027, použije sa súčasná cena
-      if (!found.gas2027) {
-        v('inp_gas2027').value = curGasN;
-      }
-      // Druh (FIX / SPOT) sa berie zo stĺpca K v Exceli – nie pevne SPOT
-      if (rs.kind.gas) setFixSpot('fsGas', rs.kind.gas === 'KOMBI' ? 'FIX' : rs.kind.gas);
-    } else if (!consMissing.gas) {
-      missing.push('Vážený priemer ceny plyn');
-    }
-
-    // Predpoklad 2027 – ak je v Exceli explicitne, prepíše hodnotu skopírovanú zo súčasnej ceny
-    setNumOpt('el2027',  'inp_el2027');
-    setNumOpt('gas2027', 'inp_gas2027');
+        const cur = wavg(cat, 'cur');
+        if (cur !== null) {
+          v(idCur).value = r4(cur);
+          v(id27).value  = r4(cur);                 // záloha, ak Excel nemá predpoklad
+          const kind = pickKind(cat);
+          if (kind) setFixSpot(fs, kind);
+        }
+        const f27 = wavg(cat, 'f27');
+        if (f27 !== null) v(id27).value = r4(f27);
+      });
 
     recalc();
-    return missing;
+
+    // rozpis po firmách (zobrazí sa v tooltipe stavu importu)
+    const fmt = x => x === null ? '—' : (Math.round(x * 100) / 100).toLocaleString('sk-SK');
+    const detail = list.map((d, i) =>
+      (fileNames[i] || '') + ' – ' + (d.name || '?') +
+      '\n   elektrina: ' + fmt(d.el.cons) + ' MWh, ' + fmt(d.el.cur) + ' €/MWh' +
+      '\n   plyn: ' + fmt(d.gas.cons) + ' MWh, ' + fmt(d.gas.cur) + ' €/MWh').join('\n');
+    return { missing: missing, warnings: warnings, detail: detail };
+  }
+
+  // jeden súbor aj viac súborov naraz
+  function parseXlsx(buffers, fileNames) {
+    const bufs = Array.isArray(buffers) ? buffers : [buffers];
+    const names = fileNames || bufs.map((b, i) => 'súbor ' + (i + 1));
+    const list = bufs.map((b, i) => {
+      try { return extractXlsx(b); }
+      catch (err) { err.message = names[i] + ': ' + err.message; throw err; }
+    });
+    return applyImports(list, names);
   }
 
   document.getElementById('xlsxFileInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
+    const files = Array.from(e.target.files || []);
     const status = v('importStatus');
-    if (!file) return;
+    if (!files.length) return;
 
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      try {
-        const missing = parseXlsx(evt.target.result);
-        if (missing.length) {
-          status.textContent = '✗ ' + file.name + ' – v hlavičke chýba: ' + missing.join(', ');
-          status.className = 'import-status err';
-        } else {
-          status.textContent = '✓ Dáta načítané';
-          status.className = 'import-status ok';
-        }
-      } catch(err) {
-        status.textContent = '✗ Chyba pri čítaní súboru';
+    const readOne = f => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = evt => resolve(evt.target.result);
+      reader.onerror = () => reject(new Error('Súbor sa nedal otvoriť: ' + f.name));
+      reader.readAsArrayBuffer(f);
+    });
+
+    Promise.all(files.map(readOne)).then(bufs => {
+      const res = parseXlsx(bufs, files.map(f => f.name));
+      const label = files.length > 1 ? files.length + ' súbory spolu' : files[0].name;
+      if (res.missing.length) {
+        status.textContent = '✗ ' + label + ' – v hlavičke chýba: ' + res.missing.join(', ');
         status.className = 'import-status err';
-        console.error(err);
+      } else {
+        status.textContent = files.length > 1
+          ? '✓ Dáta načítané (' + files.length + ' firmy sčítané)' + (res.warnings.length ? ' – pozor: ' + res.warnings.join('; ') : '')
+          : '✓ Dáta načítané';
+        status.className = 'import-status ok';
       }
-    };
-    reader.onerror = () => {
-      status.textContent = '✗ Súbor sa nedal otvoriť';
+      status.title = res.detail;
+    }).catch(err => {
+      status.textContent = '✗ Chyba pri čítaní súboru' + (files.length > 1 && err && err.message ? ' (' + err.message + ')' : '');
       status.className = 'import-status err';
-    };
-    reader.readAsArrayBuffer(file);
+      console.error(err);
+    });
     this.value = '';
   });
 
@@ -2520,20 +2698,23 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       // SPOT pole (inp_elMax) sa pri načítaní cien nikdy nemení – ostáva ručne editovateľné.
       const elKombi = ENERGY_ON.el && FS_MODE.el === 'KOMBI';
       apply('el', 'Elektrina', elRows, 'inp_years_el', 'inp_start_el', elKombi ? 'inp_elFix2028' : 'inp_elMax', 'inp_el2027');
-      apply('gas', 'Plyn',      gasRows, 'inp_years_gas', 'inp_start_gas', 'inp_gasMax', 'inp_gas2027');
+      const gasKombi = ENERGY_ON.gas && FS_MODE.gas === 'KOMBI';
+      apply('gas', 'Plyn',      gasRows, 'inp_years_gas', 'inp_start_gas', gasKombi ? 'inp_gasFix2028' : 'inp_gasMax', 'inp_gas2027');
 
-      // KOMBI: predpoklad pre rok začiatku FIX viazanosti (min. 2028) – pole inp_el2028
-      if (elKombi) {
-        const y2 = parseDateInput('inp_start_el', new Date(2028, 0, 1)).getFullYear();
+      // KOMBI: predpoklad pre rok začiatku FIX viazanosti (min. 2028) – pole inp_el2028 / inp_gas2028
+      [['Elektrina', elRows, elKombi, 'inp_start_el', 'inp_el2028'],
+       ['Plyn',      gasRows, gasKombi, 'inp_start_gas', 'inp_gas2028']].forEach(([label, rows, kombi, startId, predId]) => {
+        if (!kombi) return;
+        const y2 = parseDateInput(startId, new Date(2028, 0, 1)).getFullYear();
         const yc2 = priceColumnFor(y2, 1);
-        const pred2 = yc2 ? pickLowest(elRows, yc2.col) : null;
+        const pred2 = yc2 ? pickLowest(rows, yc2.col) : null;
         if (pred2) {
-          v('inp_el2028').value = round2(pred2.price);
-          applied.push('Elektrina predpoklad ' + y2 + ': ' + round2(pred2.price).toLocaleString('sk-SK', {minimumFractionDigits:2}) + (pred2.supplier ? ' (' + pred2.supplier + ')' : ''));
+          v(predId).value = round2(pred2.price);
+          applied.push(label + ' predpoklad ' + y2 + ': ' + round2(pred2.price).toLocaleString('sk-SK', {minimumFractionDigits:2}) + (pred2.supplier ? ' (' + pred2.supplier + ')' : ''));
         } else {
-          problems.push('Elektrina: v tabuľke chýba predpokladaná cena pre rok ' + y2);
+          problems.push(label + ': v tabuľke chýba predpokladaná cena pre rok ' + y2);
         }
-      }
+      });
 
       if (applied.length) OFFER_DATE = todayDate();
       recalc();
@@ -2589,6 +2770,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       verzia: 1,
       ulozene: localIsoNow(),
       odberatel: CLIENT_NAME,
+      odberatelia: CLIENTS.map(c => ({ nazov: c.name, dodavatel_elektrina: c.el, dodavatel_plyn: c.gas })),
       datum_ponuky: toDateInputValue(OFFER_DATE),
       platnost: VALIDITY_TEXT,
       elektrina: {
@@ -2614,6 +2796,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
         sucasna_cena: num('inp_curGas'),
         predpoklad_2027: num('inp_gas2027'),
         ponuka_max: num('inp_gasMax'),
+        predpoklad_2028: num('inp_gas2028'),
+        ponuka_fix_2028: num('inp_gasFix2028'),
         viazanost_roky: num('inp_years_gas'),
         zaciatok: v('inp_start_gas').value
       },
@@ -2679,6 +2863,12 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
 
     if (typeof s.odberatel === 'string' && s.odberatel.trim()) CLIENT_NAME = s.odberatel.trim();
     else missing.push('odberateľ');
+    CLIENTS = Array.isArray(s.odberatelia) && s.odberatelia.length > 1
+      ? s.odberatelia.filter(isObj).map(c => ({
+          name: typeof c.nazov === 'string' ? c.nazov.trim() : '',
+          el:   typeof c.dodavatel_elektrina === 'string' ? c.dodavatel_elektrina.trim() : '',
+          gas:  typeof c.dodavatel_plyn === 'string' ? c.dodavatel_plyn.trim() : '' }))
+      : [];
     if (isDate(s.datum_ponuky)) OFFER_DATE = parseDateInput2(s.datum_ponuky);
     else missing.push('dátum ponuky');
     if (typeof s.platnost === 'string' && s.platnost.trim()) VALIDITY_TEXT = s.platnost.trim();
@@ -2706,6 +2896,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     setN(gas, 'sucasna_cena',    'inp_curGas',  'plyn: súčasná cena');
     setN(gas, 'predpoklad_2027', 'inp_gas2027', 'plyn: predpoklad');
     setN(gas, 'ponuka_max',      'inp_gasMax',  'plyn: ponuka');
+    setN(gas, 'predpoklad_2028', 'inp_gas2028',    '', true);
+    setN(gas, 'ponuka_fix_2028', 'inp_gasFix2028', '', true);
     setYears(gas, 'inp_years_gas', 'plyn: viazanosť');
     setStart(gas, 'inp_start_gas', 'plyn: začiatok');
 
@@ -2717,7 +2909,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     const modeEl  = String(el.rezim  || 'FIX').toUpperCase();
     const modeGas = String(gas.rezim || 'FIX').toUpperCase();
     setFixSpot('fsEl',  ['FIX', 'SPOT', 'KOMBI'].includes(modeEl)  ? modeEl  : 'FIX');
-    setFixSpot('fsGas', ['FIX', 'SPOT'].includes(modeGas)          ? modeGas : 'FIX');
+    setFixSpot('fsGas', ['FIX', 'SPOT', 'KOMBI'].includes(modeGas) ? modeGas : 'FIX');
 
     recalc();
     return missing;
