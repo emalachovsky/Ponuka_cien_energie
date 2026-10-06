@@ -1890,13 +1890,13 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   //   Vážený priemer ceny elektrina / plyn-> súčasná cena (€/MWh)
   //   Elektrina / Plyn – predpoklad 2027  -> predpokladaná cena bez zmeny (€/MWh)
   //   Elektrina / Plyn – Ponuka MAX       -> ponúkaná cena (max) (€/MWh)
-  // Štyri cenové údaje v G3:H6 sa čítajú z PEVNÝCH adries (popis v G, hodnota v H):
-  //   H3 = Elektrina predpoklad 2027, H4 = Elektrina Ponuka MAX,
-  //   H5 = Plyn predpoklad 2027,      H6 = Plyn Ponuka MAX
+  // Štyri cenové údaje v G7:H10 sa čítajú z PEVNÝCH adries (popis v G, hodnota v H):
+  //   H7 = Elektrina predpoklad 2027, H8 = Plyn predpoklad 2027,
+  //   H9 = Elektrina Ponuka MAX,      H10 = Plyn Ponuka MAX
   // Popis v G sa len overí (zhoda podľa kľúčových slov); ak nesedí, použije sa
   // dynamické párovanie popis -> hodnota ako záloha.
   // ---------------------------------------------------------------------------
-  const HEADER_ROWS = 7;
+  const HEADER_ROWS = 11;   // hlavička = riadky 1–10 (firma 1–5, údaje 7–10), riadok 11 je prázdny
   const HEADER_COLS = 26;
 
   function parseXlsx(arrayBuffer) {
@@ -2142,13 +2142,13 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       }
     }
 
-    // 1a) PEVNÉ ADRESY G3:H6 – predpoklad 2027 a Ponuka MAX (popis v G, hodnota v H)
+    // 1a) PEVNÉ ADRESY G7:H10 – predpoklad 2027 a Ponuka MAX (popis v G, hodnota v H)
     //     Popis sa overuje len podľa kľúčových slov (odolné voči preklepom typu „Plyn - – …“).
     const FIXED_PRICE_CELLS = [
-      { key: 'el2027',  label: 'G3', value: 'H3', must: ['elektrin', 'predpoklad'] },
-      { key: 'elMax',   label: 'G4', value: 'H4', must: ['elektrin', 'ponuka'] },
-      { key: 'gas2027', label: 'G5', value: 'H5', must: ['plyn', 'predpoklad'] },
-      { key: 'gasMax',  label: 'G6', value: 'H6', must: ['plyn', 'ponuka'] }
+      { key: 'el2027',  label: 'G7',  value: 'H7',  must: ['elektrin', 'predpoklad'] },
+      { key: 'gas2027', label: 'G8',  value: 'H8',  must: ['plyn', 'predpoklad'] },
+      { key: 'elMax',   label: 'G9',  value: 'H9',  must: ['elektrin', 'ponuka'] },
+      { key: 'gasMax',  label: 'G10', value: 'H10', must: ['plyn', 'ponuka'] }
     ];
     FIXED_PRICE_CELLS.forEach(f => {
       const lab = ws[f.label];
