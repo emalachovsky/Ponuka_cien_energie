@@ -1159,6 +1159,73 @@ footer {
 @media (max-width: 480px) { .cal-day, .cal-empty { height: 40px; } }
 @media print { .cal-overlay { display: none !important; } }
 
+
+/* ─── PROVÍZIA (okrúhle tlačidlo P + okno) ─────────────────────── */
+.pdf-export-btn.round-p {
+  width: 34px; height: 34px; padding: 0; justify-content: center; gap: 0;
+  border-radius: 50%; font-size: 14.2px; font-weight: 800; color: var(--green);
+}
+.pdf-export-btn.round-p:hover { border-color: var(--green); }
+.comm-overlay {
+  position: fixed; inset: 0; z-index: 1001;
+  background: rgba(0,0,0,0.6);
+  display: none; align-items: center; justify-content: center;
+  padding: 14px;
+}
+.comm-overlay.open { display: flex; }
+.comm-card {
+  width: min(96vw, 1040px); max-height: 94vh; overflow-y: auto;
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  padding: 20px 20px 20px; position: relative; overflow-x: hidden;
+  color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 13.3px;
+}
+.comm-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; opacity: .8;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--green) 50%, var(--yellow) 100%);
+}
+.comm-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.comm-title {
+  font-size: 26.6px; font-weight: 800; letter-spacing: -1px; line-height: 1.15;
+  background: linear-gradient(100deg, #78a6d3 0%, #9db998 50%, #d1c66e 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.comm-sub { font-size: 11.4px; color: var(--text-dim); margin-top: 4px; }
+.comm-x { background: none; border: none; color: var(--text-dim); font-size: 26.6px; cursor: pointer; line-height: 1; padding: 0 8px; }
+.comm-x:hover { color: var(--text); }
+.comm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 768px) { .comm-grid { grid-template-columns: 1fr; } .comm-title { font-size: 22.8px; } }
+.comm-card .ecard { padding: 16px 18px; }
+.comm-card .ecard.off { opacity: .45; }
+.comm-card .ecard-title { font-size: 19.9px; }
+.comm-card .ecard-icon { font-size: 19.9px; }
+.comm-card .reg-badge { font-size: 11.4px; padding: 3px 10px; }
+.comm-card .data-row { padding: 9px 0; }
+.comm-card .data-label, .comm-card .offer-label { font-size: 13.8px; }
+.comm-card .offer-row { padding: 9px 14px; }
+.comm-card .inline-edit-input { font-size: 19px; width: 112px; padding: 5px 9px; }
+.comm-card .inline-edit-input.inline-edit-offer { font-size: 19.9px; width: 120px; }
+.comm-card .inline-edit-unit { font-size: 11.4px; min-width: 60px; }
+.cm-part + .cm-part { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border); }
+.cm-part-title { font-size: 12.3px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+.cm-info { font-size: 11.4px; color: var(--text-dim); margin-top: 6px; min-height: 18px; }
+.cm-info.err { color: var(--red); }
+.cm-calc { font-family: 'JetBrains Mono', monospace; font-size: 11.4px; color: var(--text-dim); margin-top: 6px; }
+.comm-card .saving-text { font-size: 13.8px; }
+.comm-card .saving-num { font-size: 19.9px; }
+.comm-card .cons-highlight { margin: 14px 0 0; padding: 12px 16px; }
+.comm-card .cons-highlight-label { font-size: 10.4px; }
+.comm-card .cons-highlight-num { font-size: 26.6px; }
+.comm-card .hero { margin-top: 12px; padding: 18px 16px; }
+.comm-card .hero-label { font-size: 11.4px; }
+.comm-card .hero-num { font-size: 30.4px; }
+.cm-pays { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; position: relative; }
+.cm-pays > div { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 6px; }
+.cm-pays span { display: block; font-size: 11.4px; color: var(--text-dim); font-weight: 600; margin-bottom: 2px; }
+.cm-pays b { font-family: 'JetBrains Mono', monospace; font-size: 17.1px; font-weight: 700; color: var(--text); }
+@media (max-width: 560px) { .cm-pays { grid-template-columns: 1fr; } .comm-card .hero-num { font-size: 26.6px; } }
+@media print { .comm-overlay { display: none !important; } }
+
 /* ─── PRINT ─────────────────────────── */
 @media print {
   @page { size: A4 landscape; margin: 8mm; }
@@ -1603,6 +1670,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
         </svg>
         Export do PDF
       </button>
+      <button class="pdf-export-btn round-p" id="commBtn" onclick="openCommission()" title="Kalkulačka provízie">P</button>
     </div>
 
     <div class="theme-tucked">
@@ -3134,6 +3202,215 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       hit.addEventListener('click', () => open(inp, title));
     });
   })();
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // PROVÍZIA – okrúhle tlačidlo „P“
+  // vzorec: (Predajná cena − Base cena) / 2 × 0,3 × Objem × Roky
+  // vyplácanie: 20 % podpis, 30 % nábeh dodávky, 50 % koniec zmluvy
+  // Base: tabuľka „Ceny od dodávateľov“, dodávateľ vždy MVM.
+  //   1 rok = cena pre daný rok, viac rokov = priemer ročných cien od začiatku viazanosti.
+  //   SPOT = Base 4.   KOMBI = (SPOT 2027 − 4) + FIX časť (FIX − Base MVM).
+  // ───────────────────────────────────────────────────────────────────────────
+  const COMM_SPOT_BASE = 4;
+  const COMM_SUPPLIER  = 'MVM';
+  const COMM_CATS = {
+    el:  { label: 'Elektrina', icon: '⚡', consId: 'inp_consEl',  yearsId: 'inp_years_el',  startId: 'inp_start_el',  maxId: 'inp_elMax',  fixId: 'inp_elFix2028' },
+    gas: { label: 'Plyn',      icon: '🔥', consId: 'inp_consGas', yearsId: 'inp_years_gas', startId: 'inp_start_gas', maxId: 'inp_gasMax', fixId: 'inp_gasFix2028' }
+  };
+  const COMM = { st: {}, ov: null, token: 0, sheet: null };
+
+  const commFmt  = (n, d) => n.toLocaleString('sk-SK', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const commNum  = x => { const n = parseFloat(String(x).replace(',', '.')); return isNaN(n) ? 0 : n; };
+  const commNorm = t => String(t == null ? '' : t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+  // Načíta blok „Ceny od dodávateľov“ a vráti ročné ceny MVM: { el: {2027: x, ...}, gas: {...} }
+  async function commLoadSupplierPrices() {
+    const rows = await fetchSheetRange('A1:E70');
+    const i0 = rows.findIndex(r => commNorm(r[0]).startsWith('ceny od dodavatel'));
+    if (i0 < 0) throw new Error('v tabuľke som nenašiel blok „Ceny od dodávateľov“');
+    const out = { el: null, gas: null };
+    let sec = null;
+    for (let i = i0 + 1; i < rows.length; i++) {
+      const a = commNorm(rows[i][0]);
+      if (a.startsWith('elektrin')) sec = 'el';
+      else if (a.startsWith('plyn')) sec = 'gas';
+      else if (sec && !out[sec] && a === commNorm(COMM_SUPPLIER)) {
+        const m = {};
+        [2027, 2028, 2029, 2030].forEach((y, k) => { const n = parseSkNum(rows[i][k + 1]); if (n !== null && n > 0) m[y] = n; });
+        out[sec] = m;
+      }
+    }
+    return out;
+  }
+
+  // Base = cena MVM pre rok začiatku (1 rok), pri viacerých rokoch priemer ročných cien
+  function commBaseFor(map, y0, years) {
+    if (!map) return { err: COMM_SUPPLIER + ' sa v tabuľke dodávateľov nenašiel' };
+    const n = Math.max(1, Math.round(years) || 1);
+    let sum = 0;
+    for (let y = y0; y < y0 + n; y++) {
+      if (map[y] == null) return { err: COMM_SUPPLIER + ' nemá v tabuľke cenu pre rok ' + y };
+      sum += map[y];
+    }
+    return { price: round1(sum / n), label: n === 1 ? 'rok ' + y0 : 'Ø ' + y0 + '–' + (y0 + n - 1) };
+  }
+
+  function commMakeParts(cat) {
+    const c = COMM_CATS[cat], mode = FS_MODE[cat];
+    const years = Math.max(1, Math.round(num(c.yearsId)) || 1);
+    const start = parseDateInput(c.startId, new Date(2027, 0, 1)).getFullYear();
+    const vol = num(c.consId);
+    const spotInfo = 'SPOT – Base cena = ' + COMM_SPOT_BASE;
+    if (mode === 'SPOT') return [{ type: 'spot', title: '', sale: round1(num(c.maxId)), base: COMM_SPOT_BASE, years, vol, info: spotInfo }];
+    if (mode === 'KOMBI') return [
+      { type: 'spot', title: 'SPOT na rok ' + KOMBI_SPOT_YEAR, sale: round1(num(c.maxId)), base: COMM_SPOT_BASE, years: 1, vol, info: spotInfo },
+      { type: 'fix',  title: 'FIX od ' + start, start, sale: round1(num(c.fixId)), base: null, years, vol, info: 'Načítavam Base z tabuľky…' }
+    ];
+    return [{ type: 'fix', title: '', start, sale: round1(num(c.maxId)), base: null, years, vol, info: 'Načítavam Base z tabuľky…' }];
+  }
+
+  function commRow(label, id, val, step, unit) {
+    return '<div class="data-row"><span class="data-label">' + label + '</span>' +
+      '<div class="inline-edit-wrap"><input type="number" inputmode="decimal" class="inline-edit-input" id="' + id + '" value="' + (val == null ? '' : val) + '" step="' + step + '">' +
+      '<span class="inline-edit-unit">' + unit + '</span></div></div>';
+  }
+
+  function commCardHtml(cat) {
+    const c = COMM_CATS[cat], st = COMM.st[cat];
+    const colorCls = cat === 'el' ? 'el-color' : 'gas-color';
+    const multi = st.parts.length > 1;
+    const parts = st.parts.map((p, pi) => {
+      const id = f => 'cm_' + cat + '_' + pi + '_' + f;
+      return '<div class="cm-part">' +
+        (p.title ? '<div class="cm-part-title">' + p.title + '</div>' : '') +
+        '<div class="offer-row"><span class="offer-label">Predajná cena (ponúkaná max)</span>' +
+          '<div class="inline-edit-wrap" style="margin-left:auto;"><input type="number" inputmode="decimal" step="0.1" class="inline-edit-input inline-edit-offer ' + colorCls + '" id="' + id('sale') + '" value="' + p.sale + '">' +
+          '<span class="inline-edit-unit">€/MWh</span></div></div>' +
+        commRow('Base cena (' + COMM_SUPPLIER + ')', id('base'), p.base, '0.1', '€/MWh') +
+        commRow('Počet rokov', id('years'), p.years, '1', 'rokov') +
+        commRow('Objem', id('vol'), p.vol, '0.1', 'MWh / rok') +
+        '<div class="cm-info" id="' + id('info') + '"></div>' +
+        '<div class="cm-calc" id="' + id('calc') + '"></div>' +
+        (multi ? '<div class="saving-badge"><span class="saving-text">Provízia – ' + (p.type === 'spot' ? 'SPOT' : 'FIX') + '</span><span class="saving-num" id="' + id('res') + '">–</span></div>' : '') +
+      '</div>';
+    }).join('');
+    const modeTxt = FS_MODE[cat];
+    return '<div class="ecard ecard-' + cat + (st.on ? '' : ' off') + '">' +
+      '<div class="ecard-header"><div class="ecard-title"><span class="ecard-icon">' + c.icon + '</span> ' + c.label + '</div>' +
+      '<span class="reg-badge ' + (st.on ? 'regulated' : 'unregulated') + '">' + (st.on ? modeTxt : 'VYPNUTÉ') + '</span></div>' +
+      parts +
+      '<div class="cons-highlight"><div class="cons-highlight-left"><div class="cons-highlight-label">Provízia – ' + c.label + '</div>' +
+      '<div class="cons-highlight-num" id="cm_' + cat + '_total">–</div></div></div>' +
+    '</div>';
+  }
+
+  function commUpdate() {
+    let grand = 0;
+    Object.keys(COMM_CATS).forEach(cat => {
+      const st = COMM.st[cat];
+      let tot = 0, any = false;
+      st.parts.forEach((p, pi) => {
+        const el = f => document.getElementById('cm_' + cat + '_' + pi + '_' + f);
+        const info = el('info');
+        info.className = 'cm-info' + (p.err ? ' err' : '');
+        info.textContent = p.err || p.info || '';
+        let val = null;
+        if (p.base != null) {
+          const per = Math.max(0, p.sale - p.base) / 2 * 0.3;
+          val = per * p.vol * p.years;
+          tot += val; any = true;
+          el('calc').textContent = '(' + commFmt(p.sale, 1) + ' − ' + commFmt(p.base, 1) + ') ÷ 2 × 0,3 = ' + commFmt(per, 1) + ' €/MWh × ' + commFmt(p.vol, 1) + ' MWh × ' + commFmt(p.years, 0) + ' r.';
+        } else {
+          el('calc').textContent = '';
+        }
+        const res = el('res'); if (res) res.textContent = val == null ? '–' : commFmt(val, 1) + ' €';
+      });
+      document.getElementById('cm_' + cat + '_total').textContent = any ? commFmt(tot, 1) + ' €' : '–';
+      if (st.on) grand += tot;
+    });
+    document.getElementById('cm_grand').textContent = commFmt(grand, 1) + ' €';
+    document.getElementById('cm_p1').textContent = commFmt(grand * 0.2, 1) + ' €';
+    document.getElementById('cm_p2').textContent = commFmt(grand * 0.3, 1) + ' €';
+    document.getElementById('cm_p3').textContent = commFmt(grand * 0.5, 1) + ' €';
+  }
+
+  // dosadí Base (MVM) do FIX dielu podľa začiatku viazanosti a počtu rokov
+  function commApplyBase(cat, pi) {
+    const p = COMM.st[cat].parts[pi];
+    const r = commBaseFor(COMM.sheet && COMM.sheet[cat], p.start, p.years);
+    const inp = document.getElementById('cm_' + cat + '_' + pi + '_base');
+    if (r.err) { p.base = null; p.err = r.err + ' – zadaj Base ručne.'; p.info = ''; inp.value = ''; }
+    else { p.base = r.price; p.err = ''; p.info = 'Base: ' + COMM_SUPPLIER + ', ' + r.label + (p.years > 1 ? ' (priemer ročných cien)' : ''); inp.value = r.price; }
+  }
+
+  function commBuild() {
+    if (COMM.ov) return;
+    const ov = document.createElement('div');
+    ov.className = 'comm-overlay';
+    ov.innerHTML =
+      '<div class="comm-card" role="dialog" aria-modal="true">' +
+        '<div class="comm-head"><div><div class="comm-title">Provízia</div>' +
+        '<div class="comm-sub">(Predajná cena − Base cena) ÷ 2 × 0,3 × Objem × Roky</div></div>' +
+        '<button type="button" class="comm-x" id="cm_close" title="Zavrieť">×</button></div>' +
+        '<div class="comm-grid" id="cm_cards"></div>' +
+        '<div class="hero"><div class="hero-label">Provízia spolu</div><div class="hero-num" id="cm_grand">–</div>' +
+        '<div class="cm-pays">' +
+          '<div><span>20 % za podpis</span><b id="cm_p1">–</b></div>' +
+          '<div><span>30 % za nábeh dodávky</span><b id="cm_p2">–</b></div>' +
+          '<div><span>50 % na konci zmluvy</span><b id="cm_p3">–</b></div>' +
+        '</div></div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    COMM.ov = ov;
+
+    ov.addEventListener('click', e => { if (e.target === ov || e.target.id === 'cm_close') commClose(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && ov.classList.contains('open')) commClose(); });
+    ov.addEventListener('input', e => {
+      const m = /^cm_(el|gas)_(\d+)_(sale|base|years|vol)$/.exec(e.target.id || '');
+      if (!m) return;
+      const cat = m[1], pi = +m[2], f = m[3];
+      const p = COMM.st[cat].parts[pi];
+      const raw = e.target.value;
+      if (f === 'base') {
+        p.base = raw === '' ? null : commNum(raw);
+        p.manual = true; p.err = ''; p.info = 'Base zadaná ručne';
+      } else {
+        p[f] = commNum(raw);
+        if (f === 'years' && p.type === 'fix' && !p.manual && COMM.sheet) commApplyBase(cat, pi);
+      }
+      commUpdate();
+    });
+  }
+
+  function commClose() { COMM.ov.classList.remove('open'); COMM.token++; }
+
+  async function openCommission() {
+    commBuild();
+    const token = ++COMM.token;
+    COMM.sheet = null;
+    COMM.st = {};
+    Object.keys(COMM_CATS).forEach(cat => { COMM.st[cat] = { on: !!ENERGY_ON[cat], parts: commMakeParts(cat) }; });
+    document.getElementById('cm_cards').innerHTML = commCardHtml('el') + commCardHtml('gas');
+    commUpdate();
+    COMM.ov.classList.add('open');
+
+    try {
+      const data = await commLoadSupplierPrices();
+      if (token !== COMM.token) return;
+      COMM.sheet = data;
+    } catch (err) {
+      if (token !== COMM.token) return;
+      Object.keys(COMM_CATS).forEach(cat => COMM.st[cat].parts.forEach(p => {
+        if (p.type === 'fix') { p.err = 'Base sa nenačítala – ' + err.message + '. Zadaj ju ručne.'; p.info = ''; }
+      }));
+      commUpdate();
+      return;
+    }
+    Object.keys(COMM_CATS).forEach(cat => COMM.st[cat].parts.forEach((p, pi) => {
+      if (p.type === 'fix' && !p.manual) commApplyBase(cat, pi);
+    }));
+    commUpdate();
+  }
 </script>
 </body>
 </html>
