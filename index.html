@@ -1269,7 +1269,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       <div class="data-row">
         <span class="data-label">Súčasná cena (2026)</span>
         <div class="data-value-col">
-          <span class="data-value" id="curElDisp">140,00</span><span class="data-unit">€/MWh</span>
+          <span class="data-value" id="curElDisp">140,0</span><span class="data-unit">€/MWh</span>
         </div>
       </div>
       <div class="data-row">
@@ -1288,7 +1288,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       </div>
       <div class="saving-badge kombi-only" id="elKombiRowUspora" style="display:none;">
         <span class="saving-text" id="elUsporaUnit">Úspora 30 €/MWh →</span>
-        <span class="saving-num" id="elUsporaDisp">1 614,06 € / rok</span>
+        <span class="saving-num" id="elUsporaDisp">1 614,1 € / rok</span>
       </div>
 
       <div class="data-row kombi-only" id="elKombiRow2028" style="display:none;">
@@ -1307,12 +1307,12 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       </div>
       <div class="saving-badge kombi-only" id="elKombiRowUsporaFix" style="display:none;">
         <span class="saving-text" id="elUsporaFixUnit">Úspora 30 €/MWh →</span>
-        <span class="saving-num" id="elUsporaFixDisp">1 614,06 € / rok</span>
+        <span class="saving-num" id="elUsporaFixDisp">1 614,1 € / rok</span>
       </div>
 
       <div class="saving-badge" id="elBottomSavingBadge">
         <span class="saving-text" id="elSavUnit">Úspora 35 €/MWh →</span>
-        <span class="saving-num" id="elSavYear">1 614,06 € / rok</span>
+        <span class="saving-num" id="elSavYear">1 614,1 € / rok</span>
       </div>
     </div>
 
@@ -1356,7 +1356,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       <div class="data-row">
         <span class="data-label">Súčasná cena (2026)</span>
         <div class="data-value-col">
-          <span class="data-value" id="curGasDisp">55,00</span><span class="data-unit">€/MWh</span>
+          <span class="data-value" id="curGasDisp">55,0</span><span class="data-unit">€/MWh</span>
         </div>
       </div>
       <div class="data-row">
@@ -1375,8 +1375,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       </div>
 
       <div class="saving-badge kombi-only" id="gasKombiRowUspora" style="display:none;">
-        <span class="saving-text" id="gasUsporaUnit">Úspora 20 €/MWh →</span>
-        <span class="saving-num" id="gasUsporaDisp">897,90 € / rok</span>
+        <span class="saving-text" id="gasUsporaUnit">Úspora 20,0 €/MWh →</span>
+        <span class="saving-num" id="gasUsporaDisp">897,9 € / rok</span>
       </div>
 
       <div class="data-row kombi-only" id="gasKombiRow2028" style="display:none;">
@@ -1394,13 +1394,13 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
         </div>
       </div>
       <div class="saving-badge kombi-only" id="gasKombiRowUsporaFix" style="display:none;">
-        <span class="saving-text" id="gasUsporaFixUnit">Úspora 20 €/MWh →</span>
-        <span class="saving-num" id="gasUsporaFixDisp">897,90 € / rok</span>
+        <span class="saving-text" id="gasUsporaFixUnit">Úspora 20,0 €/MWh →</span>
+        <span class="saving-num" id="gasUsporaFixDisp">897,9 € / rok</span>
       </div>
 
       <div class="saving-badge" id="gasBottomSavingBadge">
-        <span class="saving-text" id="gasSavUnit">Úspora 20,50 €/MWh →</span>
-        <span class="saving-num" id="gasSavYear">897,90 € / rok</span>
+        <span class="saving-text" id="gasSavUnit">Úspora 20,5 €/MWh →</span>
+        <span class="saving-num" id="gasSavYear">897,9 € / rok</span>
       </div>
     </div>
 
@@ -1466,7 +1466,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
 
       <div class="fee-row computed">
         <span class="fee-label">Ročný poplatok (12 mes.)</span>
-        <span class="fee-value" id="feeYearly">540,00 €</span>
+        <span class="fee-value" id="feeYearly">540,0 €</span>
       </div>
     </div>
 
@@ -1717,9 +1717,9 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     }
   }
 
-  const sk2  = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-  const mwh2 = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €/MWh';
-  const num2 = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const sk2  = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' €';
+  const mwh2 = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' €/MWh';
+  const num2 = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const dsk  = d => d.toLocaleDateString('sk-SK');
   const num  = id => parseFloat(document.getElementById(id).value) || 0;
   const v    = id => document.getElementById(id);
@@ -1834,16 +1834,16 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     const isGasKombi = FS_MODE.gas === 'KOMBI';
 
     if (isGasKombi) {
-      v('gasUsporaUnit').textContent    = 'Úspora ' + unitGas.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
+      v('gasUsporaUnit').textContent    = 'Úspora ' + unitGas.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh →';
       v('gasUsporaDisp').textContent    = sk2(savGasYear) + ' / rok';
-      v('gasUsporaFixUnit').textContent = 'Úspora ' + unitGasFix.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
+      v('gasUsporaFixUnit').textContent = 'Úspora ' + unitGasFix.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh →';
       v('gasUsporaFixDisp').textContent = sk2(savGasYearFix) + ' / rok';
     }
 
     if (isElKombi) {
-      v('elUsporaUnit').textContent    = 'Úspora ' + unitEl.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
+      v('elUsporaUnit').textContent    = 'Úspora ' + unitEl.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh →';
       v('elUsporaDisp').textContent    = sk2(savElYear) + ' / rok';
-      v('elUsporaFixUnit').textContent = 'Úspora ' + unitElFix.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
+      v('elUsporaFixUnit').textContent = 'Úspora ' + unitElFix.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh →';
       v('elUsporaFixDisp').textContent = sk2(savElYearFix) + ' / rok';
     }
 
@@ -1911,8 +1911,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     v('curElDisp').textContent   = num2(curEl);
     v('curGasDisp').textContent  = num2(curGas);
 
-    v('elSavUnit').textContent  = 'Úspora ' + unitEl.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
-    v('gasSavUnit').textContent = 'Úspora ' + unitGas.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' €/MWh →';
+    v('elSavUnit').textContent  = 'Úspora ' + unitEl.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh →';
+    v('gasSavUnit').textContent = 'Úspora ' + unitGas.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh →';
     v('elSavYear').textContent  = sk2(savEl)  + ' / rok';
     v('gasSavYear').textContent = sk2(savGas) + ' / rok';
 
@@ -2382,6 +2382,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     const warnings = [];
     const tag = i => multi ? fileNames[i] + ': ' : '';
     const r4  = x => (x === null || !multi) ? x : Math.round(x * 1e4) / 1e4;
+    const r1  = x => x === null ? x : Math.round(x * 10) / 10;   // ceny €/MWh na 1 desatinné miesto
 
     list.forEach((d, i) => {
       if (!d.name)      missing.push(tag(i) + 'Odberateľ');
@@ -2470,27 +2471,28 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
         applyCategoryState(cat);
 
         const max = wavg(cat, 'max');
-        if (!consMissing[cat] && max !== null) v(idMax).value = r4(max);
+        if (!consMissing[cat] && max !== null) v(idMax).value = r1(max);
 
         const cur = wavg(cat, 'cur');
         if (cur !== null) {
-          v(idCur).value = r4(cur);
-          v(id27).value  = r4(cur);                 // záloha, ak Excel nemá predpoklad
+          v(idCur).value = r1(cur);
+          v(id27).value  = r1(cur);                 // záloha, ak Excel nemá predpoklad
           const kind = pickKind(cat);
           if (kind) setFixSpot(fs, kind);
         }
         const f27 = wavg(cat, 'f27');
-        if (f27 !== null) v(id27).value = r4(f27);
+        if (f27 !== null) v(id27).value = r1(f27);
       });
 
     recalc();
 
     // rozpis po firmách (zobrazí sa v tooltipe stavu importu)
     const fmt = x => x === null ? '—' : (Math.round(x * 100) / 100).toLocaleString('sk-SK');
+    const fmtP = x => x === null ? '—' : (Math.round(x * 10) / 10).toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1});
     const detail = list.map((d, i) =>
       (fileNames[i] || '') + ' – ' + (d.name || '?') +
-      '\n   elektrina: ' + fmt(d.el.cons) + ' MWh, ' + fmt(d.el.cur) + ' €/MWh' +
-      '\n   plyn: ' + fmt(d.gas.cons) + ' MWh, ' + fmt(d.gas.cur) + ' €/MWh').join('\n');
+      '\n   elektrina: ' + fmt(d.el.cons) + ' MWh, ' + fmtP(d.el.cur) + ' €/MWh' +
+      '\n   plyn: ' + fmt(d.gas.cons) + ' MWh, ' + fmtP(d.gas.cur) + ' €/MWh').join('\n');
     return { missing: missing, warnings: warnings, detail: detail };
   }
 
@@ -2652,16 +2654,16 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
         if (!pc) { problems.push(label + ': pre ' + startYear + ' / ' + years + ' r. nie je v tabuľke stĺpec'); return; }
         const best = pickLowest(rows, pc.col);
         if (!best) { problems.push(label + ': v tabuľke chýba cena (' + pc.label + ')'); return; }
-        v(inputId).value = round2(best.price);
-        applied.push(label + ' ' + round2(best.price).toLocaleString('sk-SK', {minimumFractionDigits:2}) + ' (' + pc.label + (best.supplier ? ', ' + best.supplier : '') + ')');
+        v(inputId).value = round1(best.price);
+        applied.push(label + ' ' + round1(best.price).toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' (' + pc.label + (best.supplier ? ', ' + best.supplier : '') + ')');
 
         // Predpokladaná cena = cena pre rok začiatku viazanosti (jednoročný stĺpec B..E), najnižšia od dodávateľov
         if (predId) {
           const yc = priceColumnFor(startYear, 1);
           const pred = yc ? pickLowest(rows, yc.col) : null;
           if (pred) {
-            v(predId).value = round2(pred.price);
-            applied.push(label + ' predpoklad ' + startYear + ': ' + round2(pred.price).toLocaleString('sk-SK', {minimumFractionDigits:2}) + (pred.supplier ? ' (' + pred.supplier + ')' : ''));
+            v(predId).value = round1(pred.price);
+            applied.push(label + ' predpoklad ' + startYear + ': ' + round1(pred.price).toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + (pred.supplier ? ' (' + pred.supplier + ')' : ''));
           } else {
             problems.push(label + ': v tabuľke chýba predpokladaná cena pre rok ' + startYear);
           }
@@ -2684,8 +2686,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
         const yc2 = priceColumnFor(y2, 1);
         const pred2 = yc2 ? pickLowest(rows, yc2.col) : null;
         if (pred2) {
-          v(predId).value = round2(pred2.price);
-          applied.push(label + ' predpoklad ' + y2 + ': ' + round2(pred2.price).toLocaleString('sk-SK', {minimumFractionDigits:2}) + (pred2.supplier ? ' (' + pred2.supplier + ')' : ''));
+          v(predId).value = round1(pred2.price);
+          applied.push(label + ' predpoklad ' + y2 + ': ' + round1(pred2.price).toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + (pred2.supplier ? ' (' + pred2.supplier + ')' : ''));
         } else {
           problems.push(label + ': v tabuľke chýba predpokladaná cena pre rok ' + y2);
         }
@@ -2723,6 +2725,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   }
 
   const round2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
+  const round1 = n => Math.round((n + Number.EPSILON) * 10) / 10;
 
   function localIsoNow() {
     const d = new Date();
@@ -2825,7 +2828,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     const setN = (obj, key, id, label, optional) => {
       const n = numOf(obj[key]);
       if (n === null) { if (!optional) missing.push(label); return; }
-      v(id).value = n;
+      v(id).value = Math.round(n * 10) / 10;
     };
     const setYears = (obj, id, label) => {
       const n = numOf(obj.viazanost_roky);
