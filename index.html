@@ -2095,6 +2095,19 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     .forEach(id => v(id).addEventListener('input', onUserChange));
   ['inp_years_el','inp_years_gas','inp_start_el','inp_start_gas'].forEach(id => v(id).addEventListener('change', onUserChange));
 
+  // Ručne upravené polia „Predpoklad“ sa pri opätovnom načítaní cien už neprepisujú.
+  // (Programatický zápis hodnoty 'input' udalosť nespúšťa, takže príznak nastaví len používateľ.)
+  const MANUAL_PRED = new Set();
+  const PRED_IDS = ['inp_el2027', 'inp_gas2027', 'inp_el2028', 'inp_gas2028'];
+  PRED_IDS.forEach(id => v(id).addEventListener('input', () => MANUAL_PRED.add(id)));
+  // Zmena začiatku viazanosti posunie rok predpokladu -> ručná hodnota už neplatí pre nový rok
+  v('inp_start_el').addEventListener('change',  () => { MANUAL_PRED.delete('inp_el2027');  MANUAL_PRED.delete('inp_el2028'); });
+  v('inp_start_gas').addEventListener('change', () => { MANUAL_PRED.delete('inp_gas2027'); MANUAL_PRED.delete('inp_gas2028'); });
+
+  // Zmena počtu rokov viazanosti -> prepočíta sa Ponúkaná cena (max / FIX) z tabuľky cien
+  v('inp_years_el').addEventListener('change',  () => refreshOfferPrice('el'));
+  v('inp_years_gas').addEventListener('change', () => refreshOfferPrice('gas'));
+
   // ---------------------------------------------------------------------------
   // IMPORT Z EXCELU – vstupné údaje sa čítajú VÝHRADNE z hlavičky (prvých 7 riadkov)
   // prvého hárka. Každý údaj je dvojica „popis → hodnota (najbližšia neprázdna bunka
@@ -2600,6 +2613,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     if (names.length) CLIENT_NAME = names.join(' + ');
     CLIENTS = multi ? list.map(d => ({ name: d.name })) : [];
     if (od) OFFER_DATE = od;
+    MANUAL_PRED.clear();
     // Viazanosť je po načítaní analýzy vždy 2 roky (hodnota z Excelu sa ignoruje).
     v('inp_years_el').value = '2'; v('inp_years_gas').value = '2';
     // Začiatok viazanosti = deň po konci súčasnej viazanosti (pri viacerých OM po najneskoršom konci).
@@ -2788,6 +2802,33 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     return best;
   }
 
+  // Posledné načítané ceny zo sheetu (používa sa pri zmene počtu rokov viazanosti)
+  const PRICE_CACHE = { el: null, gas: null };
+
+  // Po zmene počtu rokov: nastaví Ponúkanú cenu (max, resp. FIX pri KOMBI) podľa nového počtu rokov.
+  // Predpoklady sa nemenia. SPOT a vypnutá komodita sa preskočia.
+  async function refreshOfferPrice(cat) {
+    if (!ENERGY_ON[cat] || FS_MODE[cat] === 'SPOT') return;
+    const label = cat === 'el' ? 'Elektrina' : 'Plyn';
+    try {
+      if (!PRICE_CACHE[cat]) PRICE_CACHE[cat] = await fetchSheetRange(PRICE_RANGES[cat]);
+      const years = Math.max(1, Math.round(num('inp_years_' + cat)) || 1);
+      const startYear = parseDateInput('inp_start_' + cat, new Date(2027, 0, 1)).getFullYear();
+      const pc = priceColumnFor(startYear, years);
+      if (!pc) { setStatus('✗ ' + label + ': pre ' + startYear + ' / ' + years + ' r. nie je v tabuľke stĺpec', false); return; }
+      const best = pickLowest(PRICE_CACHE[cat], pc.col);
+      if (!best) { setStatus('✗ ' + label + ': v tabuľke chýba cena (' + pc.label + ')', false); return; }
+      const id = FS_MODE[cat] === 'KOMBI' ? (cat === 'el' ? 'inp_elFix2028' : 'inp_gasFix2028')
+                                          : (cat === 'el' ? 'inp_elMax' : 'inp_gasMax');
+      v(id).value = round1(best.price);
+      recalc();
+      setStatus('✓ ' + label + ': ponúkaná cena aktualizovaná (' + pc.label + ')', true);
+    } catch (err) {
+      console.error(err);
+      setStatus('✗ ' + label + ': cenu pre nový počet rokov sa nepodarilo načítať – ' + err.message, false);
+    }
+  }
+
   async function loadPrices() {
     const btn = v('loadPricesBtn');
     btn.disabled = true;
@@ -2795,6 +2836,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     try {
       const elRows  = await fetchSheetRange(PRICE_RANGES.el);
       const gasRows = await fetchSheetRange(PRICE_RANGES.gas);
+      PRICE_CACHE.el = elRows; PRICE_CACHE.gas = gasRows;
 
       const applied = [];
       const problems = [];
@@ -2820,6 +2862,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
         applied.push(label + ' ' + round1(best.price).toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' (' + pc.label + (best.supplier ? ', ' + best.supplier : '') + ')');
 
         // Predpokladaná cena = cena pre rok začiatku viazanosti (jednoročný stĺpec B..E), najnižšia od dodávateľov
+        if (predId && MANUAL_PRED.has(predId)) predId = null;   // ručne upravený predpoklad sa nemení
         if (predId) {
           const yc = priceColumnFor(startYear, 1);
           const pred = yc ? pickLowest(rows, yc.col) : null;
@@ -2844,6 +2887,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       [['Elektrina', elRows, elKombi, 'inp_start_el', 'inp_el2028'],
        ['Plyn',      gasRows, gasKombi, 'inp_start_gas', 'inp_gas2028']].forEach(([label, rows, kombi, startId, predId]) => {
         if (!kombi) return;
+        if (MANUAL_PRED.has(predId)) return;   // ručne upravený predpoklad sa nemení
         const y2 = parseDateInput(startId, new Date(2028, 0, 1)).getFullYear();
         const yc2 = priceColumnFor(y2, 1);
         const pred2 = yc2 ? pickLowest(rows, yc2.col) : null;
@@ -3001,6 +3045,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       if (isDate(obj.zaciatok)) v(id).value = obj.zaciatok; else missing.push(label);
     };
 
+    MANUAL_PRED.clear();
     if (typeof s.odberatel === 'string' && s.odberatel.trim()) CLIENT_NAME = s.odberatel.trim();
     else missing.push('odberateľ');
     CLIENTS = Array.isArray(s.odberatelia) && s.odberatelia.length > 1
