@@ -1079,7 +1079,7 @@ footer {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 22px;
-  padding: 8px 18px 8px 16px;
+  padding: 8px 12px;
   cursor: pointer;
   color: var(--text);
   font-family: 'Inter', sans-serif;
@@ -1674,9 +1674,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     </div>
 
     <div class="theme-tucked">
-      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Prepnúť tmavý / svetlý režim" aria-label="Prepnúť tmavý / svetlý režim">
         <span class="icon" id="themeIcon">🌙</span>
-        <span id="themeLabel">Tmavý režim</span>
       </button>
     </div>
   </div>
@@ -1689,7 +1688,6 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
     const isLight = html.getAttribute('data-theme') === 'light';
     html.setAttribute('data-theme', isLight ? 'dark' : 'light');
     v('themeIcon').textContent  = isLight ? '🌙' : '☀️';
-    v('themeLabel').textContent = isLight ? 'Tmavý režim' : 'Svetlý režim';
   }
 
   function exportToPdf() {
