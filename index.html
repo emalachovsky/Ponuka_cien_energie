@@ -1328,10 +1328,8 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
 :root { --old: #e5645c; --old-glow: rgba(229,100,92,0.12); --new: #3fb950; --new-glow: rgba(63,185,80,0.14); }
 html[data-theme="light"] { --old: #c0392b; --old-glow: rgba(192,57,43,0.08); --new: #1e7a3c; --new-glow: rgba(30,122,60,0.10); }
 
-/* stará / súčasná cena a predpoklad „bez zmeny“ */
-.ecard .lbl-old { color: var(--old); }
-.ecard-el #curElDisp, .ecard-gas #curGasDisp { color: var(--old); }
-#inp_el2027, #inp_el2028, #inp_gas2027, #inp_gas2028 {
+/* texty a súčasná cena ostávajú v pôvodných farbách; červená len pre cenu 2027, ak je vyššia ako súčasná */
+#inp_el2027.price-up, #inp_gas2027.price-up {
   color: var(--old);
 }
 
@@ -3555,7 +3553,13 @@ html[data-theme="light"] .energy-grid .ecard-gas .offer-row:not(.kombi-only)::af
     if(!isFinite(v)||v<=0||!vis){m.style.display='none';return;}
     m.innerHTML='to je pribli\u017ene <b>'+fmt(v/12)+' \u20ac</b> mesa\u010dne'; m.style.display='';
   }
+  function priceUp(id,curId){
+    var e=document.getElementById(id); if(!e) return;
+    var p=val(id), c=val(curId);
+    e.classList.toggle('price-up', isFinite(p)&&isFinite(c)&&p>c);
+  }
   function upd(){
+    priceUp('inp_el2027','inp_curEl'); priceUp('inp_gas2027','inp_curGas');
     bars('El','inp_el2027','inp_elMax'); bars('Gas','inp_gas2027','inp_gasMax');
     month('El','elSavYear','elBottomSavingBadge'); month('Gas','gasSavYear','gasBottomSavingBadge');
   }
