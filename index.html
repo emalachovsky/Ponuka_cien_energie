@@ -1328,6 +1328,50 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   .hero .hero-num { font-size: 24px; }
   .ycard-num { font-size: 24px; }
 }
+
+/* ═══ PSYCHOLOGIA CIEN: stará = červená ▲, ponúkaná/úspora = zelená ▼ ═══ */
+:root { --old: #e5645c; --old-glow: rgba(229,100,92,0.12); --new: #3fb950; --new-glow: rgba(63,185,80,0.14); }
+html[data-theme="light"] { --old: #c0392b; --old-glow: rgba(192,57,43,0.08); --new: #1e7a3c; --new-glow: rgba(30,122,60,0.10); }
+
+/* stará / súčasná cena a predpoklad „bez zmeny“ */
+.ecard .lbl-old { color: var(--old); }
+.ecard .lbl-old::before { content: "▲ "; font-size: 0.85em; }
+.ecard-el #curElDisp, .ecard-gas #curGasDisp { color: var(--old); }
+#inp_el2027, #inp_el2028, #inp_gas2027, #inp_gas2028 {
+  color: var(--old);
+  text-decoration: line-through; text-decoration-thickness: 1px; text-decoration-color: var(--old);
+}
+
+/* ponúkaná cena */
+.ecard.ecard-el .offer-row, .ecard.ecard-gas .offer-row {
+  background: var(--new-glow); border-color: var(--new);
+}
+html[data-theme="dark"] .ecard.ecard-el .offer-row, html[data-theme="dark"] .ecard.ecard-gas .offer-row {
+  background: rgba(63,185,80,0.14);
+  box-shadow: 0 0 16px 2px rgba(63,185,80,0.35), inset 0 0 10px rgba(63,185,80,0.08);
+}
+.ecard .offer-label, .ecard .offer-value { color: var(--new); }
+.ecard .offer-label::before { content: "▼ "; font-size: 0.85em; }
+html[data-theme] .ecard .inline-edit-input.inline-edit-offer.el-color,
+html[data-theme] .ecard .inline-edit-input.inline-edit-offer.gas-color {
+  color: var(--new); border-color: var(--new); font-weight: 800;
+}
+html[data-theme="dark"] .ecard .inline-edit-input.inline-edit-offer.el-color,
+html[data-theme="dark"] .ecard .inline-edit-input.inline-edit-offer.gas-color {
+  color: #d9ffe0; text-shadow: 0 0 6px rgba(63,185,80,0.9), 0 0 14px rgba(63,185,80,0.5);
+}
+html[data-theme] .ecard .inline-edit-input.inline-edit-offer.el-color:focus,
+html[data-theme] .ecard .inline-edit-input.inline-edit-offer.gas-color:focus {
+  border-color: var(--new); box-shadow: 0 0 0 3px var(--new-glow);
+}
+
+/* úspora */
+html[data-theme] .ecard.ecard-el .saving-badge, html[data-theme] .ecard.ecard-gas .saving-badge {
+  background: var(--new-glow); border: 1px solid var(--new);
+}
+.ecard.ecard-el .saving-num, .ecard.ecard-gas .saving-num { color: var(--new); }
+.energy-grid .ecard .saving-num { font-size: 22px; }
+.ecard .saving-text { color: var(--text); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -1393,13 +1437,13 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       </div>
 
       <div class="data-row">
-        <span class="data-label">Súčasná cena (2026)</span>
+        <span class="data-label lbl-old">Súčasná cena (2026)</span>
         <div class="data-value-col">
           <span class="data-value" id="curElDisp">140,0</span><span class="data-unit">€/MWh</span>
         </div>
       </div>
       <div class="data-row">
-        <span class="data-label">Predpoklad <span id="elYearLabel">2027</span> (bez zmeny)</span>
+        <span class="data-label lbl-old">Predpoklad <span id="elYearLabel">2027</span> (bez zmeny)</span>
         <div class="inline-edit-wrap">
           <input type="number" class="inline-edit-input" id="inp_el2027" value="165" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
@@ -1418,7 +1462,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       </div>
 
       <div class="data-row kombi-only" id="elKombiRow2028" style="display:none;">
-        <span class="data-label">Predpoklad <span id="elYear2Label">2028</span></span>
+        <span class="data-label lbl-old">Predpoklad <span id="elYear2Label">2028</span></span>
         <div class="inline-edit-wrap">
           <input type="number" class="inline-edit-input" id="inp_el2028" value="165" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
@@ -1480,13 +1524,13 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       </div>
 
       <div class="data-row">
-        <span class="data-label">Súčasná cena (2026)</span>
+        <span class="data-label lbl-old">Súčasná cena (2026)</span>
         <div class="data-value-col">
           <span class="data-value" id="curGasDisp">55,0</span><span class="data-unit">€/MWh</span>
         </div>
       </div>
       <div class="data-row">
-        <span class="data-label">Predpoklad <span id="gasYearLabel">2027</span> (bez zmeny)</span>
+        <span class="data-label lbl-old">Predpoklad <span id="gasYearLabel">2027</span> (bez zmeny)</span>
         <div class="inline-edit-wrap">
           <input type="number" class="inline-edit-input" id="inp_gas2027" value="60" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
@@ -1506,7 +1550,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
       </div>
 
       <div class="data-row kombi-only" id="gasKombiRow2028" style="display:none;">
-        <span class="data-label">Predpoklad <span id="gasYear2Label">2028</span></span>
+        <span class="data-label lbl-old">Predpoklad <span id="gasYear2Label">2028</span></span>
         <div class="inline-edit-wrap">
           <input type="number" class="inline-edit-input" id="inp_gas2028" value="60" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
