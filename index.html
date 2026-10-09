@@ -1389,6 +1389,52 @@ html[data-theme] .ecard .inline-edit-input.inline-edit-offer.gas-color:focus { b
 .energy-grid .ecard-gas .offer-row:not(.kombi-only)::after { background: var(--yellow); color: #1a1400; }
 html[data-theme="light"] .energy-grid .ecard-el .offer-row:not(.kombi-only)::after,
 html[data-theme="light"] .energy-grid .ecard-gas .offer-row:not(.kombi-only)::after { color: #fff; }
+
+/* ═══ KOMPAKTNÁ VÝŠKA (desktop): celá stránka sa zmestí na obrazovku MacBook Air 15" ═══ */
+@media (min-width: 769px) {
+  .page { padding: 6px 18px 8px; }
+  .header { padding: 8px 22px 8px; margin-bottom: 6px; }
+  .header-title-main { font-size: 32px; }
+  .header-left { gap: 3px; }
+  .client-badge { padding: 4px 16px 5px; gap: 2px; }
+  .client-badge .name { font-size: 22px; }
+  .client-row .cn { font-size: 17px; }
+  .energy-grid, .stat-row, .year-grid { gap: 6px; margin-bottom: 6px; }
+  .ecard { padding: 8px 16px 9px; }
+  .ecard-header { margin-bottom: 4px; }
+  .supplier-row { margin-bottom: 4px; }
+  .cons-highlight { padding: 5px 12px; margin-bottom: 3px; }
+  .cons-highlight-num { font-size: 21px; }
+  .cons-highlight-label { margin-bottom: 2px; }
+  .data-row { padding: 3px 0; }
+  .energy-grid .ecard .offer-row:not(.kombi-only) { margin-top: 14px; padding: 4px 12px; }
+  .energy-grid .ecard .inline-edit-input.inline-edit-offer { font-size: 20px; padding: 2px 8px; }
+  .inline-edit-input { padding: 2px 8px; }
+  .pbar { margin-top: 6px; padding: 3px 12px 4px; }
+  .pbar-row { grid-template-columns: 90px 1fr auto; padding: 1px 0; }
+  .pbar-k { white-space: nowrap; }
+  .saving-badge { margin-top: 6px; padding: 4px 12px; }
+  .energy-grid .ecard .saving-num { font-size: 20px; }
+  .sav-month { margin-top: 3px; }
+  .input-section, .fees-section { padding: 8px 16px; margin-bottom: 6px; }
+  .stat-row .input-section, .stat-row .fees-section { margin-bottom: 0; }
+  .input-section.contract-el .section-title,
+  .input-section.contract-gas .section-title { font-size: 18px; margin-bottom: 4px; }
+  .input-grid { gap: 8px; }
+  .input-field { gap: 2px; }
+  .input-wrap input, .input-wrap select { padding-top: 4px; padding-bottom: 4px; }
+  .contract-range-row { margin-top: 5px; padding-top: 5px; }
+  .fee-row { padding: 3px 0; }
+  .fee-input-wrap input { padding: 3px 10px; }
+  .ycard { padding: 7px 16px 8px; }
+  .ycard-label { margin-bottom: 3px; }
+  .ycard-num { font-size: 24px; }
+  .ycard-total .ycard-num { font-size: 26px; }
+  .ycard-note { margin-top: 3px; }
+  .bottom-bar { margin-top: 6px; }
+  .pdf-export-btn { padding: 5px 18px; }
+  .theme-toggle { padding: 5px 12px; }
+}
 </style>
 </head>
 <body>
