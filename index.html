@@ -2717,17 +2717,19 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
 
   // ---------------------------------------------------------------------------
   // NAČÍTAŤ CENY z Google tabuľky
-  // Zdroj: hárok „Budúce ceny energií“, elektrina A6:J7, plyn A12:J13
+  // Zdroj: hárok „Orientačné ceny energií“ (horná tabuľka), riadky dodávateľov:
+  //   elektrina A7:J10 (hlavička v riadku 6), plyn A13:J16 (hlavička v riadku 12)
   //   stĺpce: B=2027 C=2028 D=2029 E=2030 | F=Ø27-28 G=Ø27-29 H=Ø27-30 I=Ø28-29 J=Ø28-30
-  //   (H je v hlavičke hárka chybne popísaný ako „28-30“, ale číselne je to Ø 2027–2030)
+  //   (hlavičky v hárku sú už správne popísané)
   // Cena sa vyberie podľa začiatku viazanosti a počtu rokov a vloží do „Ponúkaná cena“.
   // Do „Predpoklad <rok>“ sa vloží cena pre rok začiatku viazanosti (stĺpce B..E); pri KOMBI aj pre 2. rok.
-  // Polia zostávajú editovateľné. Z dodávateľov v riadkoch sa berie najnižšia cena.
+  // Polia zostávajú editovateľné. Z riadkov dodávateľov sa berie iba MVM (PRICE_SUPPLIER).
   // Tabuľka musí byť zdieľaná „Ktokoľvek s odkazom – zobraziť“.
   // ---------------------------------------------------------------------------
   const PRICE_SHEET_ID  = '1yjOl0-yYSOI2lTCxflBfZWiohGkQmJkMVJLIlxGBUdU';
   const PRICE_SHEET_GID = '1494981420';
-  const PRICE_RANGES    = { el: 'A6:J7', gas: 'A12:J13' };
+  const PRICE_RANGES    = { el: 'A7:J10', gas: 'A13:J16' };
+  const PRICE_SUPPLIER  = 'MVM';   // čítajú sa a používajú iba ceny tohto dodávateľa
 
   // stĺpec (index v rozsahu A..J) pre jednotlivé roky a pre priemery
   const PRICE_YEAR_COL = { 2027: 1, 2028: 2, 2029: 3, 2030: 4 };
@@ -2792,6 +2794,7 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
   function pickLowest(rows, col) {
     let best = null;
     rows.forEach(r => {
+      if (!String(r[0] == null ? '' : r[0]).trim().toUpperCase().startsWith(PRICE_SUPPLIER)) return;   // len dodávateľ MVM
       const n = parseSkNum(r[col]);
       if (n !== null && n > 0 && (best === null || n < best.price)) {
         best = { price: n, supplier: typeof r[0] === 'string' ? r[0].trim() : '' };
