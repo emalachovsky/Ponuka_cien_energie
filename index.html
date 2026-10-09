@@ -1335,11 +1335,9 @@ html[data-theme="light"] { --old: #c0392b; --old-glow: rgba(192,57,43,0.08); --n
 
 /* stará / súčasná cena a predpoklad „bez zmeny“ */
 .ecard .lbl-old { color: var(--old); }
-.ecard .lbl-old::before { content: "▲ "; font-size: 0.85em; }
 .ecard-el #curElDisp, .ecard-gas #curGasDisp { color: var(--old); }
 #inp_el2027, #inp_el2028, #inp_gas2027, #inp_gas2028 {
   color: var(--old);
-  text-decoration: line-through; text-decoration-thickness: 1px; text-decoration-color: var(--old);
 }
 
 /* ponúkaná cena */
@@ -1351,7 +1349,6 @@ html[data-theme="dark"] .ecard.ecard-el .offer-row, html[data-theme="dark"] .eca
   box-shadow: 0 0 16px 2px rgba(63,185,80,0.35), inset 0 0 10px rgba(63,185,80,0.08);
 }
 .ecard .offer-label, .ecard .offer-value { color: var(--new); }
-.ecard .offer-label::before { content: "▼ "; font-size: 0.85em; }
 html[data-theme] .ecard .inline-edit-input.inline-edit-offer.el-color,
 html[data-theme] .ecard .inline-edit-input.inline-edit-offer.gas-color {
   color: var(--new); border-color: var(--new); font-weight: 800;
@@ -1372,6 +1369,18 @@ html[data-theme] .ecard.ecard-el .saving-badge, html[data-theme] .ecard.ecard-ga
 .ecard.ecard-el .saving-num, .ecard.ecard-gas .saving-num { color: var(--new); }
 .energy-grid .ecard .saving-num { font-size: 22px; }
 .ecard .saving-text { color: var(--text); font-weight: 600; }
+
+/* šípky pri číslach: ▲ stará cena (červená), ▼ ponúkaná cena a úspora (zelená) */
+#curElDisp::before, #curGasDisp::before,
+.inline-edit-wrap:has(#inp_el2027)::before, .inline-edit-wrap:has(#inp_el2028)::before,
+.inline-edit-wrap:has(#inp_gas2027)::before, .inline-edit-wrap:has(#inp_gas2028)::before {
+  content: "▲"; color: var(--old); font-size: 0.8em; margin-right: 6px; font-family: 'Inter', sans-serif;
+}
+.ecard .offer-row .inline-edit-wrap::before,
+.energy-grid .ecard .saving-num::before {
+  content: "▼"; color: var(--new); font-size: 0.8em; margin-right: 6px; font-family: 'Inter', sans-serif;
+}
+.ecard .offer-row .inline-edit-wrap::before { font-size: 1.1em; }
 </style>
 </head>
 <body>
