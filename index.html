@@ -2389,7 +2389,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   //   Dátum ponuky:                       -> dátum ponuky (=TODAY() -> dnešný dátum)
   //   Viazanosť kontraktu v rokoch:       -> počet rokov (elektrina aj plyn)
   //   Začiatok:                           -> začiatok viazanosti (elektrina aj plyn)
-  //   Celková spotreba elektrina / plyn:  -> ročná spotreba (MWh)
+  //   Celková spotreba elektrina / plyn:  -> ročná spotreba (MWh) – stĺpec C; prázdne = klient komoditu nemá
   //   Vážený priemer ceny elektrina / plyn-> súčasná cena (€/MWh)
   //   Elektrina / Plyn – predpoklad 2027  -> predpokladaná cena bez zmeny (€/MWh)
   //   Elektrina / Plyn – Ponuka MAX       -> ponúkaná cena (max) (€/MWh)
@@ -2645,6 +2645,24 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       }
     }
 
+    // 1-spotreba) ROČNÁ SPOTREBA – ZÁKLAD JE HLAVIČKA, STĹPEC C (riadok s popisom
+    //     „Celková spotreba elektrina / plyn“ v stĺpci A, hodnota v stĺpci C).
+    //     • číslo > 0  -> ročná spotreba komodity (má prednosť pred tabuľkou OM)
+    //     • prázdne (alebo 0 / nečíselné) -> klient danú komoditu NEMÁ (cons = null)
+    //     • popis v hlavičke vôbec nie je -> (undefined) použije sa záloha z tabuľky OM
+    const headerCons = {};
+    for (let r = 0; r < HEADER_ROWS; r++) {
+      const a = ws[XLSX.utils.encode_cell({ r, c: 0 })];
+      if (!a || typeof a.v !== 'string') continue;
+      const n = norm(a.v);
+      if (n.startsWith('vazeny') || n.includes('priemer') || !n.includes('spotreba')) continue;
+      const cat = n.includes('elektrin') ? 'el' : (n.includes('plyn') ? 'gas' : null);
+      if (!cat || headerCons[cat] !== undefined) continue;
+      const cC = ws[XLSX.utils.encode_cell({ r, c: 2 })];          // stĺpec C
+      const val = hasValue(cC) ? numOfCell(cC) : null;
+      headerCons[cat] = (val !== null && val > 0) ? val : null;
+    }
+
     // 1a) PEVNÉ ADRESY G7:H10 – predpoklad 2027 a Ponuka MAX (popis v G, hodnota v H)
     //     Popis sa overuje len podľa kľúčových slov (odolné voči preklepom typu „Plyn - – …“).
     const FIXED_PRICE_CELLS = [
@@ -2792,13 +2810,19 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       bound:     rs.bound,
       kindsRaw:  rs.kindsRaw
     };
-    // Zdroj pravdy = tabuľka OM (stĺpec J, súčet riadkov; L = vážený priemer ceny).
-    // Hlavička (spotreba / priemer ceny) sa použije len ako záloha.
+    // Zdroj pravdy pre SPOTREBU = hlavička, stĺpec C (prázdne = komodita sa nepoužíva).
+    // Tabuľka OM slúži na výpočet (vážený priemer ceny) a ako záloha, ak v hlavičke popis chýba.
     // cons === null = klient nemá danú komodity (prázdna spotreba).
     [['el', 'consEl', 'curEl', 'el2027', 'elMax'], ['gas', 'consGas', 'curGas', 'gas2027', 'gasMax']]
       .forEach(([cat, kCons, kCur, k27, kMax]) => {
-        let cons = rs.rows[cat].cons;
-        if (cons === null) cons = num(kCons);
+        // Spotreba: základ = hlavička (stĺpec C). Prázdne = klient komoditu nemá (null).
+        // Tabuľka OM slúži len ako záloha, ak hlavička popis spotreby vôbec neobsahuje.
+        let cons;
+        if (headerCons[cat] !== undefined) cons = headerCons[cat];
+        else {
+          cons = rs.rows[cat].cons;
+          if (cons === null) cons = num(kCons);
+        }
         let cur = rs.rows[cat].price;
         if (cur === null) cur = num(kCur);
         const f27 = num(k27);                       // ak Excel nemá predpoklad, použije sa súčasná cena
