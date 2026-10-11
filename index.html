@@ -1188,6 +1188,27 @@ footer {
 .comm-sub { font-size: 11.4px; color: var(--text-dim); margin-top: 4px; }
 .comm-x { background: none; border: none; color: var(--text-dim); font-size: 26.6px; cursor: pointer; line-height: 1; padding: 0 8px; }
 .comm-x:hover { color: var(--text); }
+.cm-ptable { margin: 0 0 14px; }
+.cm-pt-title { font-size: 12.3px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+.cm-pt-wrap { overflow-x: auto; }
+.cm-pt { border-collapse: collapse; width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 13.4px; white-space: nowrap; }
+.cm-pt th, .cm-pt td { padding: 5px 8px; text-align: right; border-bottom: 1px solid var(--border); color: var(--text); }
+.cm-pt thead th { color: var(--text-dim); font-weight: 600; }
+.cm-pt tbody th { text-align: left; font-family: 'Inter', sans-serif; font-weight: 600; color: var(--text-dim); }
+.cm-pt .cm-pt-cat td { text-align: left; font-family: 'Inter', sans-serif; font-weight: 700; border-bottom: none; padding-top: 12px; }
+.cm-pt .cm-pt-el td { color: var(--blue); }
+.cm-pt .cm-pt-gas td { color: var(--yellow); }
+.cm-pt .cm-r-raw td { color: var(--blue); }
+.cm-pt .cm-r-raw.cm-r-gas td { color: var(--yellow); }
+.cm-pt .cm-r-base td { color: #ff8f88; }
+html[data-theme="light"] .cm-pt .cm-r-base td { color: #dc5a52; }
+.cm-pt .cm-r-off td, .cm-pt .cm-r-off th { font-size: 14.4px; }
+.cm-pt td.cm-hl { background: var(--new-glow); color: var(--new); font-weight: 700; }
+.cm-pt-note { font-size: 11.4px; color: var(--text-dim); margin-top: 8px; }
+.cm-margin { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; margin: 0 0 14px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; }
+.cm-margin-label { font-size: 13.8px; font-weight: 700; color: var(--text); }
+.cm-margin .inline-edit-input { width: 100px; }
+.cm-margin-hint { font-size: 11.4px; color: var(--text-dim); flex: 1 1 220px; }
 .comm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 768px) { .comm-grid { grid-template-columns: 1fr; } .comm-title { font-size: 22.8px; } }
 .comm-card .ecard { padding: 16px 18px; }
@@ -1340,6 +1361,7 @@ html[data-theme] .ecard.ecard-el .saving-badge, html[data-theme] .ecard.ecard-ga
 .ecard.ecard-el .saving-num, .ecard.ecard-gas .saving-num { color: var(--new); }
 .energy-grid .ecard .saving-num { font-size: 22px; }
 .ecard .saving-text { color: var(--text); font-weight: 600; }
+.saving-num .per-year, .ecard .saving-num .per-year { color: var(--text); }
 
 
 
@@ -1621,7 +1643,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         </div>
       </div>
       <div class="data-row">
-        <span class="data-label lbl-old">Predpoklad <span id="elPredTag"></span><span id="elYearLabel">2027</span></span>
+        <span class="data-label lbl-old"><span id="elPredWord">Predpoklad</span> <span id="elPredTag"></span><span id="elYearLabel">2027</span></span>
         <div class="inline-edit-wrap">
           <input type="number" class="inline-edit-input" id="inp_el2027" value="165" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
@@ -1637,11 +1659,11 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
 
       <div class="saving-badge kombi-only" id="elKombiRowUspora" style="display:none;">
         <span class="saving-text" id="elUsporaUnit">Úspora 30 €/MWh</span>
-        <span class="saving-num" id="elUsporaDisp">1 614,1 € / rok</span>
+        <span class="saving-num" id="elUsporaDisp">1 614,1 €<span class="per-year"> / rok</span></span>
       </div>
 
       <div class="data-row kombi-only" id="elKombiRow2028" style="display:none;">
-        <span class="data-label lbl-old">Predpoklad <span id="elYear2Label">2028</span></span>
+        <span class="data-label lbl-old"><span id="elPred2Word">Predpoklad</span> <span id="elYear2Label">2028</span></span>
         <div class="inline-edit-wrap">
           <input type="number" class="inline-edit-input" id="inp_el2028" value="165" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
@@ -1656,12 +1678,12 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       </div>
       <div class="saving-badge kombi-only" id="elKombiRowUsporaFix" style="display:none;">
         <span class="saving-text" id="elUsporaFixUnit">Úspora 30 €/MWh</span>
-        <span class="saving-num" id="elUsporaFixDisp">1 614,1 € / rok</span>
+        <span class="saving-num" id="elUsporaFixDisp">1 614,1 €<span class="per-year"> / rok</span></span>
       </div>
 
       <div class="saving-badge" id="elBottomSavingBadge">
         <span class="saving-text" id="elSavUnit">Úspora 35 €/MWh</span>
-        <span class="saving-num" id="elSavYear">1 614,1 € / rok</span>
+        <span class="saving-num" id="elSavYear">1 614,1 €<span class="per-year"> / rok</span></span>
       </div>
       <div class="sav-month" id="savMonthEl" style="display:none;"></div>
     </div>
@@ -1710,7 +1732,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         </div>
       </div>
       <div class="data-row">
-        <span class="data-label lbl-old">Predpoklad <span id="gasPredTag"></span><span id="gasYearLabel">2027</span></span>
+        <span class="data-label lbl-old"><span id="gasPredWord">Predpoklad</span> <span id="gasPredTag"></span><span id="gasYearLabel">2027</span></span>
         <div class="inline-edit-wrap">
           <input type="number" class="inline-edit-input" id="inp_gas2027" value="60" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
@@ -1727,11 +1749,11 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
 
       <div class="saving-badge kombi-only" id="gasKombiRowUspora" style="display:none;">
         <span class="saving-text" id="gasUsporaUnit">Úspora 20,0 €/MWh</span>
-        <span class="saving-num" id="gasUsporaDisp">897,9 € / rok</span>
+        <span class="saving-num" id="gasUsporaDisp">897,9 €<span class="per-year"> / rok</span></span>
       </div>
 
       <div class="data-row kombi-only" id="gasKombiRow2028" style="display:none;">
-        <span class="data-label lbl-old">Predpoklad <span id="gasYear2Label">2028</span></span>
+        <span class="data-label lbl-old"><span id="gasPred2Word">Predpoklad</span> <span id="gasYear2Label">2028</span></span>
         <div class="inline-edit-wrap">
           <input type="number" class="inline-edit-input" id="inp_gas2028" value="60" step="0.1" min="0">
           <span class="inline-edit-unit">€/MWh</span>
@@ -1746,12 +1768,12 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       </div>
       <div class="saving-badge kombi-only" id="gasKombiRowUsporaFix" style="display:none;">
         <span class="saving-text" id="gasUsporaFixUnit">Úspora 20,0 €/MWh</span>
-        <span class="saving-num" id="gasUsporaFixDisp">897,9 € / rok</span>
+        <span class="saving-num" id="gasUsporaFixDisp">897,9 €<span class="per-year"> / rok</span></span>
       </div>
 
       <div class="saving-badge" id="gasBottomSavingBadge">
         <span class="saving-text" id="gasSavUnit">Úspora 20,5 €/MWh</span>
-        <span class="saving-num" id="gasSavYear">897,9 € / rok</span>
+        <span class="saving-num" id="gasSavYear">897,9 €<span class="per-year"> / rok</span></span>
       </div>
       <div class="sav-month" id="savMonthGas" style="display:none;"></div>
     </div>
@@ -1993,6 +2015,9 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   }
 
   let ENERGY_ON = { el: true, gas: true };
+  // MARŽA (€/MWh): pripočíta sa k PONÚKANÝM cenám načítaným z tabuľky cien (FIX / KOMBI-FIX), kladná aj záporná.
+  // 0 = ceny ako z tabuľky. Predpoklady a SPOT ceny sa nemenia.
+  let PRICE_MARGIN = 0;
 
   function parseDateInput2(raw) {
     const d = new Date(raw + 'T00:00:00');
@@ -2023,7 +2048,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       const maxLabel    = g('MaxLabel');
       if (bottomBadge) bottomBadge.style.display = mode === 'KOMBI' ? 'none' : '';
       if (maxLabel) maxLabel.textContent = mode === 'KOMBI' ? 'Ponúkaná cena SPOT na rok ' + KOMBI_SPOT_YEAR
-                                         : mode === 'SPOT'  ? 'Ponúkaná cena SPOT' : 'Ponúkaná cena (max)';
+                                         : mode === 'SPOT'  ? 'Ponúkaná cena SPOT na rok ' + parseDateInput('inp_start_' + cat, new Date(2027, 0, 1)).getFullYear()
+                                         : 'Ponúkaná cena (max)';
       const predTag = g('PredTag');
       if (predTag) predTag.textContent = (mode === 'SPOT' || mode === 'KOMBI') ? 'SPOT ' : '';
     }
@@ -2037,9 +2063,15 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   let DATA_LOADED = false;   // true po načítaní Excelu / uloženej ponuky
   function resetModeMem() { DATA_LOADED = true; MODE_MEM.el = {}; MODE_MEM.gas = {}; LAST_NONKOMBI.el = null; LAST_NONKOMBI.gas = null; }
   const MEM_FIELDS = ['2027', 'Max', '2028', 'Fix2028'];
+  // podpis = počet rokov + začiatok viazanosti; ak sa zmení, uložené ceny režimu už nemusia platiť
+  function priceSig(cat) {
+    const y = document.getElementById('inp_years_' + cat), st = document.getElementById('inp_start_' + cat);
+    return (y ? y.value : '') + '|' + (st ? st.value : '');
+  }
   function snapPrices(cat) {
     const o = {};
     MEM_FIELDS.forEach(f => { const e = document.getElementById('inp_' + cat + f); o[f] = e ? e.value : null; });
+    o.sig = priceSig(cat);
     return o;
   }
   function restorePrices(cat, snap) {
@@ -2053,15 +2085,18 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     const pick = mode => function() {
       const cat = prefix === 'fsEl' ? 'el' : 'gas';
       const prev = FS_MODE[cat];
+      let memSnap = null;
       if (prev !== mode) {
         OFFER_DATE = todayDate();   // zmena režimu = zmena údaja
         const snap = snapPrices(cat);
         MODE_MEM[cat][prev] = snap;                 // zapamätá ceny režimu, z ktorého odchádzame
         if (prev !== 'KOMBI') LAST_NONKOMBI[cat] = snap;
         if (MODE_MEM[cat][mode]) {
-          restorePrices(cat, MODE_MEM[cat][mode]);  // návrat do režimu: vráti jeho posledné ceny
-        } else if (mode === 'KOMBI' || (mode === 'SPOT' && !DATA_LOADED)) {
-          // KOMBI / SPOT bez načítaných dát: Predpoklad = 16, Ponúkaná cena SPOT = 10
+          memSnap = MODE_MEM[cat][mode];
+          restorePrices(cat, memSnap);              // návrat do režimu: vráti jeho posledné ceny
+        } else if (mode === 'KOMBI' || mode === 'SPOT') {
+          // prvé prepnutie do KOMBI / SPOT (aj po načítaní dát): Predpoklad = 16, Ponúkaná cena SPOT = 10.
+          // Pri ďalšom návrate do režimu sa vrátia posledné hodnoty z pamäte (MODE_MEM).
           const p27 = document.getElementById('inp_' + cat + '2027');
           const pSp = document.getElementById('inp_' + cat + 'Max');
           if (p27) p27.value = 16;
@@ -2085,6 +2120,17 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         }
       }
       setFixSpot(prefix, mode);
+      // Ak už boli raz načítané ceny z tabuľky, FIX / KOMBI sa po prepnutí automaticky doplní správnymi cenami
+      // pre aktuálny počet rokov a začiatok. Uložené ceny režimu sa použijú len vtedy, keď sa roky ani
+      // začiatok od odchodu z režimu nezmenili (inak by boli zastarané).
+      if (prev !== mode && mode !== 'SPOT' && PRICE_CACHE[cat]) {
+        const keep = !!memSnap && memSnap.sig === priceSig(cat);
+        if (!keep) {
+          const r = applyCachedPrices(cat);
+          recalc();
+          if (r && !r.ok) setStatus(r.msg, false);
+        }
+      }
     };
     fixEl.addEventListener('click', pick('FIX'));
     spotEl.addEventListener('click', pick('SPOT'));
@@ -2118,6 +2164,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   }
 
   const sk2  = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' €';
+  // Úspora: suma v zelenej (farba .saving-num), „/ rok“ v bielej (farba textu témy)
+  const setSav = (id, n) => { v(id).innerHTML = sk2(n) + '<span class="per-year"> / rok</span>'; };
   const mwh2 = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' €/MWh';
   const num2 = n => n.toLocaleString('sk-SK', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const dsk  = d => d.toLocaleDateString('sk-SK');
@@ -2235,16 +2283,16 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
 
     if (isGasKombi) {
       v('gasUsporaUnit').textContent    = 'Úspora ' + unitGas.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh';
-      v('gasUsporaDisp').textContent    = sk2(savGasYear) + ' / rok';
+      setSav('gasUsporaDisp', savGasYear);
       v('gasUsporaFixUnit').textContent = 'Úspora ' + unitGasFix.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh';
-      v('gasUsporaFixDisp').textContent = sk2(savGasYearFix) + ' / rok';
+      setSav('gasUsporaFixDisp', savGasYearFix);
     }
 
     if (isElKombi) {
       v('elUsporaUnit').textContent    = 'Úspora ' + unitEl.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh';
-      v('elUsporaDisp').textContent    = sk2(savElYear) + ' / rok';
+      setSav('elUsporaDisp', savElYear);
       v('elUsporaFixUnit').textContent = 'Úspora ' + unitElFix.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh';
-      v('elUsporaFixDisp').textContent = sk2(savElYearFix) + ' / rok';
+      setSav('elUsporaFixDisp', savElYearFix);
     }
 
     const activePeriods = [];
@@ -2300,21 +2348,34 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     if (el2028Lbl) el2028Lbl.textContent = startEl.getFullYear();
     const elMaxLbl = document.getElementById('elMaxLabel');
     if (elMaxLbl && isElKombi) elMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + KOMBI_SPOT_YEAR;
+    else if (elMaxLbl && FS_MODE.el === 'SPOT') elMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + startEl.getFullYear();
     v('gasYearLabel').textContent = isGasKombi ? KOMBI_SPOT_YEAR : startGas.getFullYear();
     const gasFixLbl = document.getElementById('gasFixLabel');
     if (gasFixLbl) gasFixLbl.textContent = 'Ponúkaná cena FIX od ' + startGas.getFullYear();
     const gas2028Lbl = document.getElementById('gasYear2Label');
     if (gas2028Lbl) gas2028Lbl.textContent = startGas.getFullYear();
+    // Popis predpokladu pri FIX: „Predpokladaná cena na ďalší rok / ďalšie roky“ (podľa počtu rokov viazanosti).
+    // Rok ostáva v skrytom prvku (číta ho aj iný kód). SPOT a SPOT časť KOMBI ostáva „Predpoklad SPOT <rok>“.
+    const setPredLabel = (wordId, yearIds, fixLike, years) => {
+      const w = document.getElementById(wordId);
+      if (w) w.textContent = fixLike ? 'Predpokladaná cena na ' + (years > 1 ? 'ďalšie roky' : 'ďalší rok') : 'Predpoklad';
+      yearIds.forEach(id => { const e = document.getElementById(id); if (e) e.style.display = fixLike ? 'none' : ''; });
+    };
+    setPredLabel('elPredWord',  ['elPredTag',  'elYearLabel'],  FS_MODE.el  === 'FIX', yearsEl);
+    setPredLabel('gasPredWord', ['gasPredTag', 'gasYearLabel'], FS_MODE.gas === 'FIX', yearsGas);
+    setPredLabel('elPred2Word',  ['elYear2Label'],  true, yearsEl);    // riadok je viditeľný len pri KOMBI (FIX časť)
+    setPredLabel('gasPred2Word', ['gasYear2Label'], true, yearsGas);
     const gasMaxLbl = document.getElementById('gasMaxLabel');
     if (gasMaxLbl && isGasKombi) gasMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + KOMBI_SPOT_YEAR;
+    else if (gasMaxLbl && FS_MODE.gas === 'SPOT') gasMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + startGas.getFullYear();
 
     v('curElDisp').textContent   = num2(curEl);
     v('curGasDisp').textContent  = num2(curGas);
 
     v('elSavUnit').textContent  = 'Úspora ' + unitEl.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh';
     v('gasSavUnit').textContent = 'Úspora ' + unitGas.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' €/MWh';
-    v('elSavYear').textContent  = sk2(savEl)  + ' / rok';
-    v('gasSavYear').textContent = sk2(savGas) + ' / rok';
+    setSav('elSavYear', savEl);
+    setSav('gasSavYear', savGas);
 
     v('consElBadge').textContent  = consEl.toLocaleString('sk-SK', {maximumFractionDigits:3}) + ' MWh';
     v('consGasBadge').textContent = consGas.toLocaleString('sk-SK', {maximumFractionDigits:2}) + ' MWh';
@@ -2376,6 +2437,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   // Zmena začiatku viazanosti posunie rok predpokladu -> ručná hodnota už neplatí pre nový rok
   v('inp_start_el').addEventListener('change',  () => { MANUAL_PRED.delete('inp_el2027');  MANUAL_PRED.delete('inp_el2028'); });
   v('inp_start_gas').addEventListener('change', () => { MANUAL_PRED.delete('inp_gas2027'); MANUAL_PRED.delete('inp_gas2028'); });
+  v('inp_start_el').addEventListener('change',  () => refreshOfferPrice('el'));
+  v('inp_start_gas').addEventListener('change', () => refreshOfferPrice('gas'));
 
   // Zmena počtu rokov viazanosti -> prepočíta sa Ponúkaná cena (max / FIX) z tabuľky cien
   v('inp_years_el').addEventListener('change',  () => refreshOfferPrice('el'));
@@ -3006,6 +3069,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         status.className = 'import-status ok';
       }
       status.title = status.textContent + (res.detail ? '\n' + res.detail : '');
+      // Po každom načítaní Excelu sa hneď načítajú aj ceny (Ponúkaná cena, Predpoklad) z Google tabuľky.
+      return loadPrices({ text: status.textContent, ok: !res.missing.length, title: status.title });
     }).catch(err => {
       status.textContent = '✗ Chyba pri čítaní súboru' + (files.length > 1 && err && err.message ? ' (' + err.message + ')' : '');
       status.className = 'import-status err';
@@ -3107,38 +3172,80 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   // Posledné načítané ceny zo sheetu (používa sa pri zmene počtu rokov viazanosti)
   const PRICE_CACHE = { el: null, gas: null };
 
-  // Po zmene počtu rokov: nastaví Ponúkanú cenu (max, resp. FIX pri KOMBI) podľa nového počtu rokov.
-  // Predpoklady sa nemenia. SPOT a vypnutá komodita sa preskočia.
+  // Zmena marže: posunie ponúkané ceny odvodené z tabuľky o rozdiel (nová − stará marža):
+  //   FIX -> Ponúkaná cena (max), KOMBI -> Ponúkaná cena FIX od …; SPOT sa nemení.
+  // To isté sa urobí s uloženými cenami režimov FIX / KOMBI, aby sa po prepnutí zobrazili správne.
+  function setPriceMargin(m) {
+    m = Math.round((isFinite(m) ? m : 0) * 100) / 100;
+    const d = m - PRICE_MARGIN;
+    if (!d) return;
+    PRICE_MARGIN = m;
+    OFFER_DATE = todayDate();
+    const shiftEl = id => { const e = v(id); if (e && e.value !== '' && isFinite(parseFloat(e.value))) e.value = round1(parseFloat(e.value) + d); };
+    const shiftSn = (sn, f) => { if (sn && sn[f] !== null && sn[f] !== undefined && sn[f] !== '' && isFinite(parseFloat(sn[f]))) sn[f] = String(round1(parseFloat(sn[f]) + d)); };
+    ['el', 'gas'].forEach(cat => {
+      if (FS_MODE[cat] === 'FIX')   shiftEl('inp_' + cat + 'Max');
+      if (FS_MODE[cat] === 'KOMBI') shiftEl('inp_' + cat + 'Fix2028');
+      shiftSn(MODE_MEM[cat].FIX,   'Max');
+      shiftSn(MODE_MEM[cat].KOMBI, 'Fix2028');
+    });
+    recalc();
+  }
+
+  // Použije UŽ NAČÍTANÉ ceny zo Sheetu (PRICE_CACHE) pre aktuálny režim, počet rokov a začiatok viazanosti:
+  //   FIX   -> Ponúkaná cena (max) + Predpoklad (rok začiatku)
+  //   KOMBI -> Ponúkaná cena FIX od … + Predpoklad (rok začiatku FIX)
+  // SPOT / vypnutá komodita / ešte nenačítané ceny -> nič sa nemení (vráti null).
+  // Ručne upravený predpoklad (MANUAL_PRED) sa neprepisuje. Vráti { ok, msg }.
+  function applyCachedPrices(cat) {
+    const rows = PRICE_CACHE[cat];
+    if (!rows || !ENERGY_ON[cat]) return null;
+    const mode = FS_MODE[cat];
+    if (mode === 'SPOT') return null;
+    const label = cat === 'el' ? 'Elektrina' : 'Plyn';
+    const years = Math.max(1, Math.round(num('inp_years_' + cat)) || 1);
+    const startYear = parseDateInput('inp_start_' + cat, new Date(2027, 0, 1)).getFullYear();
+    const pc = priceColumnFor(startYear, years);
+    if (!pc) return { ok: false, msg: '✗ ' + label + ': pre ' + startYear + ' / ' + years + ' r. nie je v tabuľke stĺpec' };
+    const best = pickLowest(rows, pc.col);
+    if (!best) return { ok: false, msg: '✗ ' + label + ': v tabuľke chýba cena (' + pc.label + ')' };
+    v(mode === 'KOMBI' ? 'inp_' + cat + 'Fix2028' : 'inp_' + cat + 'Max').value = round1(best.price + PRICE_MARGIN);   // cena z tabuľky + marža
+    const predId = mode === 'KOMBI' ? 'inp_' + cat + '2028' : 'inp_' + cat + '2027';
+    if (!MANUAL_PRED.has(predId)) {
+      const yc = priceColumnFor(startYear, 1);
+      const pred = yc ? pickLowest(rows, yc.col) : null;
+      if (pred) v(predId).value = round1(pred.price);
+    }
+    return { ok: true, msg: '✓ ' + label + ': ceny aktualizované (' + pc.label + ')' };
+  }
+
+  // Po zmene počtu rokov alebo začiatku viazanosti: znova nastaví ceny z tabuľky cien.
   async function refreshOfferPrice(cat) {
     if (!ENERGY_ON[cat] || FS_MODE[cat] === 'SPOT') return;
     const label = cat === 'el' ? 'Elektrina' : 'Plyn';
     try {
       if (!PRICE_CACHE[cat]) PRICE_CACHE[cat] = await fetchSheetRange(PRICE_RANGES[cat]);
-      const years = Math.max(1, Math.round(num('inp_years_' + cat)) || 1);
-      const startYear = parseDateInput('inp_start_' + cat, new Date(2027, 0, 1)).getFullYear();
-      const pc = priceColumnFor(startYear, years);
-      if (!pc) { setStatus('✗ ' + label + ': pre ' + startYear + ' / ' + years + ' r. nie je v tabuľke stĺpec', false); return; }
-      const best = pickLowest(PRICE_CACHE[cat], pc.col);
-      if (!best) { setStatus('✗ ' + label + ': v tabuľke chýba cena (' + pc.label + ')', false); return; }
-      const id = FS_MODE[cat] === 'KOMBI' ? (cat === 'el' ? 'inp_elFix2028' : 'inp_gasFix2028')
-                                          : (cat === 'el' ? 'inp_elMax' : 'inp_gasMax');
-      v(id).value = round1(best.price);
+      const r = applyCachedPrices(cat);
       recalc();
-      setStatus('✓ ' + label + ': ponúkaná cena aktualizovaná (' + pc.label + ')', true);
+      if (r) setStatus(r.msg, r.ok);
     } catch (err) {
       console.error(err);
-      setStatus('✗ ' + label + ': cenu pre nový počet rokov sa nepodarilo načítať – ' + err.message, false);
+      setStatus('✗ ' + label + ': ceny sa nepodarilo načítať – ' + err.message, false);
     }
   }
 
-  async function loadPrices() {
+  async function loadPrices(imp) {
     const btn = v('loadPricesBtn');
+    const pre   = imp && imp.text ? imp.text + ' | ' : '';
+    const preOk = !imp || imp.ok !== false;
     btn.disabled = true;
-    setStatus('Načítavam ceny…', true);
+    setStatus(pre + 'Načítavam ceny…', true && preOk);
     try {
       const elRows  = await fetchSheetRange(PRICE_RANGES.el);
       const gasRows = await fetchSheetRange(PRICE_RANGES.gas);
       PRICE_CACHE.el = elRows; PRICE_CACHE.gas = gasRows;
+      // uložené ceny FIX / KOMBI spred načítania sú zastarané – pri prepnutí sa dopočítajú z novej tabuľky
+      ['el', 'gas'].forEach(c => { delete MODE_MEM[c].FIX; delete MODE_MEM[c].KOMBI; LAST_NONKOMBI[c] = null; });
 
       const applied = [];
       const problems = [];
@@ -3160,8 +3267,9 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         if (!pc) { problems.push(label + ': pre ' + startYear + ' / ' + years + ' r. nie je v tabuľke stĺpec'); return; }
         const best = pickLowest(rows, pc.col);
         if (!best) { problems.push(label + ': v tabuľke chýba cena (' + pc.label + ')'); return; }
-        v(inputId).value = round1(best.price);
-        applied.push(label + ' ' + round1(best.price).toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' (' + pc.label + (best.supplier ? ', ' + best.supplier : '') + ')');
+        const offered = round1(best.price + PRICE_MARGIN);   // cena z tabuľky + marža
+        v(inputId).value = offered;
+        applied.push(label + ' ' + offered.toLocaleString('sk-SK', {minimumFractionDigits:1, maximumFractionDigits:1}) + (PRICE_MARGIN ? ' (vr. marže ' + PRICE_MARGIN.toLocaleString('sk-SK') + ')' : '') + ' (' + pc.label + (best.supplier ? ', ' + best.supplier : '') + ')');
 
         // Predpokladaná cena = cena pre rok začiatku viazanosti (jednoročný stĺpec B..E), najnižšia od dodávateľov
         if (predId && MANUAL_PRED.has(predId)) predId = null;   // ručne upravený predpoklad sa nemení
@@ -3209,11 +3317,11 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       let msg = (applied.length ? '✓ Ceny načítané' : '') +
                 (problems.length ? (applied.length ? ' | ' : '✗ ') + problems.join('; ') : '');
       if (skipTxt) msg = (msg ? msg + ' | ' : '✓ ') + skipTxt;
-      setStatus(msg, (applied.length > 0 || skipped.length > 0) && !problems.length);
-      v('importStatus').title = applied.join('\n');
+      setStatus(pre + msg, preOk && (applied.length > 0 || skipped.length > 0) && !problems.length);
+      v('importStatus').title = (imp && imp.title ? imp.title + '\n' : '') + applied.join('\n');
     } catch (err) {
       console.error(err);
-      setStatus('✗ Ceny sa nepodarilo načítať – ' + err.message, false);
+      setStatus(pre + '✗ Ceny sa nepodarilo načítať – ' + err.message, false);
     } finally {
       btn.disabled = false;
     }
@@ -3260,6 +3368,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       odberatelia: CLIENTS.map(c => ({ nazov: c.name })),
       datum_ponuky: toDateInputValue(OFFER_DATE),
       platnost: VALIDITY_TEXT,
+      marza: PRICE_MARGIN,
       elektrina: {
         zapnute: ENERGY_ON.el,
         dodavatel: SUPPLIER.el,
@@ -3330,6 +3439,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     const numOf  = x => (typeof x === 'number' && isFinite(x)) ? x : null;
     const isDate = x => typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x);
 
+    PRICE_MARGIN = numOf(s.marza) !== null ? numOf(s.marza) : 0;   // ceny v súbore už maržu obsahujú
+    const mgInp = document.getElementById('cm_margin'); if (mgInp) mgInp.value = PRICE_MARGIN;
     const el   = isObj(s.elektrina) ? s.elektrina : {};
     const gas  = isObj(s.plyn)      ? s.plyn      : {};
     const fees = isObj(s.poplatky)  ? s.poplatky  : {};
@@ -3610,12 +3721,14 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     const start = parseDateInput(c.startId, new Date(2027, 0, 1)).getFullYear();
     const vol = num(c.consId);
     const spotInfo = 'SPOT – Base cena = ' + COMM_SPOT_BASE;
-    if (mode === 'SPOT') return [{ type: 'spot', title: '', sale: round1(num(c.maxId)), base: COMM_SPOT_BASE, years, vol, info: spotInfo }];
+    // Predajná cena = ponúkaná cena z hlavnej stránky (FIX ceny z tabuľky už obsahujú maržu)
+    const sl = id => round1(num(id));
+    if (mode === 'SPOT') return [{ type: 'spot', title: '', sale: sl(c.maxId), base: COMM_SPOT_BASE, years, vol, info: spotInfo }];
     if (mode === 'KOMBI') return [
-      { type: 'spot', title: 'SPOT na rok ' + KOMBI_SPOT_YEAR, sale: round1(num(c.maxId)), base: COMM_SPOT_BASE, years: 1, vol, info: spotInfo },
-      { type: 'fix',  title: 'FIX od ' + start, start, sale: round1(num(c.fixId)), base: null, years, vol, info: 'Načítavam Base z tabuľky…' }
+      { type: 'spot', title: 'SPOT na rok ' + KOMBI_SPOT_YEAR, sale: sl(c.maxId), base: COMM_SPOT_BASE, years: 1, vol, info: spotInfo },
+      { type: 'fix',  title: 'FIX od ' + start, start, sale: sl(c.fixId), base: null, years, vol, info: 'Načítavam Base z tabuľky…' }
     ];
-    return [{ type: 'fix', title: '', start, sale: round1(num(c.maxId)), base: null, years, vol, info: 'Načítavam Base z tabuľky…' }];
+    return [{ type: 'fix', title: '', start, sale: sl(c.maxId), base: null, years, vol, info: 'Načítavam Base z tabuľky…' }];
   }
 
   function commRow(label, id, val, step, unit) {
@@ -3681,6 +3794,53 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     document.getElementById('cm_p1').textContent = commFmt(grand * 0.2, 1) + ' €';
     document.getElementById('cm_p2').textContent = commFmt(grand * 0.3, 1) + ' €';
     document.getElementById('cm_p3').textContent = commFmt(grand * 0.5, 1) + ' €';
+    commRenderPrices();
+  }
+
+  // Prehľad cien na úplnom spodku okna: tabuľka cien (MVM) po rokoch aj priemery, ponúkané ceny s maržou
+  // a Base ceny (MVM), s ktorými sa počíta provízia. Použitý stĺpec je zvýraznený.
+  const CM_PCOLS = [['2027', 1], ['2028', 2], ['2029', 3], ['2030', 4],
+                    ['Ø 2027–28', 5], ['Ø 2027–29', 6], ['Ø 2027–30', 7], ['Ø 2028–29', 8], ['Ø 2028–30', 9]];
+  const CM_BASE_AVG = { 5: [2027, 2], 6: [2027, 3], 7: [2027, 4], 8: [2028, 2], 9: [2028, 3] };
+  function commRenderPrices() {
+    const box = document.getElementById('cm_ptable');
+    if (!box) return;
+    const mg = PRICE_MARGIN || 0;
+    const fmt = n => n == null ? '–' : commFmt(n, 1);
+    const td = (n, hl) => '<td' + (hl ? ' class="cm-hl"' : '') + '>' + fmt(n) + '</td>';
+    let html = '<div class="cm-pt-title">Prehľad cien, s ktorými sa počíta (€/MWh)</div>' +
+      '<div class="cm-pt-wrap"><table class="cm-pt"><thead><tr><th></th>' +
+      CM_PCOLS.map(c => '<th>' + c[0] + '</th>').join('') + '</tr></thead><tbody>';
+    let missing = false;
+    ['el', 'gas'].forEach(cat => {
+      const c = COMM_CATS[cat];
+      const rows = PRICE_CACHE[cat];
+      const map = COMM.sheet && COMM.sheet[cat];
+      const years = Math.max(1, Math.round(num(c.yearsId)) || 1);
+      const startYear = parseDateInput(c.startId, new Date(2027, 0, 1)).getFullYear();
+      const pc = priceColumnFor(startYear, years);
+      const hlCol = (ENERGY_ON[cat] && FS_MODE[cat] !== 'SPOT' && pc) ? pc.col : -1;
+      const raw = CM_PCOLS.map(([l, col]) => { const b = rows ? pickLowest(rows, col) : null; return b ? b.price : null; });
+      const withM = raw.map(x => x == null ? null : round1(x + mg));
+      const base = CM_PCOLS.map(([l, col]) => {
+        if (!map) return null;
+        if (col <= 4) return map[2026 + col] != null ? map[2026 + col] : null;
+        const a = CM_BASE_AVG[col], r = commBaseFor(map, a[0], a[1]);
+        return r.err ? null : r.price;
+      });
+      if (!rows || !map) missing = true;
+      html += '<tr class="cm-pt-cat cm-pt-' + cat + '"><td colspan="10">' + c.icon + ' ' + c.label +
+              ' · režim ' + FS_MODE[cat] + (ENERGY_ON[cat] ? '' : ' · vypnuté') + '</td></tr>';
+      html += '<tr class="cm-r-raw cm-r-' + cat + '"><th>Cena z tabuľky</th>' + raw.map((x, i) => td(x, false)).join('') + '</tr>';
+      html += '<tr class="cm-r-off"><th>Ponúkaná cena' + (mg ? ' (+ marža ' + commFmt(mg, 1) + ')' : '') + '</th>' +
+              withM.map((x, i) => td(x, CM_PCOLS[i][1] === hlCol)).join('') + '</tr>';
+      html += '<tr class="cm-r-base"><th>Base cena (' + COMM_SUPPLIER + ')</th>' + base.map(x => td(x, false)).join('') + '</tr>';
+    });
+    html += '</tbody></table></div>' +
+      '<div class="cm-pt-note">Ponúkaná cena = cena z tabuľky + marža (zvýraznený stĺpec = použitý pre aktuálny začiatok a počet rokov). ' +
+      'Provízia sa počíta z rozdielu predajnej a Base ceny; SPOT má Base ' + COMM_SPOT_BASE + '.' +
+      (missing ? ' Niektoré ceny sa ešte načítavajú alebo sa nepodarilo načítať.' : '') + '</div>';
+    box.innerHTML = html;
   }
 
   // dosadí Base (MVM) do FIX dielu podľa začiatku viazanosti a počtu rokov
@@ -3701,6 +3861,11 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         '<div class="comm-head"><div><div class="comm-title">Provízia</div>' +
         '<div class="comm-sub">(Predajná cena − Base cena) ÷ 2 × 0,3 × Objem × Roky</div></div>' +
         '<button type="button" class="comm-x" id="cm_close" title="Zavrieť">×</button></div>' +
+        '<div class="cm-margin"><span class="cm-margin-label">Marža</span>' +
+          '<div class="inline-edit-wrap"><input type="number" inputmode="decimal" step="0.1" class="inline-edit-input" id="cm_margin" value="' + (PRICE_MARGIN || 0) + '">' +
+          '<span class="inline-edit-unit">€/MWh</span></div>' +
+          '<span class="cm-margin-hint">Kladné číslo sa pripočíta, záporné odpočíta od ponúkaných FIX cien (z tabuľky cien) v celej ponuke. 0 = ceny bez zmeny.</span></div>' +
+        '<div class="cm-ptable" id="cm_ptable"></div>' +
         '<div class="comm-grid" id="cm_cards"></div>' +
         '<div class="hero"><div class="hero-label">Provízia spolu</div><div class="hero-num" id="cm_grand">–</div>' +
         '<div class="cm-pays">' +
@@ -3715,6 +3880,20 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     ov.addEventListener('click', e => { if (e.target === ov || e.target.id === 'cm_close') commClose(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && ov.classList.contains('open')) commClose(); });
     ov.addEventListener('input', e => {
+      if (e.target.id === 'cm_margin') {
+        // marža mení samotné ceny v ponuke (nie len výpočet provízie): posunie FIX ponúkané ceny
+        // na hlavnej stránke aj v uložených režimoch, z toho sa prepočíta úspora aj provízia
+        setPriceMargin(commNum(e.target.value));
+        Object.keys(COMM.st).forEach(cat => COMM.st[cat].parts.forEach((p, pi) => {
+          if (p.type !== 'fix') return;               // SPOT časť marža nemení
+          const c = COMM_CATS[cat];
+          p.sale = round1(num(FS_MODE[cat] === 'KOMBI' ? c.fixId : c.maxId));
+          const inp = document.getElementById('cm_' + cat + '_' + pi + '_sale');
+          if (inp) inp.value = p.sale;
+        }));
+        commUpdate();
+        return;
+      }
       const m = /^cm_(el|gas)_(\d+)_(sale|base|years|vol)$/.exec(e.target.id || '');
       if (!m) return;
       const cat = m[1], pi = +m[2], f = m[3];
@@ -3738,10 +3917,19 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     const token = ++COMM.token;
     COMM.sheet = null;
     COMM.st = {};
+    const mgInp = document.getElementById('cm_margin'); if (mgInp) mgInp.value = PRICE_MARGIN || 0;
     Object.keys(COMM_CATS).forEach(cat => { COMM.st[cat] = { on: !!ENERGY_ON[cat], parts: commMakeParts(cat) }; });
     document.getElementById('cm_cards').innerHTML = commCardHtml('el') + commCardHtml('gas');
     commUpdate();
     COMM.ov.classList.add('open');
+
+    ['el', 'gas'].forEach(async cat => {
+      if (PRICE_CACHE[cat]) return;
+      try {
+        PRICE_CACHE[cat] = await fetchSheetRange(PRICE_RANGES[cat]);
+        if (token === COMM.token) commUpdate();
+      } catch (e) { console.error(e); }
+    });
 
     try {
       const data = await commLoadSupplierPrices();
