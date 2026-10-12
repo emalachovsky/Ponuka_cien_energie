@@ -2985,13 +2985,18 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       .forEach(([cat, idCons, idCur, id27, idMax, fs]) => {
         const cons = total(cat);
         if (cons === null) {
-          v(idCons).value = 0;
+          // klient komoditu nemá: všetky hodnoty = 0 a komodita sa vypne
           consMissing[cat] = true;
           ENERGY_ON[cat] = false;
-        } else {
-          v(idCons).value = r4(cons);
-          ENERGY_ON[cat] = true;
+          [idCons, idCur, id27, idMax, 'inp_' + cat + '2028', 'inp_' + cat + 'Fix2028']
+            .forEach(id => { v(id).value = 0; });
+          resetModeMem();
+          setFixSpot(fs, 'FIX');
+          applyCategoryState(cat);
+          return;
         }
+        v(idCons).value = r4(cons);
+        ENERGY_ON[cat] = true;
         applyCategoryState(cat);
 
         const max = wavg(cat, 'max');
