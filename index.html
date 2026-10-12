@@ -1249,7 +1249,19 @@ html[data-theme="light"] .cm-pt .cm-r-base td { color: #dc5a52; }
   @page { size: A4 landscape; margin: 0; }
   body { background: #fff !important; }
   .bottom-bar { display: none !important; }
-  .page { max-width: 100%; padding: 10mm 8mm 8mm; }
+  .page { max-width: 100%; padding: 16mm 8mm 8mm; }
+  /* názov odberateľa: menší font a zalamovanie, aby sa vždy zmestil celý do okna */
+  .header-left { min-width: 0; max-width: 100%; }
+  .client-badge { max-width: 100%; overflow: visible; }
+  .client-badge .name {
+    font-size: 16px !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere;
+    line-height: 1.2;
+  }
+  .client-row .cn { font-size: 13px !important; overflow-wrap: anywhere; }
 }
 
 /* ─── LIGHT MODE CARD TINTS ────────────────── */
