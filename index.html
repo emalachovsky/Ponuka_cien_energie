@@ -1956,6 +1956,17 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   let OFFER_DATE     = todayDate();
   let LAST_RESULT    = null;   // posledný prepočet (pre uloženie do JSON)
   let SUPPLIER       = { el: '', gas: '' };   // dodávateľ (stĺpec C v Exceli)
+  // Začiatok viazanosti = deň po (najneskoršom) konci súčasnej viazanosti; nikdy skôr ako 1.1.2027
+  // (koniec v roku 2026 sa berie ako 31.12.2026 -> 1.1.2027).
+  function startAfterBound(listStr) {
+    const arr = String(listStr || '').split(',').map(t => t.trim()).filter(Boolean);
+    if (!arr.length) return null;
+    const m = arr[arr.length - 1].split('.');          // zoznam je zoradený vzostupne
+    let d = new Date(+m[2], +m[1] - 1, +m[0] + 1);
+    if (isNaN(d)) return null;
+    const min = new Date(2027, 0, 1);
+    return d < min ? min : d;
+  }
   let BOUND_UNTIL    = { el: '', gas: '' };   // viazanosť do (stĺpec I v Exceli)
   let CLIENTS        = [];   // pri načítaní 2+ analýz naraz: [{ name }] – zoznam odberateľov do hlavičky
 
@@ -2109,13 +2120,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         // návrat z KOMBI: začiatok viazanosti = deň po konci súčasnej viazanosti z hlavičky (napr. 31.12.2026 -> 1.1.2027)
         const stInp = document.getElementById('inp_start_' + cat);
         if (stInp) {
-          const arr = String(BOUND_UNTIL[cat] || '').split(',').map(t => t.trim()).filter(Boolean);
-          let d = null;
-          if (arr.length) {
-            const m = arr[arr.length - 1].split('.');          // zoznam je zoradený vzostupne
-            d = new Date(+m[2], +m[1] - 1, +m[0] + 1);
-            if (isNaN(d)) d = null;
-          }
+          const d = startAfterBound(BOUND_UNTIL[cat]);
           stInp.value = toDateInputValue(d || new Date(2027, 0, 1));
         }
       }
@@ -2445,22 +2450,17 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   v('inp_years_gas').addEventListener('change', () => refreshOfferPrice('gas'));
 
   // ---------------------------------------------------------------------------
-  // IMPORT Z EXCELU – vstupné údaje sa čítajú VÝHRADNE z hlavičky (prvých 7 riadkov)
-  // prvého hárka. Každý údaj je dvojica „popis → hodnota (najbližšia neprázdna bunka
-  // vpravo)“, takže nezáleží na presnom stĺpci, len na názve popisu:
+  // IMPORT Z EXCELU – načítava sa len:
+  //   1) hlavička odberateľa (prvý hárok): Odberateľ (+ Dátum ponuky, ak je uvedený),
+  //   2) pod ňou celkové spotreby a vážené priemery cien (elektrina / plyn),
+  //   3) údaje o OM (dodávateľ, koniec viazanosti, druh, spotreba, cena) podľa NÁZVOV STĹPCOV.
+  // Bunky E7:H10 sa už NEPOUŽÍVAJÚ (predpoklad 2027 a Ponuka MAX sa doplnia z cenovej tabuľky).
+  // Údaj hlavičky = dvojica „popis → hodnota (najbližšia neprázdna bunka vpravo)“:
   //   Odberateľ:                          -> meno klienta
-  //   Dátum ponuky:                       -> dátum ponuky (=TODAY() -> dnešný dátum)
-  //   Viazanosť kontraktu v rokoch:       -> počet rokov (elektrina aj plyn)
-  //   Začiatok:                           -> začiatok viazanosti (elektrina aj plyn)
   //   Celková spotreba elektrina / plyn:  -> ročná spotreba (MWh) – stĺpec C; prázdne = klient komoditu nemá
   //   Vážený priemer ceny elektrina / plyn-> súčasná cena (€/MWh)
-  //   Elektrina / Plyn – predpoklad 2027  -> predpokladaná cena bez zmeny (€/MWh)
-  //   Elektrina / Plyn – Ponuka MAX       -> ponúkaná cena (max) (€/MWh)
-  // Štyri cenové údaje v G7:H10 sa čítajú z PEVNÝCH adries (popis v G, hodnota v H):
-  //   H7 = Elektrina predpoklad 2027, H8 = Plyn predpoklad 2027,
-  //   H9 = Elektrina Ponuka MAX,      H10 = Plyn Ponuka MAX
-  // Popis v G sa len overí (zhoda podľa kľúčových slov); ak nesedí, použije sa
-  // dynamické párovanie popis -> hodnota ako záloha.
+  // Viazanosť: koniec viazanosti v roku 2026 sa berie ako 31.12.2026 -> začiatok 1.1.2027.
+  // Koniec v 2027+ -> začiatok je deň po konci (ďalej podľa počtu rokov, príp. KOMBI).
   // ---------------------------------------------------------------------------
   const HEADER_ROWS = 11;   // hlavička = riadky 1–10 (firma 1–5, údaje 7–10), riadok 11 je prázdny
   const HEADER_COLS = 26;
@@ -2683,8 +2683,6 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       if (n.startsWith('zaciatok'))            return 'start';
       if (n.includes('spotreba'))              return el ? 'consEl'  : (gas ? 'consGas'  : null);
       if (n.includes('priemer ceny'))          return el ? 'curEl'   : (gas ? 'curGas'   : null);
-      if (n.includes('predpoklad'))            return el ? 'el2027'  : (gas ? 'gas2027'  : null);
-      if (n.includes('ponuka'))                return el ? 'elMax'   : (gas ? 'gasMax'   : null);
       return null;
     };
 
@@ -2693,6 +2691,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     for (let r = 0; r < HEADER_ROWS; r++) {
       const cells = [];
       for (let c = 0; c < HEADER_COLS; c++) {
+        if (r >= 6 && r <= 9 && c >= 4 && c <= 7) continue;   // E7:H10 sa nepoužíva
         const cell = ws[XLSX.utils.encode_cell({ r, c })];
         if (hasValue(cell)) cells.push(cell);
       }
@@ -2725,24 +2724,6 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       const val = hasValue(cC) ? numOfCell(cC) : null;
       headerCons[cat] = (val !== null && val > 0) ? val : null;
     }
-
-    // 1a) PEVNÉ ADRESY G7:H10 – predpoklad 2027 a Ponuka MAX (popis v G, hodnota v H)
-    //     Popis sa overuje len podľa kľúčových slov (odolné voči preklepom typu „Plyn - – …“).
-    const FIXED_PRICE_CELLS = [
-      { key: 'el2027',  label: 'G7',  value: 'H7',  must: ['elektrin', 'predpoklad'] },
-      { key: 'gas2027', label: 'G8',  value: 'H8',  must: ['plyn', 'predpoklad'] },
-      { key: 'elMax',   label: 'G9',  value: 'H9',  must: ['elektrin', 'ponuka'] },
-      { key: 'gasMax',  label: 'G10', value: 'H10', must: ['plyn', 'ponuka'] }
-    ];
-    FIXED_PRICE_CELLS.forEach(f => {
-      const lab = ws[f.label];
-      const val = ws[f.value];
-      if (!hasValue(val) || toNum(val.v) === null) return;   // hodnota chýba -> ostane dynamické párovanie
-      const labN = lab && typeof lab.v === 'string' ? norm(lab.v) : '';
-      const labelOk = f.must.every(w => labN.includes(w));
-      // ak popis sedí, alebo je G prázdne (šablóna bez popisu), berie sa pevná bunka H
-      if (labelOk || !labN) found[f.key] = val;
-    });
 
     // 1b) dodávateľ – stĺpec C pod hlavičkou „Dodávateľ“ (elektrina, potom plyn)
     const readSuppliers = () => {
@@ -2826,7 +2807,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         // stĺpec I – dátum do kedy viazanosť (len dátum; text/prázdne = neurčitá)
         const i = ws[XLSX.utils.encode_cell({ r, c: colI })];
         if (hasValue(i)) {
-          const d = toDate(i);
+          let d = toDate(i);
+          if (d && d.getFullYear() === 2026) d = new Date(2026, 11, 31);   // koniec v roku 2026 = 31.12.2026
           if (d && !boundDates[section].some(x => x.getTime() === d.getTime())) boundDates[section].push(d);
         }
       }
@@ -2907,13 +2889,9 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
 
     list.forEach((d, i) => {
       if (!d.name)      missing.push(tag(i) + 'Odberateľ');
-      if (!d.offerDate) missing.push(tag(i) + 'Dátum ponuky');
-      if (d.years === null) missing.push(tag(i) + 'Viazanosť kontraktu v rokoch');
-      if (!d.start)     missing.push(tag(i) + 'Začiatok');
       [['el', 'Elektrina', 'elektrina'], ['gas', 'Plyn', 'plyn']].forEach(([cat, L1, L2]) => {
         const x = d[cat];
         if (x.cons === null) return;                // komodita sa nepoužíva
-        if (x.max === null) missing.push(tag(i) + L1 + ' – Ponuka MAX');
         if (x.cur === null) missing.push(tag(i) + 'Vážený priemer ceny ' + L2);
       });
     });
@@ -2976,19 +2954,12 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     MANUAL_PRED.clear();
     // Viazanosť je po načítaní analýzy vždy 2 roky (hodnota z Excelu sa ignoruje).
     v('inp_years_el').value = '2'; v('inp_years_gas').value = '2';
-    // Začiatok viazanosti = deň po konci súčasnej viazanosti (pri viacerých OM po najneskoršom konci).
-    // Ak koniec viazanosti nie je určený, použije sa „Začiatok“ z Excelu.
-    const dayAfter = list => {
-      const arr = String(list || '').split(',').map(t => t.trim()).filter(Boolean);
-      if (!arr.length) return null;
-      const last = arr[arr.length - 1];            // zoznam je zoradený vzostupne
-      const m = last.split('.');
-      const d = new Date(+m[2], +m[1] - 1, +m[0] + 1);
-      return isNaN(d) ? null : d;
-    };
+    // Začiatok viazanosti = deň po konci súčasnej viazanosti (pri viacerých OM po najneskoršom konci);
+    // koniec v roku 2026 = 31.12.2026 -> začiatok 1.1.2027. Ak koniec nie je určený: „Začiatok“ z Excelu, inak 1.1.2027.
     [['el', 'inp_start_el'], ['gas', 'inp_start_gas']].forEach(([cat, id]) => {
-      const d = dayAfter(BOUND_UNTIL[cat]) || start;
-      if (d) v(id).value = toDateInputValue(d);
+      let d = startAfterBound(BOUND_UNTIL[cat]) || start || new Date(2027, 0, 1);
+      if (d < new Date(2027, 0, 1)) d = new Date(2027, 0, 1);
+      v(id).value = toDateInputValue(d);
     });
 
     const consMissing = { el: false, gas: false };
