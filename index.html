@@ -1262,6 +1262,19 @@ html[data-theme="light"] .cm-pt .cm-r-base td { color: #dc5a52; }
     line-height: 1.2;
   }
   .client-row .cn { font-size: 13px !important; overflow-wrap: anywhere; }
+  /* zvýraznenie zvoleného režimu FIX / SPOT / KOMBI pozadím (aj bez zapnutej voľby „Grafika na pozadí“) */
+  .fix-spot-badge, .fix-spot-badge .fs-opt {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .fix-spot-badge { border: 1.5px solid #c9822a !important; }
+  .fix-spot-badge .fs-opt { background: #ffffff !important; color: #9a9a9a !important; }
+  .fix-spot-badge .fs-opt.active-fix,
+  .fix-spot-badge .fs-opt.active-spot {
+    background: #f0a84f !important;
+    color: #1a1000 !important;
+    font-weight: 800 !important;
+  }
 }
 
 /* ─── LIGHT MODE CARD TINTS ────────────────── */
@@ -4013,6 +4026,54 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   }
   ['input','change','click'].forEach(function(ev){document.addEventListener(ev,function(){setTimeout(upd,0);});});
   setInterval(upd,600); document.addEventListener('DOMContentLoaded',upd); upd();
+})();
+</script>
+
+<script>
+// ───────────────────────────────────────────────────────────────────────────
+// TLAČ: texty, ktoré by sa zalamovali alebo nevošli do okna, sa zmenšia (len pre tlač, potom sa vrátia späť)
+// ───────────────────────────────────────────────────────────────────────────
+(function () {
+  var SEL = '.data-label, .offer-label, .saving-text, .saving-num, .supplier-value, .supplier-label, .data-label-sub, ' +
+            '.contract-range-label, .contract-range-value, .fee-label, .fee-value, .ycard-label, .ycard-note, .ycard-num, ' +
+            '.cons-highlight-label, .cons-highlight-num, .section-title, .pbar-k, .pbar-v, .pbar-note, ' +
+            '.header-validity-note, .header-date-label, .offer-date, .sav-month, .ecard-title, .reg-badge, .client-row';
+  var MIN = 7, STEP = 0.5, fitted = [], busy = false;
+
+  function tight(el) {
+    var cs = getComputedStyle(el);
+    if (cs.display === 'none') return false;
+    var fs = parseFloat(cs.fontSize);
+    var lh = parseFloat(cs.lineHeight); if (isNaN(lh)) lh = fs * 1.35;
+    if (cs.display === 'inline') return el.getClientRects().length > 1;
+    var r = el.getBoundingClientRect();
+    if (!r.width) return false;
+    return r.height > lh * 1.45 || el.scrollWidth > el.clientWidth + 1;
+  }
+
+  function fitForPrint() {
+    if (busy) return; busy = true;
+    document.querySelectorAll(SEL).forEach(function (el) {
+      var fs = parseFloat(getComputedStyle(el).fontSize), changed = false, guard = 0;
+      while (tight(el) && fs > MIN && guard++ < 60) {
+        fs -= STEP; el.style.setProperty('font-size', fs + 'px', 'important'); changed = true;
+      }
+      if (changed) fitted.push(el);
+    });
+  }
+
+  function restore() {
+    fitted.forEach(function (el) { el.style.removeProperty('font-size'); });
+    fitted = []; busy = false;
+  }
+
+  window.addEventListener('beforeprint', fitForPrint);
+  window.addEventListener('afterprint', restore);
+  if (window.matchMedia) {
+    var mq = window.matchMedia('print');
+    var h = function (e) { if (e.matches) fitForPrint(); else restore(); };
+    if (mq.addEventListener) mq.addEventListener('change', h); else if (mq.addListener) mq.addListener(h);
+  }
 })();
 </script>
 </body>
