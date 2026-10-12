@@ -2725,6 +2725,22 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       headerCons[cat] = (val !== null && val > 0) ? val : null;
     }
 
+    // 1-cena) CENA KOMODITY – hlavička „Vážený priemer ceny elektrina / plyn“, hodnota v stĺpci C
+    //     (ak je stĺpec C prázdny, berie sa najbližšia neprázdna bunka vpravo – found.curEl / found.curGas).
+    //     Použije sa ako náhrada pre OM, pri ktorom cena v hlavnej tabuľke nie je zapísaná.
+    const headerPrice = { el: null, gas: null };
+    for (let r = 0; r < HEADER_ROWS; r++) {
+      const a = ws[XLSX.utils.encode_cell({ r, c: 0 })];
+      if (!a || typeof a.v !== 'string') continue;
+      const n = norm(a.v);
+      if (!n.includes('priemer ceny')) continue;
+      const cat = n.includes('elektrin') ? 'el' : (n.includes('plyn') ? 'gas' : null);
+      if (!cat || headerPrice[cat] !== null) continue;
+      const cC = ws[XLSX.utils.encode_cell({ r, c: 2 })];
+      const val = hasValue(cC) ? numOfCell(cC) : null;
+      if (val !== null && val > 0) headerPrice[cat] = val;
+    }
+
     // 1b) dodávateľ – stĺpec C pod hlavičkou „Dodávateľ“ (elektrina, potom plyn)
     const readSuppliers = () => {
       const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
@@ -2825,12 +2841,18 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         const rws = dataRows[cat];
         const cons = rws.reduce((a, r) => a + (r.cons || 0), 0);
         const withCons = rws.filter(r => r.cons !== null);
-        const priced = rws.filter(r => r.price !== null);
+        // cena komodity: z hlavnej tabuľky pri OM; ak pri OM nie je zapísaná, použije sa cena z hlavičky
+        const hp = headerPrice[cat];
+        const eff = rws.map(r => ({ cons: r.cons, price: (r.price !== null && r.price > 0) ? r.price : hp }));
+        const priced = eff.filter(r => r.price !== null);
+        const pricedCons = priced.reduce((a, r) => a + (r.cons || 0), 0);
         return {
           cons:  withCons.length ? cons : null,
-          price: (withCons.length && cons > 0)
-                   ? rws.reduce((a, r) => a + (r.cons || 0) * (r.price || 0), 0) / cons
-                   : (priced.length ? priced.reduce((a, r) => a + r.price, 0) / priced.length : null)
+          price: priced.length
+                   ? (pricedCons > 0
+                        ? priced.reduce((a, r) => a + (r.cons || 0) * r.price, 0) / pricedCons
+                        : priced.reduce((a, r) => a + r.price, 0) / priced.length)
+                   : null
         };
       };
       return {
@@ -2862,14 +2884,9 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       .forEach(([cat, kCons, kCur, k27, kMax]) => {
         // Spotreba: základ = hlavička (stĺpec C). Prázdne = klient komoditu nemá (null).
         // Tabuľka OM slúži len ako záloha, ak hlavička popis spotreby vôbec neobsahuje.
-        let cons;
-        if (headerCons[cat] !== undefined) cons = headerCons[cat];
-        else {
-          cons = rs.rows[cat].cons;
-          if (cons === null) cons = num(kCons);
-        }
-        let cur = rs.rows[cat].price;
-        if (cur === null) cur = num(kCur);
+        // Spotreba aj cena komodity = VÝHRADNE z hlavičky, stĺpec C (tabuľka OM sa na to nepoužíva).
+        const cons = headerCons[cat] !== undefined ? headerCons[cat] : null;
+        const cur  = headerPrice[cat];
         const f27 = num(k27);                       // ak Excel nemá predpoklad, použije sa súčasná cena
         out[cat] = { cons: cons, cur: cur, f27: f27 !== null ? f27 : cur, max: num(kMax) };
       });
