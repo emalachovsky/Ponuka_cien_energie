@@ -1244,10 +1244,12 @@ html[data-theme="light"] .cm-pt .cm-r-base td { color: #dc5a52; }
 
 /* ─── PRINT ─────────────────────────── */
 @media print {
-  @page { size: A4 landscape; margin: 8mm; }
+  /* margin 0 = prehliadač netlačí hlavičku ani pätičku (dátum, názov, URL, číslo strany);
+     okraje sa riešia paddingom: hore 1 cm, ostatné 8 mm */
+  @page { size: A4 landscape; margin: 0; }
   body { background: #fff !important; }
   .bottom-bar { display: none !important; }
-  .page { max-width: 100%; padding: 0; }
+  .page { max-width: 100%; padding: 10mm 8mm 8mm; }
 }
 
 /* ─── LIGHT MODE CARD TINTS ────────────────── */
