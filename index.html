@@ -2020,8 +2020,9 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
 
   // ponechá len platné dátumy (d.m.rrrr), iné hodnoty sa zahodia
   function cleanBound(x) {
+    const k = t => { const m = t.split('.'); return new Date(+m[2], +m[1] - 1, +m[0]).getTime(); };
     return String(x || '').split(',').map(t => t.trim())
-      .filter(t => /^\d{1,2}\.\d{1,2}\.\d{4}$/.test(t)).join(', ');
+      .filter(t => /^\d{1,2}\.\d{1,2}\.\d{4}$/.test(t)).sort((p, q) => k(p) - k(q)).join(', ');
   }
 
   function showBoundUntil() {
@@ -2678,24 +2679,39 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     };
 
     const toDate = c => {
+      if (!c) return null;
       if (c.f && /^\s*TODAY\s*\(\s*\)\s*$/i.test(c.f)) {
         const t = new Date();
         return new Date(t.getFullYear(), t.getMonth(), t.getDate());
       }
-      const x = c.v;
+      let x = c.v;
+      // vzorec bez uloženej hodnoty -> skús vyhodnotiť (výsledok = excelovské sériové číslo)
+      if ((x === undefined || x === null || x === '') && c.f) x = evalFormula(c.f, 1);
       if (Object.prototype.toString.call(x) === '[object Date]' && !isNaN(x)) {
         const r = new Date(x.getTime() + 12 * 3600 * 1000);
         return new Date(r.getFullYear(), r.getMonth(), r.getDate());
       }
       if (typeof x === 'number') {
+        // len rozumný rozsah sériových čísel (rok 2000–2099); iné čísla nie sú dátum
+        if (x < 36526 || x > 73415) return null;
         const u = new Date(Math.round((x - 25569) * 86400 * 1000));
         return isNaN(u) ? null : new Date(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate());
       }
       if (typeof x === 'string') {
-        let m = /^\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\s*$/.exec(x);
-        if (m) return new Date(+m[3], +m[2] - 1, +m[1]);
-        m = /^\s*(\d{4})-(\d{2})-(\d{2})/.exec(x);
-        if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+        const mk = (y, mo, d) => {
+          if (y < 100) y += 2000;
+          const r = new Date(y, mo - 1, d);
+          return (r.getFullYear() === y && r.getMonth() === mo - 1 && r.getDate() === d) ? r : null;
+        };
+        // d.m.rrrr / d. m. rrrr / d/m/rrrr / d-m-rrrr / d.m.rr – aj s textom okolo („do 31.12.2027“)
+        let m = /(\d{1,2})\s*[.\/\-]\s*(\d{1,2})\s*[.\/\-]\s*(\d{4}|\d{2})(?!\d)/.exec(x);
+        if (m) { const r = mk(+m[3], +m[2], +m[1]); if (r) return r; }
+        // rrrr-mm-dd
+        m = /(\d{4})-(\d{1,2})-(\d{1,2})/.exec(x);
+        if (m) { const r = mk(+m[1], +m[2], +m[3]); if (r) return r; }
+        // m/rrrr alebo mm.rrrr -> posledný deň mesiaca
+        m = /^\s*(\d{1,2})\s*[.\/]\s*(\d{4})\s*$/.exec(x);
+        if (m && +m[1] >= 1 && +m[1] <= 12) return new Date(+m[2], +m[1], 0);
       }
       return null;
     };
@@ -2789,6 +2805,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       let section = null;
       const sup   = { el: [], gas: [] };
       const boundDates = { el: [], gas: [] };
+      const boundBad = { el: [], gas: [] };      // hodnoty v stĺpci „koniec viazanosti“, ktoré sa nepodarilo prečítať ako dátum
       const kinds    = { el: [], gas: [] };      // druh z stĺpca K
       const dataRows = { el: [], gas: [] };      // spotreba (J) a cena (L) z riadkov OM
       const add = (arr, t) => { if (t && !arr.includes(t)) arr.push(t); };
@@ -2810,7 +2827,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
             if (!h || typeof h.v !== 'string') continue;
             const hn = norm(h.v);
             if (hn.startsWith('dodavatel'))                     found.sup   = cc;
-            else if (hn.startsWith('koniec viazanosti'))        found.bound = cc;
+            else if (!hn.startsWith('zaciatok') && !hn.startsWith('doba') && (hn.includes('viazanost') || hn.startsWith('koniec') || hn.includes('konca') || hn.includes('ukoncen'))) found.bound = cc;
             else if (hn.startsWith('spotreba'))                 found.cons  = cc;
             else if (hn === 'druh' || hn.startsWith('druh '))   found.kind  = cc;
             else if (hn.startsWith('cena komodity'))            found.price = cc;
@@ -2851,6 +2868,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         const i = ws[XLSX.utils.encode_cell({ r, c: colI })];
         if (hasValue(i)) {
           let d = toDate(i);
+          if (!d && i.v != null && String(i.v).trim() !== '' && !/neurc|neobmed|bez /.test(norm(i.v))) boundBad[section].push('riadok ' + (r + 1) + ': „' + String(i.v).trim() + '“');
           if (d && d.getFullYear() === 2026) d = new Date(2026, 11, 31);   // koniec v roku 2026 = 31.12.2026
           if (d && !boundDates[section].some(x => x.getTime() === d.getTime())) boundDates[section].push(d);
         }
@@ -2885,6 +2903,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       return {
         sup:   { el: sup.el.join(', '),   gas: sup.gas.join(', ') },
         bound: { el: fmtList(boundDates.el), gas: fmtList(boundDates.gas) },
+        boundBad: boundBad,
         kind:  { el: pickKind('el'), gas: pickKind('gas') },
         kindsRaw: kinds,
         rows:  { el: sumRows('el'),  gas: sumRows('gas') }
@@ -2902,7 +2921,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       start:     found.start ? toDate(found.start) : null,
       sup:       rs.sup,
       bound:     rs.bound,
-      kindsRaw:  rs.kindsRaw
+      kindsRaw:  rs.kindsRaw,
+      boundBad:  rs.boundBad
     };
     // Zdroj pravdy pre SPOTREBU = hlavička, stĺpec C (prázdne = komodita sa nepoužíva).
     // Tabuľka OM slúži na výpočet (vážený priemer ceny) a ako záloha, ak v hlavičke popis chýba.
@@ -2940,6 +2960,12 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       });
     });
 
+    list.forEach((d, i) => {
+      [['el', 'elektrina'], ['gas', 'plyn']].forEach(([cat, L]) => {
+        const bad = d.boundBad && d.boundBad[cat];
+        if (bad && bad.length) warnings.push(tag(i) + 'koniec viazanosti (' + L + ') sa nepodarilo prečítať – ' + bad.join('; '));
+      });
+    });
     // spoločné údaje – z prvého súboru, pri rozdieloch upozornenie
     const firstOf = key => { for (const d of list) if (d[key] !== null && d[key] !== '') return d[key]; return null; };
     const years = firstOf('years');
