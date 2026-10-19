@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Ponuka cien energií">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <style>
 :root {
   --bg: #0a0e14;
@@ -202,6 +202,15 @@ body {
   flex-shrink: 0;
   font-weight: 600;
 }
+.client-badge .client-ico {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+.client-badge .client-ico.cr { margin-left: 8px; }
 .client-badge .name {
   font-size: 28px;
   font-weight: 800;
@@ -1203,7 +1212,14 @@ footer {
 .cm-pt .cm-r-base td { color: #ff8f88; }
 html[data-theme="light"] .cm-pt .cm-r-base td { color: #dc5a52; }
 .cm-pt .cm-r-off td, .cm-pt .cm-r-off th { font-size: 14.4px; }
-.cm-pt td.cm-hl { background: var(--new-glow); color: var(--new); font-weight: 700; }
+.cm-pt-wrap { padding: 6px 4px; }
+.cm-pt .cm-hlbox {
+  display: inline-block; padding: 2px 9px; border-radius: 8px;
+  border: 2px solid var(--new); color: var(--text); font-weight: 800; background: transparent;
+  box-shadow: 0 0 9px 1px color-mix(in srgb, var(--new) 50%, transparent), inset 0 0 6px color-mix(in srgb, var(--new) 25%, transparent);
+}
+.cm-head-actions { display: flex; align-items: center; gap: 8px; }
+.cm-yinfo { font-size: 11.4px; color: var(--text-dim); margin-top: 4px; }
 .cm-pt-note { font-size: 11.4px; color: var(--text-dim); margin-top: 8px; }
 .cm-margin { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; margin: 0 0 14px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; }
 .cm-margin-label { font-size: 13.8px; font-weight: 700; color: var(--text); }
@@ -1610,6 +1626,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       <span class="client-badge">
         <span class="k" id="clientLabel">Odberateľ</span>
         <span class="name" id="clientDisp">Firma</span>
+        <span class="client-ico" id="clientIco" style="display:none;"></span>
         <div class="client-multi" id="clientMulti" style="display:none;"></div>
       </span>
     </div>
@@ -1995,6 +2012,15 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     return d < min ? min : d;
   }
   let BOUND_UNTIL    = { el: '', gas: '' };   // viazanosť do (stĺpec I v Exceli)
+  // Názov spoločnosti: VEĽKÉ PÍSMENÁ, bez právnej formy „s.r.o.“
+  function companyName(n) {
+    return String(n == null ? '' : n).trim()
+      .replace(/[\s,]+(?:spol\.?\s*)?s\.?\s*r\.?\s*o\.?\s*$/i, '')
+      .replace(/[\s,]+$/, '').toLocaleUpperCase('sk-SK');
+  }
+  let CLIENT_FULL    = '';   // úplný názov z analýzy (aj s s.r.o.) – len pre export provízií
+  let CLIENT_ICO     = '';   // IČO z analýzy (viac analýz = IČO oddelené čiarkou)
+  let OM_LIST        = { el: [], gas: [] };   // odberné miesta z analýzy – používa sa len v exporte provízií
   let CLIENTS        = [];   // pri načítaní 2+ analýz naraz: [{ name }] – zoznam odberateľov do hlavičky
 
   // Hlavička: jeden odberateľ = veľký názov; viac odberateľov (2+ analýzy naraz) = zoznam názvov pod sebou.
@@ -2005,6 +2031,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     const box    = document.getElementById('clientMulti');
     const label  = document.getElementById('clientLabel');
     if (!nameEl || !box) return;
+    const icoEl = document.getElementById('clientIco');
+    if (icoEl) { icoEl.textContent = (!multi && CLIENT_ICO) ? 'IČO ' + CLIENT_ICO : ''; icoEl.style.display = (!multi && CLIENT_ICO) ? '' : 'none'; }
     nameEl.style.display = multi ? 'none' : '';
     box.style.display    = multi ? '' : 'none';
     if (label) label.textContent = multi ? 'Odberatelia' : 'Odberateľ';
@@ -2014,6 +2042,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       const row = document.createElement('div');
       row.className = 'client-row cn';
       row.textContent = c.name || '—';
+      if (c.ico) { const i = document.createElement('span'); i.className = 'client-ico cr'; i.textContent = 'IČO ' + c.ico; row.appendChild(i); }
       box.appendChild(row);
     });
   }
@@ -2720,7 +2749,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     const headerKey = n => {
       const el  = n.includes('elektrin');
       const gas = n.includes('plyn');
-      if (n.startsWith('odberatel'))           return 'client';
+      if (n.startsWith('odberatel') || n.startsWith('obchodne meno')) return 'client';
+      if (n === 'ico' || /^ico(?![a-z])/.test(n)) return 'ico';          // „IČO“, „IČO:“, „IČO / DIČ“, „IČO odberateľa“
       if (n.startsWith('datum ponuky'))        return 'offerDate';
       if (n.startsWith('viazanost kontraktu')) return 'years';
       if (n.startsWith('zaciatok'))            return 'start';
@@ -2800,7 +2830,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       range.e.r = Math.min(range.e.r, lastRow);
       // Stĺpce sa hľadajú podľa názvov v hlavičke tabuľky OM („Dodávateľ“, „Koniec viazanosti“, „Spotreba“,
       // „Druh“, „Cena komodity“). Ak hlavička chýba, použijú sa pôvodné pevné stĺpce (C, I, J, K, L).
-      const defaultCols = () => ({ sup: 2, bound: 8, cons: 9, kind: 10, price: 11 });
+      const defaultCols = () => ({ sup: 2, bound: 8, cons: 9, kind: 10, price: 11, om: null });
       const cols = { el: defaultCols(), gas: defaultCols() };
       let section = null;
       const sup   = { el: [], gas: [] };
@@ -2808,6 +2838,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       const boundBad = { el: [], gas: [] };      // hodnoty v stĺpci „koniec viazanosti“, ktoré sa nepodarilo prečítať ako dátum
       const kinds    = { el: [], gas: [] };      // druh z stĺpca K
       const dataRows = { el: [], gas: [] };      // spotreba (J) a cena (L) z riadkov OM
+      const omCodes  = { el: [], gas: [] };      // kódy odberných miest (EIC / POD)
+      const OM_RE = /^(\d{2}Z[A-Z0-9]{13}|SK[A-Z]{3,}\d{6,})$/i;
       const add = (arr, t) => { if (t && !arr.includes(t)) arr.push(t); };
       const p2  = n => String(n).padStart(2, '0');
       const fmtD = d => d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear();
@@ -2827,6 +2859,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
             if (!h || typeof h.v !== 'string') continue;
             const hn = norm(h.v);
             if (hn.startsWith('dodavatel'))                     found.sup   = cc;
+            else if (cc > 0 && (hn.includes('eic') || hn === 'pod' || hn.startsWith('pod ') || hn.includes('odberne miesto') || hn.includes('cislo om') || hn.includes('kod om') || hn.includes('om kod') || hn.includes('identifikac'))) found.om = cc;
             else if (!hn.startsWith('zaciatok') && !hn.startsWith('doba') && (hn.includes('viazanost') || hn.startsWith('koniec') || hn.includes('konca') || hn.includes('ukoncen'))) found.bound = cc;
             else if (hn.startsWith('spotreba'))                 found.cons  = cc;
             else if (hn === 'druh' || hn.startsWith('druh '))   found.kind  = cc;
@@ -2854,6 +2887,20 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
           const cons  = numOfCell(cJ);
           const price = numOfCell(cL);
           dataRows[section].push({ cons: cons, price: price });
+          // kód OM: stĺpec z hlavičky tabuľky, inak prvá bunka v riadku s tvarom EIC / POD
+          let omv = '';
+          if (cols[section].om !== null) {
+            const oc = ws[XLSX.utils.encode_cell({ r, c: cols[section].om })];
+            if (oc && oc.v != null) omv = String(oc.v).replace(/\s+/g, '');
+          }
+          if (!omv) {
+            for (let cc = 1; cc < HEADER_COLS; cc++) {
+              const oc = ws[XLSX.utils.encode_cell({ r, c: cc })];
+              const t = oc && oc.v != null ? String(oc.v).replace(/\s+/g, '') : '';
+              if (OM_RE.test(t)) { omv = t; break; }
+            }
+          }
+          if (omv) add(omCodes[section], omv);
           // druh – stĺpec K: FIX / SPOT / KOMBI (aj v tvare „Fix“, „spotová“, „fixná“ …)
           if (cK && cK.v != null) {
             const kn = norm(cK.v);
@@ -2902,6 +2949,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       };
       return {
         sup:   { el: sup.el.join(', '),   gas: sup.gas.join(', ') },
+        om:    omCodes,
         bound: { el: fmtList(boundDates.el), gas: fmtList(boundDates.gas) },
         boundBad: boundBad,
         kind:  { el: pickKind('el'), gas: pickKind('gas') },
@@ -2915,7 +2963,15 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     const nameCell = found.client;
     const yrsRaw = num('years');
     const out = {
-      name:      nameCell && typeof nameCell.v === 'string' ? nameCell.v.trim() : '',
+      name:      nameCell && typeof nameCell.v === 'string' ? companyName(nameCell.v) : '',
+      full:      nameCell && typeof nameCell.v === 'string' ? nameCell.v.trim() : '',
+      ico:       (() => {
+        const c = found.ico; if (!c || c.v == null) return '';
+        let t = String(c.v).replace(/\s+/g, '');
+        if (/^\d{5,7}$/.test(t)) t = t.padStart(8, '0');          // IČO uložené ako číslo bez úvodných núl
+        return t;
+      })(),
+      om:        rs.om,
       offerDate: found.offerDate ? toDate(found.offerDate) : null,
       years:     (yrsRaw !== null && yrsRaw > 0) ? Math.min(4, Math.max(1, Math.round(yrsRaw))) : null,
       start:     found.start ? toDate(found.start) : null,
@@ -3019,7 +3075,10 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
 
     // zápis do polí analýzy
     if (names.length) CLIENT_NAME = names.join(' + ');
-    CLIENTS = multi ? list.map(d => ({ name: d.name })) : [];
+    CLIENTS = multi ? list.map(d => ({ name: d.name, full: d.full || d.name, ico: d.ico || '' })) : [];
+    CLIENT_FULL = [...new Set(list.map(d => d.full || d.name).filter(Boolean))].join(' + ');
+    CLIENT_ICO = [...new Set(list.map(d => d.ico).filter(Boolean))].join(', ');
+    OM_LIST = { el: [...new Set([].concat(...list.map(d => (d.om && d.om.el) || [])))], gas: [...new Set([].concat(...list.map(d => (d.om && d.om.gas) || [])))] };
     if (od) OFFER_DATE = od;
     MANUAL_PRED.clear();
     // Viazanosť je po načítaní analýzy vždy 2 roky (hodnota z Excelu sa ignoruje).
@@ -3411,7 +3470,10 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       verzia: 1,
       ulozene: localIsoNow(),
       odberatel: CLIENT_NAME,
-      odberatelia: CLIENTS.map(c => ({ nazov: c.name })),
+      odberatelia: CLIENTS.map(c => ({ nazov: c.name, plny_nazov: c.full || '', ico: c.ico || '' })),
+      plny_nazov: CLIENT_FULL,
+      ico: CLIENT_ICO,
+      odberne_miesta: { elektrina: OM_LIST.el, plyn: OM_LIST.gas },
       datum_ponuky: toDateInputValue(OFFER_DATE),
       platnost: VALIDITY_TEXT,
       marza: PRICE_MARGIN,
@@ -3506,11 +3568,15 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     };
 
     MANUAL_PRED.clear();
-    if (typeof s.odberatel === 'string' && s.odberatel.trim()) CLIENT_NAME = s.odberatel.trim();
+    if (typeof s.odberatel === 'string' && s.odberatel.trim()) CLIENT_NAME = companyName(s.odberatel);
     else missing.push('odberateľ');
     CLIENTS = Array.isArray(s.odberatelia) && s.odberatelia.length > 1
-      ? s.odberatelia.filter(isObj).map(c => ({ name: typeof c.nazov === 'string' ? c.nazov.trim() : '' }))
+      ? s.odberatelia.filter(isObj).map(c => ({ name: typeof c.nazov === 'string' ? companyName(c.nazov) : '', full: typeof c.plny_nazov === 'string' ? c.plny_nazov.trim() : '', ico: typeof c.ico === 'string' ? c.ico.trim() : '' }))
       : [];
+    CLIENT_FULL = typeof s.plny_nazov === 'string' ? s.plny_nazov.trim() : '';
+    CLIENT_ICO = typeof s.ico === 'string' ? s.ico.trim() : '';
+    { const om = isObj(s.odberne_miesta) ? s.odberne_miesta : {};
+      OM_LIST = { el: Array.isArray(om.elektrina) ? om.elektrina.map(String) : [], gas: Array.isArray(om.plyn) ? om.plyn.map(String) : [] }; }
     if (isDate(s.datum_ponuky)) OFFER_DATE = parseDateInput2(s.datum_ponuky);
     else missing.push('dátum ponuky');
     if (typeof s.platnost === 'string' && s.platnost.trim()) VALIDITY_TEXT = s.platnost.trim();
@@ -3711,7 +3777,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
 
   // ───────────────────────────────────────────────────────────────────────────
   // PROVÍZIA – okrúhle tlačidlo „P“
-  // vzorec: (Predajná cena − Base cena) / 2 × 0,3 × Objem × Roky
+  // vzorec: (Predajná cena − Base cena daného roka) / 2 × 0,3 × Objem × Podiel roka (každý rok zvlášť, záporný rozdiel sa nenuluje)
   // vyplácanie: 20 % podpis, 30 % nábeh dodávky, 50 % koniec zmluvy
   // Base: tabuľka „Ceny od dodávateľov“, dodávateľ vždy MVM.
   //   1 rok = cena pre daný rok, viac rokov = priemer ročných cien od začiatku viazanosti.
@@ -3764,17 +3830,21 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   function commMakeParts(cat) {
     const c = COMM_CATS[cat], mode = FS_MODE[cat];
     const years = Math.max(1, Math.round(num(c.yearsId)) || 1);
-    const start = parseDateInput(c.startId, new Date(2027, 0, 1)).getFullYear();
+    const startD = parseDateInput(c.startId, new Date(2027, 0, 1));
+    const start = startD.getFullYear();
+    // alikvotná časť prvého roka: začiatok v inom mesiaci ako január → len zvyšné mesiace + ďalšie celé roky
+    const offset = startD.getMonth() / 12;
+    const effYears = Math.max(1 / 12, years - offset);
     const vol = num(c.consId);
     const spotInfo = 'SPOT – Base cena = ' + COMM_SPOT_BASE;
     // Predajná cena = ponúkaná cena z hlavnej stránky (FIX ceny z tabuľky už obsahujú maržu)
     const sl = id => round1(num(id));
-    if (mode === 'SPOT') return [{ type: 'spot', title: '', sale: sl(c.maxId), base: COMM_SPOT_BASE, years, vol, info: spotInfo }];
+    if (mode === 'SPOT') return [{ type: 'spot', title: '', start, startD, span: years, offset, sale: sl(c.maxId), base: COMM_SPOT_BASE, years: effYears, vol, info: spotInfo }];
     if (mode === 'KOMBI') return [
-      { type: 'spot', title: 'SPOT na rok ' + KOMBI_SPOT_YEAR, sale: sl(c.maxId), base: COMM_SPOT_BASE, years: 1, vol, info: spotInfo },
-      { type: 'fix',  title: 'FIX od ' + start, start, sale: sl(c.fixId), base: null, years, vol, info: 'Načítavam Base z tabuľky…' }
+      { type: 'spot', title: 'SPOT na rok ' + KOMBI_SPOT_YEAR, span: 1, offset: 0, sale: sl(c.maxId), base: COMM_SPOT_BASE, years: 1, vol, info: spotInfo },
+      { type: 'fix',  title: 'FIX od ' + start, start, startD, span: years, offset, sale: sl(c.fixId), base: null, years: effYears, vol, info: 'Načítavam Base z tabuľky…' }
     ];
-    return [{ type: 'fix', title: '', start, sale: sl(c.maxId), base: null, years, vol, info: 'Načítavam Base z tabuľky…' }];
+    return [{ type: 'fix', title: '', start, startD, span: years, offset, sale: sl(c.maxId), base: null, years: effYears, vol, info: 'Načítavam Base z tabuľky…' }];
   }
 
   function commRow(label, id, val, step, unit) {
@@ -3794,9 +3864,10 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         '<div class="offer-row"><span class="offer-label">Predajná cena (ponúkaná max)</span>' +
           '<div class="inline-edit-wrap" style="margin-left:auto;"><input type="number" inputmode="decimal" step="0.1" class="inline-edit-input inline-edit-offer ' + colorCls + '" id="' + id('sale') + '" value="' + p.sale + '">' +
           '<span class="inline-edit-unit">€/MWh</span></div></div>' +
-        commRow('Base cena (' + COMM_SUPPLIER + ')', id('base'), p.base, '0.1', '€/MWh') +
-        commRow('Počet rokov', id('years'), p.years, '1', 'rokov') +
+        commRow('Base cena (' + COMM_SUPPLIER + ', Ø – počíta sa po rokoch)', id('base'), p.base, '0.1', '€/MWh') +
+        commRow('Počet rokov (alikvotne)', id('years'), +(+p.years).toFixed(4), 'any', 'rokov') +
         commRow('Objem', id('vol'), p.vol, '0.1', 'MWh / rok') +
+        '<div class="cm-yinfo" id="' + id('yinfo') + '"></div>' +
         '<div class="cm-info" id="' + id('info') + '"></div>' +
         '<div class="cm-calc" id="' + id('calc') + '"></div>' +
         (multi ? '<div class="saving-badge"><span class="saving-text">Provízia – ' + (p.type === 'spot' ? 'SPOT' : 'FIX') + '</span><span class="saving-num" id="' + id('res') + '">–</span></div>' : '') +
@@ -3812,6 +3883,43 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     '</div>';
   }
 
+  const commYF = y => y.toLocaleString('sk-SK', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  const commDate = d => d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear();
+  // vysvetlenie alikvotného počtu rokov pre daný diel
+  function commYearsNote(p) {
+    if (!p.startD || !p.offset) return '';
+    const m1 = 12 - p.startD.getMonth(), n = Math.round(p.span || 1);
+    const end = new Date(p.startD.getFullYear() + n - 1, 11, 31);
+    return 'Viazanosť ' + commDate(p.startD) + ' – ' + commDate(end) + ': ' + m1 + '/12' +
+      (n > 1 ? ' + ' + (n - 1) : '') + ' = ' + commYF(m1 / 12 + n - 1) + ' roka pre výpočet';
+  }
+  // Base pre konkrétny rok: SPOT = pevná Base, FIX = cena MVM pre daný rok (ručne zadaná Base platí pre všetky roky)
+  function commBaseYear(cat, p, y) {
+    if (p.type === 'spot') return p.base;
+    const m = COMM.sheet && COMM.sheet[cat];
+    if (!p.manual && m && m[y] != null) return m[y];
+    return p.base;
+  }
+  // Rozpis po rokoch: Predajná cena (rovnaká pre všetky roky) − Base cena daného roka. Záporný rozdiel sa nenuluje.
+  function commYearRows(cat, p) {
+    const y0 = p.startD ? p.startD.getFullYear() : (p.start || KOMBI_SPOT_YEAR);
+    const n = Math.max(1, Math.round(p.span || 1));
+    const frac = []; for (let i = 0; i < n; i++) frac.push(i === 0 ? 1 - (p.offset || 0) : 1);
+    const k = p.years / frac.reduce((a, b) => a + b, 0);       // zladí súčet podielov s počtom rokov z karty
+    const rows = [];
+    for (let i = 0; i < n; i++) {
+      const y = y0 + i, b = commBaseYear(cat, p, y);
+      if (b == null) return null;
+      const share = frac[i] * k, diff = p.sale - b, per = diff / 2 * 0.3;
+      rows.push({ y, i, share, base: b, diff, per, tot: per * p.vol * share });
+    }
+    return rows;
+  }
+  function commCalcPart(cat, p) {
+    const rows = commYearRows(cat, p);
+    return rows ? { rows, val: rows.reduce((a, x) => a + x.tot, 0) } : null;
+  }
+
   function commUpdate() {
     let grand = 0;
     Object.keys(COMM_CATS).forEach(cat => {
@@ -3822,12 +3930,13 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         const info = el('info');
         info.className = 'cm-info' + (p.err ? ' err' : '');
         info.textContent = p.err || p.info || '';
+        const yi = el('yinfo'); if (yi) yi.textContent = commYearsNote(p);
         let val = null;
-        if (p.base != null) {
-          const per = Math.max(0, p.sale - p.base) / 2 * 0.3;
-          val = per * p.vol * p.years;
-          tot += val; any = true;
-          el('calc').textContent = '(' + commFmt(p.sale, 1) + ' − ' + commFmt(p.base, 1) + ') ÷ 2 × 0,3 = ' + commFmt(per, 1) + ' €/MWh × ' + commFmt(p.vol, 1) + ' MWh × ' + commFmt(p.years, 0) + ' r.';
+        const rc = commCalcPart(cat, p);
+        if (rc) {
+          val = rc.val; tot += val; any = true;
+          el('calc').innerHTML = rc.rows.map(x => x.y + ': (' + commFmt(p.sale, 1) + ' − ' + commFmt(x.base, 1) + ') ÷ 2 × 0,3 × ' +
+            commFmt(p.vol, 1) + ' MWh × ' + commYF(x.share) + ' = <b>' + commFmt(x.tot, 2) + ' €</b>').join('<br>');
         } else {
           el('calc').textContent = '';
         }
@@ -3853,7 +3962,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     if (!box) return;
     const mg = PRICE_MARGIN || 0;
     const fmt = n => n == null ? '–' : commFmt(n, 1);
-    const td = (n, hl) => '<td' + (hl ? ' class="cm-hl"' : '') + '>' + fmt(n) + '</td>';
+    const td = (n, hl) => '<td>' + (hl ? '<span class="cm-hlbox">' + fmt(n) + '</span>' : fmt(n)) + '</td>';
     let html = '<div class="cm-pt-title">Prehľad cien, s ktorými sa počíta (€/MWh)</div>' +
       '<div class="cm-pt-wrap"><table class="cm-pt"><thead><tr><th></th>' +
       CM_PCOLS.map(c => '<th>' + c[0] + '</th>').join('') + '</tr></thead><tbody>';
@@ -3892,10 +4001,10 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   // dosadí Base (MVM) do FIX dielu podľa začiatku viazanosti a počtu rokov
   function commApplyBase(cat, pi) {
     const p = COMM.st[cat].parts[pi];
-    const r = commBaseFor(COMM.sheet && COMM.sheet[cat], p.start, p.years);
+    const r = commBaseFor(COMM.sheet && COMM.sheet[cat], p.start, p.span || p.years);
     const inp = document.getElementById('cm_' + cat + '_' + pi + '_base');
     if (r.err) { p.base = null; p.err = r.err + ' – zadaj Base ručne.'; p.info = ''; inp.value = ''; }
-    else { p.base = r.price; p.err = ''; p.info = 'Base: ' + COMM_SUPPLIER + ', ' + r.label + (p.years > 1 ? ' (priemer ročných cien)' : ''); inp.value = r.price; }
+    else { p.base = r.price; p.err = ''; p.info = 'Base: ' + COMM_SUPPLIER + ', ' + r.label + ((p.span || p.years) > 1 ? ' (priemer ročných cien)' : ''); inp.value = r.price; }
   }
 
   function commBuild() {
@@ -3905,8 +4014,11 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     ov.innerHTML =
       '<div class="comm-card" role="dialog" aria-modal="true">' +
         '<div class="comm-head"><div><div class="comm-title">Provízia</div>' +
-        '<div class="comm-sub">(Predajná cena − Base cena) ÷ 2 × 0,3 × Objem × Roky</div></div>' +
-        '<button type="button" class="comm-x" id="cm_close" title="Zavrieť">×</button></div>' +
+        '<div class="comm-sub">(Predajná cena − Base cena daného roka) ÷ 2 × 0,3 × Objem × Podiel roka</div></div>' +
+        '<div class="cm-head-actions"><button type="button" class="pdf-export-btn" id="cm_export" title="Exportovať výpočet provízie do Excelu (xlsx)">' +
+          '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M9 2v3h3" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>' +
+          'Export provízie</button>' +
+        '<button type="button" class="comm-x" id="cm_close" title="Zavrieť">×</button></div></div>' +
         '<div class="cm-margin"><span class="cm-margin-label">Marža</span>' +
           '<div class="inline-edit-wrap"><input type="number" inputmode="decimal" step="0.1" class="inline-edit-input" id="cm_margin" value="' + (PRICE_MARGIN || 0) + '">' +
           '<span class="inline-edit-unit">€/MWh</span></div>' +
@@ -3923,7 +4035,10 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     document.body.appendChild(ov);
     COMM.ov = ov;
 
-    ov.addEventListener('click', e => { if (e.target === ov || e.target.id === 'cm_close') commClose(); });
+    ov.addEventListener('click', e => {
+      if (e.target === ov || e.target.id === 'cm_close') commClose();
+      else if (e.target.closest && e.target.closest('#cm_export')) commExport();
+    });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && ov.classList.contains('open')) commClose(); });
     ov.addEventListener('input', e => {
       if (e.target.id === 'cm_margin') {
@@ -3950,10 +4065,184 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         p.manual = true; p.err = ''; p.info = 'Base zadaná ručne';
       } else {
         p[f] = commNum(raw);
+        if (f === 'years') p.span = Math.max(1, Math.ceil(p.years + (p.offset || 0) - 1e-6));
         if (f === 'years' && p.type === 'fix' && !p.manual && COMM.sheet) commApplyBase(cat, pi);
       }
       commUpdate();
     });
+  }
+
+  // Export provízie → xlsx (xlsx-js-style): jeden farebný hárok, riadok = jeden rok zmluvy.
+  // Stĺpce: IČO | Názov | Druh komodity (EE/ZP + OM) | Obdobie | MWh | Druh | Spolu | 20 % | 30 % | 50 %
+  // Na boku sú len Base ceny MVM po rokoch pre EE a ZP, všetko ostatné sú vzorce.
+  // Spolu = (Predajná − Base daného roka) ÷ 2 × 0,3 × MWh × podiel roka; záporný rozdiel sa nenuluje.
+  // Údaje o firme pre export: plný názov (aj s s.r.o.), názov bez s.r.o. do mena súboru, IČO.
+  function commClientInfo() {
+    const clientEl = document.getElementById('clientDisp');
+    const multiC = typeof CLIENTS !== 'undefined' && CLIENTS.length > 1;
+    const shown = companyName(clientEl ? clientEl.textContent : '');
+    return {
+      client:      multiC ? CLIENTS.map(c => c.full || c.name).join(', ') : (CLIENT_FULL || shown),
+      clientShort: multiC ? CLIENTS.map(c => c.name).join(', ') : shown,
+      ico:         CLIENT_ICO || (multiC ? CLIENTS.map(c => c.ico).filter(Boolean).join(', ') : '')
+    };
+  }
+
+  function commExport() {
+    if (typeof XLSX === 'undefined') { alert('Knižnica XLSX sa nenačítala (je potrebné pripojenie na internet).'); return; }
+    const cats = Object.keys(COMM_CATS).filter(cat => COMM.st[cat] && COMM.st[cat].on);
+    if (!cats.length) { alert('Elektrina aj plyn sú vypnuté – nie je čo exportovať.'); return; }
+    const info = commClientInfo();
+    const client = info.client;            // v exporte celý názov aj s s.r.o. (z analýzy / uloženej ponuky)
+    const clientShort = info.clientShort;  // do názvu súboru bez s.r.o.
+    const ico = info.ico;                  // IČO z analýzy / uloženej ponuky
+    const now = new Date(), today = now.toLocaleDateString('sk-SK');
+    const MONTHS = ['január', 'február', 'marec', 'apríl', 'máj', 'jún', 'júl', 'august', 'september', 'október', 'november', 'december'];
+    const pd = n => String(n).padStart(2, '0');
+    const dmy = d => pd(d.getDate()) + '.' + pd(d.getMonth() + 1) + '.' + d.getFullYear();
+    const A = XLSX.utils.encode_cell;
+    const L = c => A({ r: 0, c }).replace(/\d+/, '');            // písmeno stĺpca
+    const abs = (r, c) => '$' + L(c) + '$' + (r + 1);
+    const EUR = '#,##0.00 "€"', P1 = '#,##0.0', P2 = '#,##0.00';
+    // stĺpce
+    const cI = 0, cN = 1, cC = 2, cP = 3, cV = 4, cD = 5, cS = 6, c20 = 7, c30 = 8, c50 = 9, cK = 11;
+    const ws = {}; let maxc = 0, maxr = 0;
+    const put = (r, c, v, z, f, st) => {
+      if (v === null || v === undefined) return;
+      const cell = typeof v === 'number' ? { t: 'n', v } : { t: 's', v: String(v) };
+      if (z) cell.z = z; if (f) cell.f = f; if (st) cell.s = st;
+      ws[A({ r, c })] = cell; maxc = Math.max(maxc, c); maxr = Math.max(maxr, r);
+    };
+    const thin = { style: 'thin', color: { rgb: 'FFB8C0CC' } };
+    const BORDER = { top: thin, bottom: thin, left: thin, right: thin };
+    const fill = rgb => ({ patternType: 'solid', fgColor: { rgb } });
+    const COL = {
+      el:  { row: 'FFEAF3FC', sub: 'FFBBD9F5' },
+      gas: { row: 'FFFDF6D8', sub: 'FFF3DE8A' }
+    };
+    const stHead = rgb => ({ font: { name: 'Arial', sz: 10, bold: true, color: { rgb: 'FFFFFFFF' } }, fill: fill(rgb), border: BORDER, alignment: { horizontal: 'center', vertical: 'center', wrapText: true } });
+    const stBody = (rgb, bold, h) => ({ font: { name: 'Arial', sz: 10, bold: !!bold }, fill: fill(rgb), border: BORDER, alignment: { horizontal: h || 'left', vertical: 'center' } });
+    const code = { el: 'EE', gas: 'ZP' };
+    const omOf = cat => (OM_LIST && OM_LIST[cat] && OM_LIST[cat].length) ? ' ' + OM_LIST[cat].join(', ') : '';
+
+    // zber riadkov po komodite + Base ceny po rokoch
+    const blocks = {}; const base = { el: {}, gas: {} }; const yrSet = {};
+    cats.forEach(cat => {
+      blocks[cat] = [];
+      COMM.st[cat].parts.forEach(p => {
+        const rows = commYearRows(cat, p);
+        if (!rows) { blocks[cat].push({ cat, p, missing: true }); return; }
+        rows.forEach(x => {
+          blocks[cat].push({ cat, p, x });
+          yrSet[x.y] = true;
+          if (p.type !== 'spot') base[cat][x.y] = x.base;
+        });
+      });
+    });
+    const years = Object.keys(yrSet).map(Number).sort((a, b) => a - b);
+    const nY = Math.max(1, years.length);
+    const lastC = cK + nY;                           // K = názov komodity, ďalšie = roky
+    const HR = 4;                                    // riadok hlavičky (0-based)
+    const yearsRng = abs(HR, cK + 1) + ':' + abs(HR, lastC);
+    const namesRng = abs(HR + 1, cK) + ':' + abs(HR + 2, cK);
+    const tblRng = abs(HR + 1, cK + 1) + ':' + abs(HR + 2, lastC);
+
+    put(0, 0, 'Rozpis provízií – ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear(), null, null,
+      { font: { name: 'Arial', sz: 16, bold: true, color: { rgb: 'FF1F2A44' } } });
+    put(1, 0, client + (ico ? '  ·  IČO ' + ico : ''), null, null, { font: { name: 'Arial', sz: 11, bold: true } });
+    put(2, 0, 'Dátum: ' + today, null, null, { font: { name: 'Arial', sz: 10, color: { rgb: 'FF485046' } } });
+
+    const HEAD = 'FF2B3445';
+    ['IČO', 'Názov', 'Druh komodity', 'Obdobie dodávky', 'MWh', 'Druh', 'Spolu', '20 %', '30 %', '50 %'].forEach((h, i) => put(HR, i, h, null, null, stHead(HEAD)));
+    put(HR, cK, 'Base MVM (€/MWh)', null, null, stHead(HEAD));
+    years.forEach((y, i) => put(HR, cK + 1 + i, y, null, null, stHead(HEAD)));
+    ['el', 'gas'].forEach((cat, k) => {
+      put(HR + 1 + k, cK, code[cat], null, null, stBody(COL[cat].sub, true, 'center'));
+      years.forEach((y, i) => put(HR + 1 + k, cK + 1 + i, base[cat][y] != null ? base[cat][y] : '', P2, null, stBody(COL[cat].row, false, 'right')));
+    });
+
+    let r = HR + 1; const subRows = []; const subVals = {}; const subRowOf = {}; const pay = {};
+    cats.forEach(cat => {
+      const first = r; let tot = 0; const cl = COL[cat];
+      blocks[cat].forEach(Lr => {
+        const e = r + 1, p = Lr.p;
+        put(r, cI, ico, null, null, stBody(cl.row));
+        put(r, cN, client, null, null, stBody(cl.row));
+        put(r, cC, code[cat] + omOf(cat), null, null, stBody(cl.row));
+        put(r, cV, p.vol, P1, null, stBody(cl.row, false, 'right'));
+        put(r, cD, p.type === 'spot' ? 'SPOT' : 'Fix', null, null, stBody(cl.row, false, 'center'));
+        if (Lr.missing) {
+          put(r, cP, 'chýba Base – zadaj ju ručne', null, null, stBody(cl.row));
+          [cS, c20, c30, c50].forEach(c => put(r, c, '', null, null, stBody(cl.row))); r++; return;
+        }
+        const x = Lr.x;
+        const from = (x.i === 0 && p.startD) ? p.startD : new Date(x.y, 0, 1);
+        put(r, cP, dmy(from) + ' – 31.12.' + x.y, null, null, stBody(cl.row));
+        const m = Math.round(x.share * 12);
+        const shareTxt = Math.abs(x.share * 12 - m) < 1e-6 ? (m === 12 ? '' : '*' + m + '/12') : '*' + +x.share.toFixed(6);
+        const baseTxt = p.type === 'spot'
+          ? String(p.base)
+          : 'INDEX(' + tblRng + ',MATCH(LEFT(' + L(cC) + e + ',2),' + namesRng + ',0),MATCH(VALUE(RIGHT(' + L(cP) + e + ',4)),' + yearsRng + ',0))';
+        put(r, cS, x.tot, EUR, '(' + p.sale + '-' + baseTxt + ')/2*0.3*' + L(cV) + e + shareTxt, stBody(cl.row, true, 'right'));
+        put(r, c20, x.tot * 0.2, EUR, L(cS) + e + '*0.2', stBody(cl.row, false, 'right'));
+        put(r, c30, x.tot * 0.3, EUR, L(cS) + e + '*0.3', stBody(cl.row, false, 'right'));
+        put(r, c50, x.tot * 0.5, EUR, L(cS) + e + '*0.5', stBody(cl.row, false, 'right'));
+        tot += x.tot; r++;
+      });
+      const last = r - 1;
+      put(r, cN, 'Spolu – ' + COMM_CATS[cat].label.toLowerCase(), null, null, stBody(cl.sub, true));
+      [cI, cC, cP, cV, cD].forEach(c => put(r, c, '', null, null, stBody(cl.sub, true)));
+      [cS, c20, c30, c50].forEach((c, k) => put(r, c, tot * [1, 0.2, 0.3, 0.5][k], EUR,
+        'SUM(' + A({ r: first, c }) + ':' + A({ r: last, c }) + ')', stBody(cl.sub, true, 'right')));
+      subRows.push(r); subVals[cat] = tot; subRowOf[cat] = r;
+      const fr = blocks[cat].filter(b => b.x).map(b => (b.x.i === 0 && b.p.startD) ? b.p.startD : new Date(b.x.y, 0, 1));
+      const ly = blocks[cat].filter(b => b.x).map(b => b.x.y);
+      if (fr.length) { pay[cat] = { from: new Date(Math.min.apply(null, fr)), to: new Date(Math.max.apply(null, ly), 11, 31) }; }
+      r++;
+    });
+    if (subRows.length > 1) {
+      const gt = cats.reduce((a, cat) => a + subVals[cat], 0);
+      const stG = { font: { name: 'Arial', sz: 10, bold: true, color: { rgb: 'FFFFFFFF' } }, fill: fill('FF2B3445'), border: BORDER, alignment: { horizontal: 'left', vertical: 'center' } };
+      put(r, cN, 'Spolu – elektrina + plyn', null, null, stG);
+      [cI, cC, cP, cV, cD].forEach(c => put(r, c, '', null, null, stG));
+      [cS, c20, c30, c50].forEach((c, k) => put(r, c, gt * [1, 0.2, 0.3, 0.5][k], EUR,
+        subRows.map(sr => A({ r: sr, c })).join('+'), Object.assign({}, stG, { alignment: { horizontal: 'right', vertical: 'center' } })));
+    }
+
+    // ── Súhrn: spolu za komoditu + termíny výplaty (20 % pri podpise, 30 % pri nábehu dodávky, 50 % na konci obdobia) – vždy posledný deň mesiaca
+    {
+      r += 2;
+      const serial = d => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000 + 25569;
+      const DATE = 'dd.mm.yyyy';
+      const eom = d => new Date(d.getFullYear(), d.getMonth() + 1, 0);       // posledný deň mesiaca, v ktorom dátum pripadá
+      put(r, cN, 'Súhrn a termíny výplaty', null, null, stHead(HEAD));
+      put(r, cC, 'Suma', null, null, stHead(HEAD));
+      put(r, cP, 'Dátum výplaty', null, null, stHead(HEAD));
+      r++;
+      cats.forEach(cat => {
+        const cl = COL[cat], sr = subRowOf[cat] + 1, pc = pay[cat];
+        const row = (label, col, val, d, bold, note) => {
+          put(r, cN, label, null, null, stBody(bold ? cl.sub : cl.row, bold));
+          put(r, cC, val, EUR, L(col) + sr, stBody(bold ? cl.sub : cl.row, bold, 'right'));
+          if (d) put(r, cP, serial(eom(d)), DATE, null, stBody(bold ? cl.sub : cl.row, bold, 'center'));
+          else put(r, cP, note || '', null, null, stBody(bold ? cl.sub : cl.row, bold, 'center'));
+          r++;
+        };
+        row('Spolu – ' + COMM_CATS[cat].label.toLowerCase(), cS, subVals[cat], null, true, '');
+        row('20 % pri podpise zmluvy', c20, subVals[cat] * 0.2, now, false);
+        row('30 % pri nábehu dodávky', c30, subVals[cat] * 0.3, pc ? pc.from : null, false, 'chýba začiatok');
+        row('50 % na konci obdobia', c50, subVals[cat] * 0.5, pc ? pc.to : null, false, 'chýba koniec');
+      });
+    }
+
+    ws['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: maxr, c: Math.max(maxc, lastC) } });
+    const omW = Math.max(14, ...cats.map(cat => (code[cat] + omOf(cat)).length + 2));
+    ws['!cols'] = [12, 28, omW, 26, 8, 8, 14, 12, 12, 12, 3, 18].concat(years.map(() => 10)).map(w => ({ wch: w }));
+    ws['!rows'] = []; ws['!rows'][0] = { hpt: 24 }; ws['!rows'][HR] = { hpt: 28 };
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Provízia');
+    const fname = 'Provizia' + (clientShort ? '_' + clientShort.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\-]+/g, '_') : '') + '.xlsx';
+    XLSX.writeFile(wb, fname);
   }
 
   function commClose() { COMM.ov.classList.remove('open'); COMM.token++; }
