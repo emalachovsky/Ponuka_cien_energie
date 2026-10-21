@@ -11,6 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root {
   --bg: #0a0e14;
@@ -1615,9 +1617,62 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   .pdf-export-btn { padding: 5px 18px; }
   .theme-toggle { padding: 5px 12px; }
 }
+
+/* ─── STRUČNÁ SPRÁVA PRE KLIENTA (PDF export) ─────────────────────────── */
+#pdfReport { display: none; }
+/* počas generovania PDF sa správa vykreslí mimo obrazovky (nie je vidieť, ale má rozmery) */
+#pdfReport.rp-capture { display: block; position: absolute; left: -10000px; top: 0; z-index: -1; }
+@media print {
+  html.rp-printing body > *:not(#pdfReport) { display: none !important; }
+  html.rp-printing body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  html.rp-printing #pdfReport { display: block; }
+}
+#pdfReport, #pdfReport * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+#pdfReport { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #1b2430; background: #fff; width: 210mm; }
+#pdfReport .rp-page { padding: 12mm 14mm; }
+#pdfReport b { font-weight: 700; color: #0f1b2d; }
+#pdfReport .rp-head { position: relative; background: linear-gradient(135deg, #0f1b2d, #17335a); border-radius: 14px; padding: 18px 22px 16px; color: #fff; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; overflow: hidden; }
+#pdfReport .rp-head::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, #4c9eff, #3fb950); }
+#pdfReport .rp-title { font-size: 26px; font-weight: 800; color: #f0a84f; line-height: 1.1; letter-spacing: -0.3px; }
+#pdfReport .rp-client { margin-top: 8px; font-size: 13px; color: #c9d6e6; }
+#pdfReport .rp-client strong { color: #fff; font-size: 17px; font-weight: 700; margin-left: 4px; }
+#pdfReport .rp-client span { margin-left: 8px; color: #8fa3bd; }
+#pdfReport .rp-date { text-align: right; font-size: 10.5px; color: #8fa3bd; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+#pdfReport .rp-date b { display: block; font-size: 17px; color: #fff; letter-spacing: 0; margin: 2px 0 3px; }
+#pdfReport .rp-date i { display: block; font-style: normal; text-transform: none; letter-spacing: 0; font-size: 10.5px; }
+
+#pdfReport .rp-card { margin-top: 14px; border: 1.5px solid var(--rp-line); border-radius: 14px; overflow: hidden; }
+#pdfReport .rp-card.el  { --rp-line: #bcd5f7; --rp-tint: #eaf2ff; --rp-ink: #1a5fb4; }
+#pdfReport .rp-card.gas { --rp-line: #f1d6a0; --rp-tint: #fff4de; --rp-ink: #a86a00; }
+#pdfReport .rp-card-h { display: flex; align-items: center; gap: 10px; background: var(--rp-tint); padding: 10px 16px; }
+#pdfReport .rp-card-h svg { flex: none; }
+#pdfReport .rp-card-h h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--rp-ink); }
+#pdfReport .rp-chip { margin-left: auto; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: #fff; border: 1px solid var(--rp-line); color: var(--rp-ink); white-space: nowrap; }
+#pdfReport .rp-chip + .rp-chip { margin-left: 0; }
+#pdfReport .rp-card-b { padding: 12px 16px 14px; }
+#pdfReport .rp-msg { margin: 0; font-size: 12.5px; line-height: 1.55; color: #2b3644; }
+
+#pdfReport .rp-tbl { margin-top: 12px; }
+#pdfReport .rp-th, #pdfReport .rp-tr { display: grid; grid-template-columns: 1.55fr 1fr 1fr 1.45fr; gap: 10px; align-items: center; }
+#pdfReport .rp-th { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #7a8696; padding: 0 4px 5px; }
+#pdfReport .rp-tr { padding: 9px 4px; border-top: 1px solid #e6eaf0; }
+#pdfReport .rp-per b { display: block; font-size: 12.5px; }
+#pdfReport .rp-per small { display: block; font-size: 10.5px; color: #5b6777; margin-top: 1px; }
+#pdfReport .rp-old { font-size: 16px; font-weight: 600; color: #d6453d; text-decoration: line-through; text-decoration-thickness: 1.5px; }
+#pdfReport .rp-new { font-size: 21px; font-weight: 800; color: #1e7a3c; }
+#pdfReport .rp-old small, #pdfReport .rp-new small { font-size: 9.5px; font-weight: 600; margin-left: 2px; text-decoration: none; display: inline-block; color: #7a8696; }
+#pdfReport .rp-sav { background: #e6f6ea; border: 1px solid #b7e0c2; border-radius: 10px; padding: 6px 10px; }
+#pdfReport .rp-sav b { display: block; font-size: 15px; color: #1e7a3c; }
+#pdfReport .rp-sav small { display: block; font-size: 9.5px; color: #3d6b4a; margin-top: 1px; }
+
+#pdfReport .rp-total { margin-top: 14px; background: linear-gradient(135deg, #0e5a2a, #1e8a44); color: #fff; border-radius: 14px; padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+#pdfReport .rp-total .lbl { font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: #bdeccb; font-weight: 700; }
+#pdfReport .rp-total .note { margin-top: 5px; font-size: 11.5px; color: #d6f3de; line-height: 1.4; }
+#pdfReport .rp-total .num { font-size: 34px; font-weight: 800; white-space: nowrap; }
 </style>
 </head>
 <body>
+<div id="pdfReport"></div>
 <div class="page">
 
   <!-- HEADER -->
@@ -1982,13 +2037,155 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     v('themeIcon').textContent  = isLight ? '🌙' : '☀️';
   }
 
-  function exportToPdf() {
+  // ─── PDF EXPORT: stručná správa pre klienta ───────────────────────────────
+  // Z aktuálnych hodnôt poskladá jednu stranu A4 (základné údaje, stará/nová cena, dátumy, úspora
+  // + krátke vysvetlenie nastavenia) a vytlačí ju; dashboard sa pri tlači skryje.
+  function buildPdfReport() {
+    const esc  = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const eur0 = n => ((Math.round(n) || 0)).toLocaleString('sk-SK') + '\u00a0€';
+    const mwh  = n => num2(n) + '\u00a0€/MWh';
+    const ICON = {
+      el:  '<svg width="22" height="22" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#f5a623" stroke="#d98b00" stroke-width="0.8" stroke-linejoin="round"/></svg>',
+      gas: '<svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z" fill="#f28c28" stroke="#c96a10" stroke-width="0.8" stroke-linejoin="round"/></svg>'
+    };
+
+    const cats = ['el', 'gas'].filter(c => ENERGY_ON[c]);
+    if (!cats.length) return null;
+
+    const cards = cats.map(cat => {
+      const C      = cat === 'el' ? 'El' : 'Gas';
+      const mode   = FS_MODE[cat];
+      const cons   = num('inp_cons' + C);
+      const cur    = num('inp_cur' + C);
+      const pred   = num('inp_' + cat + '2027'),  offer  = num('inp_' + cat + 'Max');
+      const pred2  = num('inp_' + cat + '2028'),  offer2 = num('inp_' + cat + 'Fix2028');
+      const years  = Math.max(1, Math.round(num('inp_years_' + cat)) || 2);
+      const start  = parseDateInput('inp_start_' + cat, new Date(mode === 'KOMBI' ? 2028 : 2027, 0, 1));
+      const end    = calcContractEnd(start, years);
+      const range  = dsk(start) + ' – ' + dsk(end);
+      const supplier = (SUPPLIER[cat] || '').trim();
+      const boundArr = String(BOUND_UNTIL[cat] || '').split(',').map(t => t.trim()).filter(Boolean);
+      const bound  = boundArr.length ? boundArr[boundArr.length - 1] : '';
+
+      // riadky tabuľky: obdobie | očakávaná cena | naša cena | úspora
+      let rows;
+      if (mode === 'KOMBI') {
+        rows = [
+          { lab: 'SPOT ' + KOMBI_SPOT_YEAR, dates: dsk(new Date(KOMBI_SPOT_YEAR, 0, 1)) + ' – ' + dsk(new Date(KOMBI_SPOT_YEAR, 11, 31)), old: pred,  nw: offer },
+          { lab: 'FIX od ' + start.getFullYear(), dates: range, old: pred2, nw: offer2 }
+        ];
+      } else if (mode === 'SPOT') {
+        rows = [{ lab: 'Cena SPOT', dates: range, old: pred, nw: offer }];
+      } else {
+        rows = [{ lab: 'Pevná cena FIX', dates: range, old: pred, nw: offer }];
+      }
+      rows.forEach(r => { r.unit = r.old - r.nw; r.year = cons * r.unit; });
+
+      // krátka správa: ako je ponuka nastavená a prečo
+      const s1 = cur > 0
+        ? 'Dnes platíte <b>' + mwh(cur) + '</b>' + (supplier ? ' (' + esc(supplier) + ')' : '') + (bound ? ', zmluva končí <b>' + esc(bound) + '</b>' : '') + '. '
+        : (bound ? 'Súčasná zmluva končí <b>' + esc(bound) + '</b>. ' : '');
+      const est = bound ? 'Po jej skončení odhadujeme cenu približne na ' : 'Odhadujeme cenu približne na ';
+      let s2;
+      if (mode === 'KOMBI') {
+        s2 = 'Navrhujeme kombináciu: v roku ' + KOMBI_SPOT_YEAR + ' SPOT cenu <b>' + mwh(offer) + '</b> (odhad bez zmeny <b>' + mwh(pred) + '</b>) a od ' + start.getFullYear() +
+             ' pevnú FIX cenu <b>' + mwh(offer2) + '</b> (odhad <b>' + mwh(pred2) + '</b>) do konca viazanosti.';
+      } else if (mode === 'SPOT') {
+        s2 = est + '<b>' + mwh(pred) + '</b>. Ponúkame Vám SPOT cenu <b>' + mwh(offer) + '</b> na rok ' + start.getFullYear() + '; cena sleduje vývoj na trhu.';
+      } else {
+        s2 = est + '<b>' + mwh(pred) + '</b>. Preto Vám ponúkame pevnú (FIX) cenu <b>' + mwh(offer) + '</b> na celé obdobie viazanosti – nezmení sa bez ohľadu na vývoj na trhu.';
+      }
+
+      const rowsHtml = rows.map(r =>
+        '<div class="rp-tr">' +
+          '<div class="rp-per"><b>' + esc(r.lab) + '</b><small>' + esc(r.dates) + '</small></div>' +
+          '<div class="rp-old">' + num2(r.old) + '<small> €/MWh</small></div>' +
+          '<div class="rp-new">' + num2(r.nw) + '<small> €/MWh</small></div>' +
+          '<div class="rp-sav"><b>' + eur0(r.year) + ' / rok</b><small>' + num2(r.unit) + ' €/MWh · ≈ ' + eur0(r.year / 12) + ' mesačne</small></div>' +
+        '</div>').join('');
+
+      return '<section class="rp-card ' + cat + '">' +
+        '<div class="rp-card-h">' + ICON[cat] + '<h2>' + (cat === 'el' ? 'Elektrina' : 'Plyn') + '</h2>' +
+          '<span class="rp-chip">' + esc(mode) + '</span>' +
+          '<span class="rp-chip">' + cons.toLocaleString('sk-SK', { maximumFractionDigits: 2 }) + ' MWh / rok</span></div>' +
+        '<div class="rp-card-b"><p class="rp-msg">' + s1 + s2 + '</p>' +
+          '<div class="rp-tbl"><div class="rp-th"><span>Obdobie</span><span>Očakávaná cena bez zmeny</span><span>Naša cena</span><span>Úspora</span></div>' +
+          rowsHtml + '</div></div></section>';
+    }).join('');
+
+    // celková úspora (rovnaká hodnota ako v dashboarde) + poznámka o poplatkoch
+    const total  = LAST_RESULT ? LAST_RESULT.total : 0;
+    const fee1   = num('inp_fee1'), feeM = num('inp_feeM');
+    const feeParts = [];
+    if (fee1 > 0) feeParts.push('jednorazový poplatok ' + eur0(fee1));
+    if (feeM > 0) feeParts.push('mesačný poplatok ' + eur0(feeM));
+    const totalNote = feeParts.length
+      ? 'Čistá úspora po odrátaní poplatkov za službu (' + feeParts.join(', ') + ').'
+      : 'Súčet úspor za celé obdobie viazanosti.';
+
+    const multi = CLIENTS.length > 1;
+    const clientName = multi ? CLIENTS.map(c => c.name).filter(Boolean).join(', ') : (CLIENT_NAME || '');
+    const ico = (!multi && CLIENT_ICO) ? '<span>IČO ' + esc(CLIENT_ICO) + '</span>' : '';
+
+    return '<div class="rp-page">' +
+      '<div class="rp-head"><div><div class="rp-title">Ponuka cien energií</div>' +
+        '<div class="rp-client">Odberateľ:<strong>' + esc(clientName) + '</strong>' + ico + '</div></div>' +
+        '<div class="rp-date">Dátum ponuky<b>' + esc(dsk(OFFER_DATE)) + '</b><i>Ceny sú orientačné a platné ' + esc(VALIDITY_TEXT) + '</i></div></div>' +
+      cards +
+      '<div class="rp-total"><div><div class="lbl">Celková úspora</div><div class="note">' + esc(totalNote) + '</div></div>' +
+        '<div class="num">' + eur0(total) + '</div></div>' +
+      '</div>';
+  }
+
+  // Vygeneruje PDF priamo v prehliadači a automaticky ho stiahne (bez tlačového okna).
+  // Obsah sa vždy zmenší tak, aby sa zmestil celý na jednu stranu A4 na výšku.
+  async function exportToPdf() {
+    recalc();
+    const html = buildPdfReport();
+    if (!html) { alert('Zapnite aspoň jednu komoditu (Elektrina / Plyn).'); return; }
+    if (!window.html2canvas || !window.jspdf) {
+      alert('Knižnice na tvorbu PDF sa nenačítali (je potrebné pripojenie na internet).');
+      return;
+    }
+
     const clientEl = document.getElementById('clientDisp');
-    const clientName = clientEl ? clientEl.textContent.trim() : '';
-    const prevTitle = document.title;
-    document.title = 'Ponuka cien energií' + (clientName ? ' - ' + clientName : '');
-    window.print();
-    setTimeout(() => { document.title = prevTitle; }, 500);
+    const multi = CLIENTS.length > 1;
+    const clientName = multi ? CLIENTS.map(c => c.name).filter(Boolean).join(', ') : (clientEl ? clientEl.textContent.trim() : '');
+    const safe = s => String(s || '').replace(/[\\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const fileName = 'Ponuka cien energií' + (safe(clientName) ? ' - ' + safe(clientName) : '') + '.pdf';
+
+    const btn = v('pdfExportBtn');
+    const host = document.getElementById('pdfReport');
+    if (btn) btn.disabled = true;
+    try {
+      host.innerHTML = html;
+      host.classList.add('rp-capture');
+      if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+
+      const canvas = await window.html2canvas(host, {
+        scale: 2.5,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+        windowWidth: host.scrollWidth
+      });
+
+      const PW = 210, PH = 297;                         // A4 na výšku (mm)
+      let w = PW, h = canvas.height / canvas.width * PW;
+      if (h > PH) { w = w * PH / h; h = PH; }           // príliš vysoké -> zmenší sa na jednu stranu
+      const x = (PW - w) / 2;                           // pri zmenšení sa vycentruje
+
+      const pdf = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', x, 0, w, h);
+      pdf.save(fileName);
+    } catch (err) {
+      console.error(err);
+      alert('PDF sa nepodarilo vytvoriť: ' + (err && err.message ? err.message : err));
+    } finally {
+      host.classList.remove('rp-capture');
+      host.innerHTML = '';
+      if (btn) btn.disabled = false;
+    }
   }
 
   let STATIC_EL2027  = 135;
