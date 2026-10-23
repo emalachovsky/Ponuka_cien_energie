@@ -1394,8 +1394,9 @@ html[data-theme="light"] .stat-row .input-section .input-wrap select {
 :root { --old: #e5645c; --old-glow: rgba(229,100,92,0.12); --new: #3fb950; --new-glow: rgba(63,185,80,0.14); }
 html[data-theme="light"] { --old: #c0392b; --old-glow: rgba(192,57,43,0.08); --new: #1e7a3c; --new-glow: rgba(30,122,60,0.10); }
 
-/* texty a súčasná cena ostávajú v pôvodných farbách; červená len pre cenu 2027, ak je vyššia ako súčasná */
-#inp_el2027.price-up, #inp_gas2027.price-up, #inp_el2028.price-up, #inp_gas2028.price-up {
+/* texty a súčasná cena ostávajú v pôvodných farbách; predpokladaná cena (FIX) a predpoklad SPOT sú vždy červené – len číslo */
+#inp_el2027, #inp_gas2027, #inp_el2028, #inp_gas2028,
+html[data-theme] #inp_el2027, html[data-theme] #inp_gas2027, html[data-theme] #inp_el2028, html[data-theme] #inp_gas2028 {
   color: var(--old);
 }
 
