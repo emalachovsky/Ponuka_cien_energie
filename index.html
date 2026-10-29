@@ -2061,8 +2061,9 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       const pred   = num('inp_' + cat + '2027'),  offer  = num('inp_' + cat + 'Max');
       const pred2  = num('inp_' + cat + '2028'),  offer2 = num('inp_' + cat + 'Fix2028');
       const years  = Math.max(1, Math.round(num('inp_years_' + cat)) || 2);
-      const start  = parseDateInput('inp_start_' + cat, new Date(mode === 'KOMBI' ? 2028 : 2027, 0, 1));
-      const end    = calcContractEnd(start, years);
+      const start  = parseDateInput('inp_start_' + cat, new Date(2027, 0, 1));
+      const end    = contractEndFor(cat, start, years);
+      const fixYear = start.getFullYear() + 1;
       const range  = dsk(start) + ' – ' + dsk(end);
       const supplier = (SUPPLIER[cat] || '').trim();
       const boundArr = String(BOUND_UNTIL[cat] || '').split(',').map(t => t.trim()).filter(Boolean);
@@ -2072,13 +2073,13 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       let rows;
       if (mode === 'KOMBI') {
         rows = [
-          { lab: 'SPOT ' + KOMBI_SPOT_YEAR, dates: dsk(new Date(KOMBI_SPOT_YEAR, 0, 1)) + ' – ' + dsk(new Date(KOMBI_SPOT_YEAR, 11, 31)), old: pred,  nw: offer },
-          { lab: 'FIX od ' + start.getFullYear(), dates: range, old: pred2, nw: offer2 }
+          { lab: 'SPOT ' + start.getFullYear(), dates: dsk(start) + ' – ' + dsk(new Date(start.getFullYear(), 11, 31)), old: pred,  nw: offer },
+          { lab: 'FIX ' + fixSpanText(fixYear, years), dates: dsk(new Date(fixYear, 0, 1)) + ' – ' + dsk(end), old: pred2, nw: offer2 }
         ];
       } else if (mode === 'SPOT') {
         rows = [{ lab: 'Cena SPOT', dates: range, old: pred, nw: offer }];
       } else {
-        rows = [{ lab: 'Pevná cena FIX', dates: range, old: pred, nw: offer }];
+        rows = [{ lab: 'Pevná cena FIX ' + fixSpanText(start.getFullYear(), years), dates: range, old: pred, nw: offer }];
       }
       rows.forEach(r => { r.unit = r.old - r.nw; r.year = cons * r.unit; });
 
@@ -2089,8 +2090,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       const est = bound ? 'Po jej skončení odhadujeme cenu približne na ' : 'Odhadujeme cenu približne na ';
       let s2;
       if (mode === 'KOMBI') {
-        s2 = 'Navrhujeme kombináciu: v roku ' + KOMBI_SPOT_YEAR + ' SPOT cenu <b>' + mwh(offer) + '</b> (odhad bez zmeny <b>' + mwh(pred) + '</b>) a od ' + start.getFullYear() +
-             ' pevnú FIX cenu <b>' + mwh(offer2) + '</b> (odhad <b>' + mwh(pred2) + '</b>) do konca viazanosti.';
+        s2 = 'Navrhujeme kombináciu: v roku ' + start.getFullYear() + ' SPOT cenu <b>' + mwh(offer) + '</b> (odhad bez zmeny <b>' + mwh(pred) + '</b>) a potom pevnú FIX cenu <b>' + mwh(offer2) + '</b> (odhad <b>' + mwh(pred2) + '</b>) na ' + (years > 1 ? 'roky ' : 'rok ') + fixYear + (years > 1 ? '–' + (fixYear + years - 1) + ' (priemer)' : '') + '.';
       } else if (mode === 'SPOT') {
         s2 = est + '<b>' + mwh(pred) + '</b>. Ponúkame Vám SPOT cenu <b>' + mwh(offer) + '</b> na rok ' + start.getFullYear() + '; cena sleduje vývoj na trhu.';
       } else {
@@ -2204,7 +2204,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     const arr = String(listStr || '').split(',').map(t => t.trim()).filter(Boolean);
     if (!arr.length) return null;
     const m = arr[arr.length - 1].split('.');          // zoznam je zoradený vzostupne
-    let d = new Date(+m[2], +m[1] - 1, +m[0] + 1);
+    let d = new Date(+m[2], +m[1], 1);   // 1. deň mesiaca po konci viazanosti
     if (isNaN(d)) return null;
     const min = new Date(2027, 0, 1);
     return d < min ? min : d;
@@ -2313,9 +2313,9 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       const bottomBadge = g('BottomSavingBadge');
       const maxLabel    = g('MaxLabel');
       if (bottomBadge) bottomBadge.style.display = mode === 'KOMBI' ? 'none' : '';
-      if (maxLabel) maxLabel.textContent = mode === 'KOMBI' ? 'Ponúkaná cena SPOT na rok ' + KOMBI_SPOT_YEAR
+      if (maxLabel) maxLabel.textContent = mode === 'KOMBI' ? 'Ponúkaná cena SPOT na rok ' + startYearOf(cat)
                                          : mode === 'SPOT'  ? 'Ponúkaná cena SPOT na rok ' + parseDateInput('inp_start_' + cat, new Date(2027, 0, 1)).getFullYear()
-                                         : 'Ponúkaná cena (max)';
+                                         : 'Ponúkaná cena FIX ' + fixSpanText(startYearOf(cat), Math.max(1, Math.round(num('inp_years_' + cat)) || 1));
       const predTag = g('PredTag');
       if (predTag) predTag.textContent = (mode === 'SPOT' || mode === 'KOMBI') ? 'SPOT ' : '';
     }
@@ -2369,14 +2369,6 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
           if (pSp) pSp.value = 10;
         } else if (prev === 'KOMBI' && LAST_NONKOMBI[cat]) {
           restorePrices(cat, LAST_NONKOMBI[cat]);   // režim ešte nebol použitý: ceny spred KOMBI
-        }
-      }
-      if (mode !== 'KOMBI' && FS_MODE[cat] === 'KOMBI') {
-        // návrat z KOMBI: začiatok viazanosti = deň po konci súčasnej viazanosti z hlavičky (napr. 31.12.2026 -> 1.1.2027)
-        const stInp = document.getElementById('inp_start_' + cat);
-        if (stInp) {
-          const d = startAfterBound(BOUND_UNTIL[cat]);
-          stInp.value = toDateInputValue(d || new Date(2027, 0, 1));
         }
       }
       setFixSpot(prefix, mode);
@@ -2473,16 +2465,16 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   const MAX_END_YEAR = 2030;
 
   // KOMBI: SPOT je vždy len na rok 2027, FIX viazanosť môže začať najskôr 1.1.2028.
-  const KOMBI_SPOT_YEAR = 2027;
-  const KOMBI_MIN_START = '2028-01-01';
-  function applyKombiStartLimit() {
-    ['el', 'gas'].forEach(cat => {
-      const inp = document.getElementById('inp_start_' + cat);
-      if (!inp) return;
-      const kombi = FS_MODE[cat] === 'KOMBI';
-      inp.min = kombi ? KOMBI_MIN_START : '';
-      if (kombi && inp.value && inp.value < KOMBI_MIN_START) inp.value = KOMBI_MIN_START;
-    });
+  // KOMBI: SPOT = rok začiatku viazanosti, FIX = od 1.1. nasledujúceho roka. Všetko sa riadi poľom „Začiatok viazanosti“.
+  function applyKombiStartLimit() {}
+  // Text obdobia FIX: „2029“ alebo „Ø 2029–2030“ (priemer, ak je FIX na viac rokov)
+  function fixSpanText(firstYear, years) {
+    return years > 1 ? 'Ø ' + firstYear + '–' + (firstYear + years - 1) : String(firstYear);
+  }
+  function startYearOf(cat) { return parseDateInput('inp_start_' + cat, new Date(2027, 0, 1)).getFullYear(); }
+  function fixYearOf(cat) { return startYearOf(cat) + (FS_MODE[cat] === 'KOMBI' ? 1 : 0); }
+  function contractEndFor(cat, start, years) {
+    return FS_MODE[cat] === 'KOMBI' ? new Date(start.getFullYear() + years, 11, 31) : calcContractEnd(start, years);
   }
 
   function clampContractYears() {
@@ -2491,7 +2483,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       const startInp = document.getElementById('inp_start_' + k);
       if (!sel || !startInp || !startInp.value) return;
       const startYear = parseDateInput('inp_start_' + k, new Date(2027, 0, 1)).getFullYear();
-      const maxYears = Math.max(1, MAX_END_YEAR - startYear + 1);
+      const maxYears = Math.max(1, MAX_END_YEAR - startYear + (FS_MODE[k] === 'KOMBI' ? 0 : 1));
       Array.from(sel.options).forEach(o => { o.disabled = parseInt(o.value, 10) > maxYears; });
       if (parseInt(sel.value, 10) > maxYears) sel.value = String(Math.min(maxYears, 4));
     });
@@ -2505,10 +2497,10 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
 
     const yearsEl  = Math.max(1, Math.round(num('inp_years_el'))  || 2);
     const yearsGas = Math.max(1, Math.round(num('inp_years_gas')) || 2);
-    const startEl  = parseDateInput('inp_start_el',  new Date(FS_MODE.el === 'KOMBI' ? 2028 : 2027, 0, 1));
-    const startGas = parseDateInput('inp_start_gas', new Date(FS_MODE.gas === 'KOMBI' ? 2028 : 2027, 0, 1));
-    const endEl    = calcContractEnd(startEl,  yearsEl);
-    const endGas   = calcContractEnd(startGas, yearsGas);
+    const startEl  = parseDateInput('inp_start_el',  new Date(2027, 0, 1));
+    const startGas = parseDateInput('inp_start_gas', new Date(2027, 0, 1));
+    const endEl    = contractEndFor('el',  startEl,  yearsEl);
+    const endGas   = contractEndFor('gas', startGas, yearsGas);
 
     const consEl    = num('inp_consEl');
     const consGas   = num('inp_consGas');
@@ -2564,17 +2556,14 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     if (activePeriods.length) {
       const overallStart = new Date(Math.min(...activePeriods.map(p => p.start.getTime())));
       const overallEnd   = new Date(Math.max(...activePeriods.map(p => p.end.getTime())));
-      // KOMBI: prvý rok je vždy SPOT 2027 (aj keď FIX viazanosť začína až 2028+)
-      const startYearNum = ((ENERGY_ON.el && isElKombi) || (ENERGY_ON.gas && isGasKombi))
-        ? Math.min(overallStart.getFullYear(), KOMBI_SPOT_YEAR)
-        : overallStart.getFullYear();
+      const startYearNum = overallStart.getFullYear();
       const endYearNum   = overallEnd.getFullYear();
       for (let calYear = startYearNum, i = 0; calYear <= endYearNum; calYear++, i++) {
         let gasYearSav = 0;
         if (ENERGY_ON.gas) {
           if (isGasKombi) {
-            if (calYear === KOMBI_SPOT_YEAR) gasYearSav = savGasYear;                                              // SPOT 2027
-            else if (calYear >= startGas.getFullYear() && calYear <= endGas.getFullYear()) gasYearSav = savGasYearFix; // FIX
+            if (calYear === startGas.getFullYear()) gasYearSav = savGasYear;                                              // SPOT 2027
+            else if (calYear > startGas.getFullYear() && calYear <= endGas.getFullYear()) gasYearSav = savGasYearFix; // FIX
           } else if (calYear >= startGas.getFullYear() && calYear <= endGas.getFullYear()) {
             gasYearSav = savGasYear;
           }
@@ -2582,8 +2571,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         let elYearSav = 0;
         if (ENERGY_ON.el) {
           if (isElKombi) {
-            if (calYear === KOMBI_SPOT_YEAR) elYearSav = savElYear;                                              // SPOT 2027
-            else if (calYear >= startEl.getFullYear() && calYear <= endEl.getFullYear()) elYearSav = savElYearFix; // FIX
+            if (calYear === startEl.getFullYear()) elYearSav = savElYear;                                              // SPOT 2027
+            else if (calYear > startEl.getFullYear() && calYear <= endEl.getFullYear()) elYearSav = savElYearFix; // FIX
           } else if (calYear >= startEl.getFullYear() && calYear <= endEl.getFullYear()) {
             elYearSav = savElYear;
           }
@@ -2601,19 +2590,20 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     v('viazanostDisp_el').textContent  = dsk(startEl)  + ' – ' + dsk(endEl);
     v('viazanostDisp_gas').textContent = dsk(startGas) + ' – ' + dsk(endGas);
 
-    v('elYearLabel').textContent  = isElKombi ? KOMBI_SPOT_YEAR : startEl.getFullYear();
+    v('elYearLabel').textContent  = startEl.getFullYear();
     const elFixLbl = document.getElementById('elFixLabel');
-    if (elFixLbl) elFixLbl.textContent = 'Ponúkaná cena FIX od ' + startEl.getFullYear();
+    if (elFixLbl) elFixLbl.textContent = 'Ponúkaná cena FIX ' + fixSpanText(startEl.getFullYear() + 1, yearsEl);
     const el2028Lbl = document.getElementById('elYear2Label');
-    if (el2028Lbl) el2028Lbl.textContent = startEl.getFullYear();
+    if (el2028Lbl) el2028Lbl.textContent = (isElKombi ? 1 : 0) + startEl.getFullYear();
     const elMaxLbl = document.getElementById('elMaxLabel');
-    if (elMaxLbl && isElKombi) elMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + KOMBI_SPOT_YEAR;
+    if (elMaxLbl && isElKombi) elMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + startEl.getFullYear();
     else if (elMaxLbl && FS_MODE.el === 'SPOT') elMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + startEl.getFullYear();
-    v('gasYearLabel').textContent = isGasKombi ? KOMBI_SPOT_YEAR : startGas.getFullYear();
+    else if (elMaxLbl && FS_MODE.el === 'FIX') elMaxLbl.textContent = 'Ponúkaná cena FIX ' + fixSpanText(startEl.getFullYear(), yearsEl);
+    v('gasYearLabel').textContent = startGas.getFullYear();
     const gasFixLbl = document.getElementById('gasFixLabel');
-    if (gasFixLbl) gasFixLbl.textContent = 'Ponúkaná cena FIX od ' + startGas.getFullYear();
+    if (gasFixLbl) gasFixLbl.textContent = 'Ponúkaná cena FIX ' + fixSpanText(startGas.getFullYear() + 1, yearsGas);
     const gas2028Lbl = document.getElementById('gasYear2Label');
-    if (gas2028Lbl) gas2028Lbl.textContent = startGas.getFullYear();
+    if (gas2028Lbl) gas2028Lbl.textContent = (isGasKombi ? 1 : 0) + startGas.getFullYear();
     // Popis predpokladu pri FIX: „Predpokladaná cena na ďalší rok / ďalšie roky“ (podľa počtu rokov viazanosti).
     // Rok ostáva v skrytom prvku (číta ho aj iný kód). SPOT a SPOT časť KOMBI ostáva „Predpoklad SPOT <rok>“.
     const setPredLabel = (wordId, yearIds, fixLike, years) => {
@@ -2626,8 +2616,9 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     setPredLabel('elPred2Word',  ['elYear2Label'],  true, yearsEl);    // riadok je viditeľný len pri KOMBI (FIX časť)
     setPredLabel('gasPred2Word', ['gasYear2Label'], true, yearsGas);
     const gasMaxLbl = document.getElementById('gasMaxLabel');
-    if (gasMaxLbl && isGasKombi) gasMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + KOMBI_SPOT_YEAR;
+    if (gasMaxLbl && isGasKombi) gasMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + startGas.getFullYear();
     else if (gasMaxLbl && FS_MODE.gas === 'SPOT') gasMaxLbl.textContent = 'Ponúkaná cena SPOT na rok ' + startGas.getFullYear();
+    else if (gasMaxLbl && FS_MODE.gas === 'FIX') gasMaxLbl.textContent = 'Ponúkaná cena FIX ' + fixSpanText(startGas.getFullYear(), yearsGas);
 
     v('curElDisp').textContent   = num2(curEl);
     v('curGasDisp').textContent  = num2(curGas);
@@ -2656,7 +2647,6 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     let overallStartYear = activePeriods.length
       ? new Date(Math.min(...activePeriods.map(p => p.start.getTime()))).getFullYear()
       : startEl.getFullYear();
-    if ((ENERGY_ON.el && isElKombi) || (ENERGY_ON.gas && isGasKombi)) overallStartYear = Math.min(overallStartYear, KOMBI_SPOT_YEAR);
     yearValues.forEach((val, i) => {
       const card = document.createElement('div');
       card.className = 'ycard';
@@ -3387,7 +3377,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   // ---------------------------------------------------------------------------
   // NAČÍTAŤ CENY z Google tabuľky
   // Zdroj: hárok „Orientačné ceny energií“ (horná tabuľka), riadky dodávateľov:
-  //   elektrina A7:J10 (hlavička v riadku 6), plyn A13:J16 (hlavička v riadku 12)
+  //   elektrina A7:K10 (hlavička v riadku 6), plyn A13:K16 (hlavička v riadku 12)
   //   stĺpce: B=2027 C=2028 D=2029 E=2030 | F=Ø27-28 G=Ø27-29 H=Ø27-30 I=Ø28-29 J=Ø28-30
   //   (hlavičky v hárku sú už správne popísané)
   // Cena sa vyberie podľa začiatku viazanosti a počtu rokov a vloží do „Ponúkaná cena“.
@@ -3397,12 +3387,12 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   // ---------------------------------------------------------------------------
   const PRICE_SHEET_ID  = '1yjOl0-yYSOI2lTCxflBfZWiohGkQmJkMVJLIlxGBUdU';
   const PRICE_SHEET_GID = '1494981420';
-  const PRICE_RANGES    = { el: 'A7:J10', gas: 'A13:J16' };
+  const PRICE_RANGES    = { el: 'A7:K10', gas: 'A13:K16' };
   const PRICE_SUPPLIER  = 'MVM';   // čítajú sa a používajú iba ceny tohto dodávateľa
 
   // stĺpec (index v rozsahu A..J) pre jednotlivé roky a pre priemery
   const PRICE_YEAR_COL = { 2027: 1, 2028: 2, 2029: 3, 2030: 4 };
-  const PRICE_AVG_COL  = { '2027-2028': 5, '2027-2029': 6, '2027-2030': 7, '2028-2029': 8, '2028-2030': 9 };
+  const PRICE_AVG_COL  = { '2027-2028': 5, '2027-2029': 6, '2027-2030': 7, '2028-2029': 8, '2028-2030': 9, '2029-2030': 10 };
 
   function priceColumnFor(startYear, years) {
     const endYear = startYear + years - 1;
@@ -3411,8 +3401,14 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         ? { col: PRICE_YEAR_COL[startYear], label: 'rok ' + startYear } : null;
     }
     const key = startYear + '-' + endYear;
-    return PRICE_AVG_COL[key] !== undefined
-      ? { col: PRICE_AVG_COL[key], label: 'Ø ' + startYear + '–' + endYear } : null;
+    if (PRICE_AVG_COL[key] !== undefined) return { col: PRICE_AVG_COL[key], label: 'Ø ' + startYear + '–' + endYear };
+    // v tabuľke nie je hotový priemer (napr. 2029–2030) -> priemer z ročných stĺpcov
+    const cols = [];
+    for (let y = startYear; y <= endYear; y++) {
+      if (PRICE_YEAR_COL[y] === undefined) return null;
+      cols.push(PRICE_YEAR_COL[y]);
+    }
+    return { col: cols, label: 'Ø ' + startYear + '–' + endYear + ' (z ročných cien)' };
   }
 
   function parseSkNum(x) {
@@ -3464,7 +3460,11 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     let best = null;
     rows.forEach(r => {
       if (!String(r[0] == null ? '' : r[0]).trim().toUpperCase().startsWith(PRICE_SUPPLIER)) return;   // len dodávateľ MVM
-      const n = parseSkNum(r[col]);
+      let n;
+      if (Array.isArray(col)) {   // priemer viacerých ročných stĺpcov – všetky musia mať cenu
+        const vals = col.map(c => parseSkNum(r[c]));
+        n = vals.every(x => x !== null && x > 0) ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 100) / 100 : null;
+      } else n = parseSkNum(r[col]);
       if (n !== null && n > 0 && (best === null || n < best.price)) {
         best = { price: n, supplier: typeof r[0] === 'string' ? r[0].trim() : '' };
       }
@@ -3507,7 +3507,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     if (mode === 'SPOT') return null;
     const label = cat === 'el' ? 'Elektrina' : 'Plyn';
     const years = Math.max(1, Math.round(num('inp_years_' + cat)) || 1);
-    const startYear = parseDateInput('inp_start_' + cat, new Date(2027, 0, 1)).getFullYear();
+    const startYear = parseDateInput('inp_start_' + cat, new Date(2027, 0, 1)).getFullYear() + (mode === 'KOMBI' ? 1 : 0);
     const pc = priceColumnFor(startYear, years);
     if (!pc) return { ok: false, msg: '✗ ' + label + ': pre ' + startYear + ' / ' + years + ' r. nie je v tabuľke stĺpec' };
     const best = pickLowest(rows, pc.col);
@@ -3564,7 +3564,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         if (isKombi) predId = null;   // KOMBI: 1. rok je SPOT -> Predpoklad 2027 sa nemení
         const years = Math.max(1, Math.round(num(yearsId)) || 1);
         const start = parseDateInput(startId, new Date(2027, 0, 1));
-        const startYear = start.getFullYear();
+        const startYear = start.getFullYear() + (isKombi ? 1 : 0);   // KOMBI: FIX začína rok po SPOT roku
 
         const pc = priceColumnFor(startYear, years);
         if (!pc) { problems.push(label + ': pre ' + startYear + ' / ' + years + ' r. nie je v tabuľke stĺpec'); return; }
@@ -3601,7 +3601,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
        ['Plyn',      gasRows, gasKombi, 'inp_start_gas', 'inp_gas2028']].forEach(([label, rows, kombi, startId, predId]) => {
         if (!kombi) return;
         if (MANUAL_PRED.has(predId)) return;   // ručne upravený predpoklad sa nemení
-        const y2 = parseDateInput(startId, new Date(2028, 0, 1)).getFullYear();
+        const y2 = parseDateInput(startId, new Date(2027, 0, 1)).getFullYear() + 1;
         const yc2 = priceColumnFor(y2, 1);
         const pred2 = yc2 ? pickLowest(rows, yc2.col) : null;
         if (pred2) {
@@ -3665,7 +3665,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     const r = LAST_RESULT || { el: 0, gas: 0, years: [], total: 0 };
     return {
       format: OFFER_FORMAT,
-      verzia: 1,
+      verzia: 2,
       ulozene: localIsoNow(),
       odberatel: CLIENT_NAME,
       odberatelia: CLIENTS.map(c => ({ nazov: c.name, plny_nazov: c.full || '', ico: c.ico || '' })),
@@ -3806,6 +3806,15 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     setN(gas, 'ponuka_fix_2028', 'inp_gasFix2028', '', true);
     setYears(gas, 'inp_years_gas', 'plyn: viazanosť');
     setStart(gas, 'inp_start_gas', 'plyn: začiatok');
+    // staršie ponuky (verzia 1): pri KOMBI bol začiatok = začiatok FIX; teraz je to rok SPOT
+    if ((numOf(s.verzia) || 1) < 2) {
+      [[el, 'inp_start_el'], [gas, 'inp_start_gas']].forEach(([o, id]) => {
+        if (String(o.rezim || '').toUpperCase() === 'KOMBI' && isDate(o.zaciatok)) {
+          const yy = parseInt(o.zaciatok.slice(0, 4), 10) - 1;
+          if (yy >= 2027) v(id).value = yy + o.zaciatok.slice(4);
+        }
+      });
+    }
 
     setN(fees, 'jednorazovy', 'inp_fee1', 'poplatok: jednorazový');
     setN(fees, 'mesacny',     'inp_feeM', 'poplatok: mesačný');
@@ -4038,10 +4047,13 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     // Predajná cena = ponúkaná cena z hlavnej stránky (FIX ceny z tabuľky už obsahujú maržu)
     const sl = id => round1(num(id));
     if (mode === 'SPOT') return [{ type: 'spot', title: '', start, startD, span: years, offset, sale: sl(c.maxId), base: COMM_SPOT_BASE, years: effYears, vol, info: spotInfo }];
-    if (mode === 'KOMBI') return [
-      { type: 'spot', title: 'SPOT na rok ' + KOMBI_SPOT_YEAR, span: 1, offset: 0, sale: sl(c.maxId), base: COMM_SPOT_BASE, years: 1, vol, info: spotInfo },
-      { type: 'fix',  title: 'FIX od ' + start, start, startD, span: years, offset, sale: sl(c.fixId), base: null, years: effYears, vol, info: 'Načítavam Base z tabuľky…' }
-    ];
+    if (mode === 'KOMBI') {
+      const fixStart = start + 1;
+      return [
+        { type: 'spot', title: 'SPOT na rok ' + start, start, startD, span: 1, offset, sale: sl(c.maxId), base: COMM_SPOT_BASE, years: Math.max(1 / 12, 1 - offset), vol, info: spotInfo },
+        { type: 'fix', title: 'FIX od ' + fixStart, start: fixStart, startD: new Date(fixStart, 0, 1), span: years, offset: 0, sale: sl(c.fixId), base: null, years, vol, info: 'Načítavam Base z tabuľky…' }
+      ];
+    }
     return [{ type: 'fix', title: '', start, startD, span: years, offset, sale: sl(c.maxId), base: null, years: effYears, vol, info: 'Načítavam Base z tabuľky…' }];
   }
 
@@ -4100,7 +4112,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   }
   // Rozpis po rokoch: Predajná cena (rovnaká pre všetky roky) − Base cena daného roka. Záporný rozdiel sa nenuluje.
   function commYearRows(cat, p) {
-    const y0 = p.startD ? p.startD.getFullYear() : (p.start || KOMBI_SPOT_YEAR);
+    const y0 = p.startD ? p.startD.getFullYear() : (p.start || 2027);
     const n = Math.max(1, Math.round(p.span || 1));
     const frac = []; for (let i = 0; i < n; i++) frac.push(i === 0 ? 1 - (p.offset || 0) : 1);
     const k = p.years / frac.reduce((a, b) => a + b, 0);       // zladí súčet podielov s počtom rokov z karty
@@ -4153,8 +4165,8 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   // Prehľad cien na úplnom spodku okna: tabuľka cien (MVM) po rokoch aj priemery, ponúkané ceny s maržou
   // a Base ceny (MVM), s ktorými sa počíta provízia. Použitý stĺpec je zvýraznený.
   const CM_PCOLS = [['2027', 1], ['2028', 2], ['2029', 3], ['2030', 4],
-                    ['Ø 2027–28', 5], ['Ø 2027–29', 6], ['Ø 2027–30', 7], ['Ø 2028–29', 8], ['Ø 2028–30', 9]];
-  const CM_BASE_AVG = { 5: [2027, 2], 6: [2027, 3], 7: [2027, 4], 8: [2028, 2], 9: [2028, 3] };
+                    ['Ø 2027–28', 5], ['Ø 2027–29', 6], ['Ø 2027–30', 7], ['Ø 2028–29', 8], ['Ø 2028–30', 9], ['Ø 2029–30', 10]];
+  const CM_BASE_AVG = { 5: [2027, 2], 6: [2027, 3], 7: [2027, 4], 8: [2028, 2], 9: [2028, 3], 10: [2029, 2] };
   function commRenderPrices() {
     const box = document.getElementById('cm_ptable');
     if (!box) return;
@@ -4170,9 +4182,9 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       const rows = PRICE_CACHE[cat];
       const map = COMM.sheet && COMM.sheet[cat];
       const years = Math.max(1, Math.round(num(c.yearsId)) || 1);
-      const startYear = parseDateInput(c.startId, new Date(2027, 0, 1)).getFullYear();
+      const startYear = parseDateInput(c.startId, new Date(2027, 0, 1)).getFullYear() + (FS_MODE[cat] === 'KOMBI' ? 1 : 0);
       const pc = priceColumnFor(startYear, years);
-      const hlCol = (ENERGY_ON[cat] && FS_MODE[cat] !== 'SPOT' && pc) ? pc.col : -1;
+      const hlCol = (ENERGY_ON[cat] && FS_MODE[cat] !== 'SPOT' && pc && !Array.isArray(pc.col)) ? pc.col : -1;
       const raw = CM_PCOLS.map(([l, col]) => { const b = rows ? pickLowest(rows, col) : null; return b ? b.price : null; });
       const withM = raw.map(x => x == null ? null : round1(x + mg));
       const base = CM_PCOLS.map(([l, col]) => {
