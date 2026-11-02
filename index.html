@@ -3422,29 +3422,30 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
 
   // Načíta rozsah cez gviz pomocou <script> tagu (JSONP) – nepodlieha CORS, takže funguje
   // aj keď je súbor otvorený lokálne (file://). Vráti 2D pole hodnôt.
-  function fetchSheetRange(range) {
+  function fetchSheetRange(range, formatted) {
     return new Promise((resolve, reject) => {
+      const cbName = '__gvizCb' + (++window.__gvizSeq || (window.__gvizSeq = 1));
       const url = 'https://docs.google.com/spreadsheets/d/' + PRICE_SHEET_ID +
         '/gviz/tq?gid=' + PRICE_SHEET_GID + '&range=' + encodeURIComponent(range) +
-        '&headers=0&tqx=responseHandler:__gvizCb';
+        '&headers=0&tqx=responseHandler:' + cbName;
       const script = document.createElement('script');
       let done = false;
       const cleanup = () => {
         clearTimeout(timer);
         script.remove();
-        try { delete window.__gvizCb; } catch (e) { window.__gvizCb = undefined; }
+        try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
       };
       const timer = setTimeout(() => {
         if (done) return; done = true; cleanup();
         reject(new Error('časový limit – tabuľka neodpovedala'));
       }, 15000);
-      window.__gvizCb = json => {
+      window[cbName] = json => {
         if (done) return; done = true; cleanup();
         if (!json || json.status === 'error') {
           const msg = json && json.errors && json.errors[0] && (json.errors[0].detailed_message || json.errors[0].message);
           return reject(new Error(msg || 'chyba tabuľky'));
         }
-        resolve((json.table.rows || []).map(r => (r.c || []).map(c => c ? (c.v !== undefined ? c.v : null) : null)));
+        resolve((json.table.rows || []).map(r => (r.c || []).map(c => c ? (formatted && c.f != null ? c.f : (c.v !== undefined ? c.v : null)) : null)));
       };
       script.onerror = () => {
         if (done) return; done = true; cleanup();
@@ -3996,7 +3997,20 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     el:  { label: 'Elektrina', icon: '⚡', consId: 'inp_consEl',  yearsId: 'inp_years_el',  startId: 'inp_start_el',  maxId: 'inp_elMax',  fixId: 'inp_elFix2028' },
     gas: { label: 'Plyn',      icon: '🔥', consId: 'inp_consGas', yearsId: 'inp_years_gas', startId: 'inp_start_gas', maxId: 'inp_gasMax', fixId: 'inp_gasFix2028' }
   };
-  const COMM = { st: {}, ov: null, token: 0, sheet: null };
+  const COMM = { st: {}, ov: null, token: 0, sheet: null, priceDate: null };
+
+  // Dátum platných cien zo Sheetu – bunka D44 (zobrazí sa tak, ako je naformátovaný v tabuľke)
+  async function commLoadPriceDate() {
+    const rows = await fetchSheetRange('D44:D44', true);
+    return commDateText(rows[0] && rows[0][0]);
+  }
+  function commDateText(v) {
+    if (v == null || v === '') return '';
+    if (v instanceof Date) return v.getDate() + '. ' + (v.getMonth() + 1) + '. ' + v.getFullYear();
+    const m = /^Date\((\d+),(\d+),(\d+)/.exec(String(v));
+    if (m) return (+m[3]) + '. ' + (+m[2] + 1) + '. ' + m[1];
+    return String(v).trim();
+  }
 
   const commFmt  = (n, d) => n.toLocaleString('sk-SK', { minimumFractionDigits: d, maximumFractionDigits: d });
   const commNum  = x => { const n = parseFloat(String(x).replace(',', '.')); return isNaN(n) ? 0 : n; };
@@ -4005,6 +4019,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
   // Načíta blok „Ceny od dodávateľov“ a vráti ročné ceny MVM: { el: {2027: x, ...}, gas: {...} }
   async function commLoadSupplierPrices() {
     const rows = await fetchSheetRange('A1:E70');
+    if (rows[43] && !COMM.priceDate) COMM.priceDate = commDateText(rows[43][3]);
     const i0 = rows.findIndex(r => commNorm(r[0]).startsWith('ceny od dodavatel'));
     if (i0 < 0) throw new Error('v tabuľke som nenašiel blok „Ceny od dodávateľov“');
     const out = { el: null, gas: null };
@@ -4174,6 +4189,7 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
     const fmt = n => n == null ? '–' : commFmt(n, 1);
     const td = (n, hl) => '<td>' + (hl ? '<span class="cm-hlbox">' + fmt(n) + '</span>' : fmt(n)) + '</td>';
     let html = '<div class="cm-pt-title">Prehľad cien, s ktorými sa počíta (€/MWh)</div>' +
+      '<div class="cm-pt-date" style="font-size:14px;font-weight:800;margin:2px 0 8px;color:var(--orange)">Ceny platné k: ' + (COMM.priceDate || '…') + '</div>' +
       '<div class="cm-pt-wrap"><table class="cm-pt"><thead><tr><th></th>' +
       CM_PCOLS.map(c => '<th>' + c[0] + '</th>').join('') + '</tr></thead><tbody>';
     let missing = false;
@@ -4475,6 +4491,9 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
         if (token === COMM.token) commUpdate();
       } catch (e) { console.error(e); }
     });
+
+    commLoadPriceDate().then(d => { if (d) COMM.priceDate = d; if (token === COMM.token) commUpdate(); })
+      .catch(e => console.error(e));
 
     try {
       const data = await commLoadSupplierPrices();
