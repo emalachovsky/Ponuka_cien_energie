@@ -4212,9 +4212,9 @@ html[data-theme="light"] .import-tucked .import-link:hover { background: #cbdcf3
       if (!rows || !map) missing = true;
       html += '<tr class="cm-pt-cat cm-pt-' + cat + '"><td colspan="10">' + c.icon + ' ' + c.label +
               ' · režim ' + FS_MODE[cat] + (ENERGY_ON[cat] ? '' : ' · vypnuté') + '</td></tr>';
-      html += '<tr class="cm-r-raw cm-r-' + cat + '"><th>Cena z tabuľky</th>' + raw.map((x, i) => td(x, false)).join('') + '</tr>';
-      html += '<tr class="cm-r-off"><th>Ponúkaná cena' + (mg ? ' (+ marža ' + commFmt(mg, 1) + ')' : '') + '</th>' +
+      html += '<tr class="cm-r-raw cm-r-off cm-r-' + cat + '"><th>Ponúkaná cena' + (mg ? ' (+ marža ' + commFmt(mg, 1) + ')' : '') + '</th>' +
               withM.map((x, i) => td(x, CM_PCOLS[i][1] === hlCol)).join('') + '</tr>';
+      html += '<tr class="cm-r-tab"><th>Cena z tabuľky</th>' + raw.map((x, i) => td(x, false)).join('') + '</tr>';
       html += '<tr class="cm-r-base"><th>Base cena (' + COMM_SUPPLIER + ')</th>' + base.map(x => td(x, false)).join('') + '</tr>';
     });
     html += '</tbody></table></div>' +
