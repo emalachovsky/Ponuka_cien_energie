@@ -7,7 +7,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#1c2535">
+<meta name="theme-color" content="#17191c">
 <meta name="apple-mobile-web-app-title" content="Ponuka cien energií">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -58,11 +58,31 @@ html[data-theme] .client-row .cn{text-transform:uppercase!important}
 #pdfReport .rp-title,#pdfReport .rp-client strong{text-transform:uppercase}
 
 /* === červené predpokladané ceny + tmavo sivomodré pozadie === */
-html[data-theme=dark]{--old:#ff4545;--old-glow:#ff45451f;--bg:#1c2535}
+html[data-theme=dark]{--old:#ff4545;--old-glow:#ff45451f;--bg:#17191c}
 html[data-theme=light]{--old:#d81f1f;--old-glow:#d81f1f1a}
 html[data-theme] #inp_el2027,html[data-theme] #inp_gas2027,
 html[data-theme] #inp_el2028,html[data-theme] #inp_gas2028{color:var(--old)!important}
-html[data-theme=dark],html[data-theme=dark] body{background-color:#1c2535!important}
+html[data-theme=dark],html[data-theme=dark] body{background-color:#17191c!important}
+
+/* === menší nadpis a názov firmy === */
+html[data-theme] .header .header-title-main{font-size:38px!important}
+html[data-theme] .header .client-badge .name{font-size:29px!important}
+html[data-theme] .client-row .cn{font-size:16px!important}
+
+/* === sivé pozadie (bez tieňov okien) === */
+html[data-theme=dark] body{background-image:none!important}
+
+/* === jemný farebný rámček okien podľa prevládajúcej farby (oranžová / zelená; modrá a žltá už sú) === */
+html[data-theme=dark] .header,
+html[data-theme=dark] .fees-section{border-color:#ff9f1c40!important}
+html[data-theme=dark] .ycard,
+html[data-theme=dark] .cal-card,
+html[data-theme=dark] .comm-card{border-color:#4ade8047!important}
+html[data-theme=light] .header,
+html[data-theme=light] .fees-section{border-color:#e6b566!important}
+html[data-theme=light] .ycard:not(.ycard-total),
+html[data-theme=light] .cal-card,
+html[data-theme=light] .comm-card{border-color:#9ed0b0!important}
 </style>
 </head>
 <body>
