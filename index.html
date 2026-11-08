@@ -83,6 +83,11 @@ html[data-theme=light] .fees-section{border-color:#e6b566!important}
 html[data-theme=light] .ycard:not(.ycard-total),
 html[data-theme=light] .cal-card,
 html[data-theme=light] .comm-card{border-color:#9ed0b0!important}
+
+/* === dlhý názov firmy: jeden riadok, písmo sa prispôsobí (JS fitClientName) === */
+html[data-theme] .header .client-badge .name{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}
+html[data-theme] .client-badge .client-row.cn{white-space:nowrap;text-transform:uppercase}
+@media (width>=769px){html[data-theme] .header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -656,6 +661,7 @@ html[data-theme=light] .comm-card{border-color:#9ed0b0!important}
       if (c.ico) { const i = document.createElement('span'); i.className = 'client-ico cr'; i.textContent = 'IČO ' + c.ico; row.appendChild(i); }
       box.appendChild(row);
     });
+    fitClientName();
   }
 
   // ponechá len platné dátumy (d.m.rrrr), iné hodnoty sa zahodia
@@ -849,22 +855,26 @@ html[data-theme=light] .comm-card{border-color:#9ed0b0!important}
     return new Date(endYear, 11, 31);
   }
 
+  // Názov odberateľa (aj viac odberateľov) sa vždy zmestí na jeden riadok: písmo sa zmenší podľa dĺžky názvu.
   function fitClientName() {
-    const el = document.getElementById('clientDisp');
-    const badge = el.closest('.client-badge');
-    if (!el || !badge) return;
-    const maxFont = 28;
-    const minFont = 13;
-    el.style.fontSize = maxFont + 'px';
-    let size = maxFont;
+    const badge = document.querySelector('.client-badge');
+    if (!badge || !badge.parentElement) return;
     const container = badge.parentElement;
-    const available = () => container.getBoundingClientRect().width;
-    while (badge.scrollWidth > available() && size > minFont) {
-      size -= 1;
-      el.style.fontSize = size + 'px';
-    }
+    const fit = (el, maxFont, minFont) => {
+      if (!el || el.offsetParent === null) return;
+      let size = maxFont;
+      el.style.setProperty('font-size', size + 'px', 'important');
+      const avail = container.clientWidth;
+      while (size > minFont && el.scrollWidth > avail + 1) {
+        size -= 0.5;
+        el.style.setProperty('font-size', size + 'px', 'important');
+      }
+    };
+    fit(document.getElementById('clientDisp'), 29, 10);
+    document.querySelectorAll('#clientMulti .client-row').forEach(r => fit(r, 14, 8));
   }
   window.addEventListener('resize', fitClientName);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitClientName);
 
   function toDateInputValue(d) {
     const y = d.getFullYear();
