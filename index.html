@@ -55,7 +55,7 @@ html[data-theme] .section-title{font-size:20px!important}
 html[data-theme] .ecard .ecard-title{font-size:26px!important;text-transform:uppercase!important;letter-spacing:.03em!important}
 html[data-theme] .ecard .ecard-icon svg{width:23px!important;height:23px!important}
 html[data-theme] .ecard .data-label-sub,
-html[data-theme] .ecard .data-label-sub b{font-size:17px!important;text-transform:uppercase!important}
+html[data-theme] .ecard .data-label-sub b{font-size:16px!important;text-transform:uppercase!important}
 html[data-theme] .section-title,
 html[data-theme] .input-section.contract-el .section-title,
 html[data-theme] .input-section.contract-gas .section-title{font-size:15px!important;text-transform:uppercase!important;letter-spacing:.06em!important}
@@ -77,9 +77,16 @@ html[data-theme] .client-row .cn{text-transform:uppercase!important}
 /* === červené predpokladané ceny + tmavo sivomodré pozadie === */
 html[data-theme=dark]{--old:#ff4545;--old-glow:#ff45451f;--bg:#17191c}
 html[data-theme=light]{--old:#d81f1f;--old-glow:#d81f1f1a}
-html[data-theme] #inp_el2027,html[data-theme] #inp_gas2027,
-html[data-theme] #inp_el2028,html[data-theme] #inp_gas2028{color:var(--old)!important}
+html[data-theme=dark] #inp_el2027,html[data-theme=dark] #inp_gas2027,
+html[data-theme=dark] #inp_el2028,html[data-theme=dark] #inp_gas2028{color:#ff7373!important}
+html[data-theme=light] #inp_el2027,html[data-theme=light] #inp_gas2027,
+html[data-theme=light] #inp_el2028,html[data-theme=light] #inp_gas2028{color:#e34a4a!important}
 html[data-theme=dark],html[data-theme=dark] body{background-color:#17191c!important}
+/* súčasné ceny – tmavšia farba */
+html[data-theme=dark] #curElDisp{color:#3f86e0!important}
+html[data-theme=dark] #curGasDisp{color:#c9a92e!important}
+html[data-theme=light] #curElDisp{color:#144a8f!important}
+html[data-theme=light] #curGasDisp{color:#8a6a00!important}
 
 /* === menší nadpis a názov firmy === */
 html[data-theme] .header .header-title-main{font-size:38px!important}
@@ -105,6 +112,43 @@ html[data-theme=light] .comm-card{border-color:#9ed0b0!important}
 html[data-theme] .header .client-badge .name{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}
 html[data-theme] .client-badge .client-row.cn{white-space:nowrap;text-transform:uppercase}
 @media (width>=769px){html[data-theme] .header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}}
+
+/* === sivé (tlmené) texty: o 1 bod väčšie === */
+html[data-theme] .header h1{font-size:12px!important}
+html[data-theme] .client-badge .k{font-size:12px!important}
+html[data-theme] .client-badge .client-ico{font-size:13px!important}
+html[data-theme] .header-date-label{font-size:12px!important}
+html[data-theme] .header-validity-note{font-size:13.5px!important}
+html[data-theme] .contract-range-label{font-size:15px!important}
+html[data-theme] .hero .hero-label,html[data-theme] .hero .hero-note{font-size:13px!important}
+html[data-theme] .cons-highlight-label{font-size:12px!important}
+html[data-theme] .data-label{font-size:15px!important}
+html[data-theme] .data-value-col .data-unit{font-size:14px!important}
+html[data-theme] .supplier-label{font-size:12px!important}
+html[data-theme] .section-title,
+html[data-theme] .input-section.contract-el .section-title,
+html[data-theme] .input-section.contract-gas .section-title{font-size:16px!important}
+html[data-theme] .fee-label,html[data-theme] .fee-row.computed .fee-label,html[data-theme] .fee-input-wrap .fee-unit{font-size:15px!important}
+html[data-theme] .ycard-label{font-size:14px!important}
+html[data-theme] .ycard-note{font-size:12.5px!important}
+html[data-theme] .inline-edit-unit{font-size:14px!important}
+html[data-theme] .input-unit{font-size:12px!important}
+html[data-theme] .input-field label{font-size:15px!important}
+html[data-theme] .pbar-k{font-size:13px!important}
+html[data-theme] .pbar-note{font-size:12px!important}
+html[data-theme] .pbar-v.old{font-size:15px!important}
+html[data-theme] .sav-month{font-size:15px!important}
+html[data-theme] .cat-switch{font-size:13px!important}
+html[data-theme] footer{font-size:13px!important}
+html[data-theme] .cal-title,html[data-theme] .cal-dow{font-size:13px!important}
+/* okno komunikácie */
+html[data-theme] .comm-sub,html[data-theme] .cm-yinfo,html[data-theme] .cm-pt-note,html[data-theme] .cm-info,html[data-theme] .cm-calc,html[data-theme] .cm-margin-hint,html[data-theme] .cm-pays span{font-size:13.4px!important}
+html[data-theme] .cm-pt-title,html[data-theme] .cm-part-title{font-size:14.3px!important}
+html[data-theme] .cm-pt thead th,html[data-theme] .cm-pt tbody th{font-size:15.4px!important}
+html[data-theme] .comm-card .data-label,html[data-theme] .comm-card .saving-text{font-size:15.8px!important}
+html[data-theme] .comm-card .inline-edit-unit{font-size:13.4px!important}
+html[data-theme] .comm-card .cons-highlight-label{font-size:12.4px!important}
+html[data-theme] .comm-card .hero-label{font-size:13.4px!important}
 </style>
 </head>
 <body>
