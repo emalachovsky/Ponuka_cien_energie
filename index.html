@@ -1110,27 +1110,31 @@ html[data-theme] .comm-card .hero-label{font-size:13.4px!important}
       const overallEnd   = new Date(Math.max(...activePeriods.map(p => p.end.getTime())));
       const startYearNum = overallStart.getFullYear();
       const endYearNum   = overallEnd.getFullYear();
+      // alikvota: v roku začiatku viazanosti sa počíta len (12 − mesiac začiatku)/12; ďalšie roky celé (koniec je vždy 31.12.)
+      const aliq = (calYear, st) => calYear === st.getFullYear() ? (12 - st.getMonth()) / 12 : 1;
       for (let calYear = startYearNum, i = 0; calYear <= endYearNum; calYear++, i++) {
+        const feeMonths = calYear === startYearNum ? 12 - overallStart.getMonth() : 12;   // mesačný poplatok len za mesiace v zmluve
         let gasYearSav = 0;
         if (ENERGY_ON.gas) {
           if (isGasKombi) {
-            if (calYear === startGas.getFullYear()) gasYearSav = savGasYear;                                              // SPOT 2027
+            if (calYear === startGas.getFullYear()) gasYearSav = savGasYear * aliq(calYear, startGas);                    // SPOT – alikvotne od mesiaca začiatku
             else if (calYear > startGas.getFullYear() && calYear <= endGas.getFullYear()) gasYearSav = savGasYearFix; // FIX
           } else if (calYear >= startGas.getFullYear() && calYear <= endGas.getFullYear()) {
-            gasYearSav = savGasYear;
+            gasYearSav = savGasYear * aliq(calYear, startGas);
           }
         }
         let elYearSav = 0;
         if (ENERGY_ON.el) {
           if (isElKombi) {
-            if (calYear === startEl.getFullYear()) elYearSav = savElYear;                                              // SPOT 2027
+            if (calYear === startEl.getFullYear()) elYearSav = savElYear * aliq(calYear, startEl);                    // SPOT – alikvotne od mesiaca začiatku
             else if (calYear > startEl.getFullYear() && calYear <= endEl.getFullYear()) elYearSav = savElYearFix; // FIX
           } else if (calYear >= startEl.getFullYear() && calYear <= endEl.getFullYear()) {
-            elYearSav = savElYear;
+            elYearSav = savElYear * aliq(calYear, startEl);
           }
         }
         const yearGross = elYearSav + gasYearSav;
-        const val = i === 0 ? yearGross - fee1 - feeYear : yearGross - feeYear;
+        const feeY = feeM * feeMonths;
+        const val = i === 0 ? yearGross - fee1 - feeY : yearGross - feeY;
         yearValues.push(val);
         totalNy += val;
       }
@@ -1199,13 +1203,14 @@ html[data-theme] .comm-card .hero-label{font-size:13.4px!important}
     let overallStartYear = activePeriods.length
       ? new Date(Math.min(...activePeriods.map(p => p.start.getTime()))).getFullYear()
       : startEl.getFullYear();
+    const overallStartMonth = activePeriods.length ? new Date(Math.min(...activePeriods.map(p => p.start.getTime()))).getMonth() : 0;
     yearValues.forEach((val, i) => {
       const card = document.createElement('div');
       card.className = 'ycard';
       card.innerHTML = `
         <div class="ycard-label">Rok ${i + 1} · ${overallStartYear + i}</div>
         <div class="ycard-num">${sk2(val)}</div>
-        <div class="ycard-note">Čistá úspora (po odrátaní poplatku)</div>
+        <div class="ycard-note">Čistá úspora (po odrátaní poplatku)${i === 0 && overallStartMonth > 0 ? ' · alikvotne ' + (12 - overallStartMonth) + '/12 roka' : ''}</div>
       `;
       grid.appendChild(card);
     });
